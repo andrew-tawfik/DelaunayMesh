@@ -27,6 +27,9 @@ public:
     //-------------------------------------------------------------------------
     int getNeighbourIndex(int index);
     void setNeighbourIndex(int index, int value);
+
+    int getPointIndex(int index);
+    void setPointIndex(int index, int value);
     //-------------------------------------------------------------------------
 
     bool operator==(Triangle& other);

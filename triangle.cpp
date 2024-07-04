@@ -12,9 +12,14 @@ Triangle::Triangle()
     this->p1 = Point();
     this->p2 = Point(3.0f, 0.0f);
     this->p3 = Point(3.0f, 4.0f);
+
     neighbourIndices[0] = -1;
     neighbourIndices[1] = -1;
     neighbourIndices[2] = -1;
+
+    pointIndices[0] = -1;
+    pointIndices[1] = -1;
+    pointIndices[2] = -1;
 }
 
 Triangle::Triangle(Point p1, Point p2, Point p3)
@@ -37,6 +42,9 @@ Triangle::Triangle(Point p1, Point p2, Point p3)
     neighbourIndices[1] = -1;
     neighbourIndices[2] = -1;
 
+    pointIndices[0] = -1;
+    pointIndices[1] = -1;
+    pointIndices[2] = -1;
 
 
 }
@@ -234,6 +242,25 @@ void Triangle::setNeighbourIndex(int index, int value)
     if (index >= 0 && index < 3)
     {
         neighbourIndices[index] = value;
+    }
+}
+
+// Getter for pointIndices
+int Triangle::getPointIndex(int index)
+{
+    if (index >= 0 && index < 3)
+    {
+        return pointIndices[index];
+    }
+    return -1; // Return -1 for invalid index
+}
+
+// Setter for pointIndices
+void Triangle::setPointIndex(int index, int value)
+{
+    if (index >= 0 && index < 3)
+    {
+        pointIndices[index] = value;
     }
 }
 

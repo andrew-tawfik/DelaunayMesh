@@ -8,7 +8,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_executable(ShapeTriangulation main.cpp
     point.h point.cpp
     triangle.h triangle.cpp
-    mesh.h mesh.cpp)
+    mesh.h mesh.cpp
+    README.md)
 
 include(GNUInstallDirs)
 install(TARGETS ShapeTriangulation
