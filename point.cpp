@@ -9,26 +9,31 @@ Point::Point() {}
 Point::Point(float fx, float fy) : fx(fx), fy(fy) {}
 
 // Getter for x
-float Point::getX() {
+float Point::getX()
+{
     return fx;
 }
 
 // Setter for x
-void Point::setX(float fx) {
+void Point::setX(float fx)
+{
     this->fx = fx;
 }
 
 // Getter for y
-float Point::getY() {
+float Point::getY()
+{
     return fy;
 }
 
 // Setter for y
-void Point::setY(float fy) {
+void Point::setY(float fy)
+{
     this->fy = fy;
 }
 
-double Point::findDistance(Point p2) {
+double Point::findDistance(Point p2)
+{
     double dx1 = fx;
     double dy1 = fy;
 
@@ -43,7 +48,8 @@ double Point::findDistance(Point p2) {
     return dDistance;
 }
 
-double Point::findSlope(Point p2) {
+double Point::findSlope(Point p2)
+{
     double dx1 = fx;
     double dy1 = fy;
 
@@ -55,22 +61,29 @@ double Point::findSlope(Point p2) {
     return dSlope;
 }
 
-bool Point::betweenPoints(Point p2, Point pTargetPoint) {
+bool Point::betweenPoints(Point p2, Point pTargetPoint)
+{
     double db = p2.getY() - (p2.getX() * findSlope(p2));
     double dtpx = pTargetPoint.getX();
     double dtpy = pTargetPoint.getY();
 
-    if (dtpy == findSlope(p2) * dtpx + db) {
-        if ((dtpx >= (std::fmin(getX(), p2.getX()))) && (dtpx <= (std::fmax(getX(), p2.getX())))) {
-            if ((dtpy >= (std::fmin(getY(), p2.getY()))) && (dtpy <= (std::fmax(getY(), p2.getY())))) {
+    if (dtpy == findSlope(p2) * dtpx + db)
+    {
+        if ((dtpx >= (std::fmin(getX(), p2.getX()))) && (dtpx <= (std::fmax(getX(), p2.getX()))))
+        {
+            if ((dtpy >= (std::fmin(getY(), p2.getY()))) && (dtpy <= (std::fmax(getY(), p2.getY()))))
+            {
                 return true;
             }
         }
-    } else {
+    }
+    else
+    {
         return false;
     }
 }
 
-bool Point::equals(Point pOther) {
+bool Point::equals(Point pOther)
+{
     return fx == pOther.getX() && fy == pOther.getY();
 }
