@@ -8,7 +8,8 @@
 #include <vector>
 
 // Default constructor
-Triangle::Triangle() {
+Triangle::Triangle()
+{
     this->p1 = Point();
     this->p2 = Point(3.0f, 0.0f);
     this->p3 = Point(3.0f, 4.0f);
@@ -22,12 +23,15 @@ Triangle::Triangle() {
     pointIndices[2] = -1;
 }
 
-Triangle::Triangle(Point p1, Point p2, Point p3) {
-    if (getArea() >= 0) {
+Triangle::Triangle(Point p1, Point p2, Point p3)
+{
+    if (getArea() >= 0)
+    {
         this->p1 = p1;
         this->p2 = p2;
         this->p3 = p3;
-    } else {
+    } else
+    {
         this->p1 = p2;
         this->p2 = p1;
         this->p3 = p3;
@@ -43,7 +47,8 @@ Triangle::Triangle(Point p1, Point p2, Point p3) {
 }
 
 // Get length of a side
-double Triangle::getLength(int side) {
+double Triangle::getLength(int side)
+{
     if (side == 0) return p1.findDistance(p2);
     if (side == 1) return p2.findDistance(p3);
     if (side == 2) return p3.findDistance(p1);
@@ -51,35 +56,42 @@ double Triangle::getLength(int side) {
 }
 
 // Get perimeter of the triangle
-double Triangle::getPerimeter() {
+double Triangle::getPerimeter()
+{
     return getLength(0) + getLength(1) + getLength(2);
 }
 
 // Get angle in the triangle
-double Triangle::getAng(int angle) {
+double Triangle::getAng(int angle)
+{
     double dL1 = getLength(0);
     double dL2 = getLength(1);
     double dL3 = getLength(2);
 
-    if (angle == 0) {
+    if (angle == 0)
+    {
         return (180 / M_PI) * std::acos(((dL2 * dL2) + (dL3 * dL3) - (dL1 * dL1)) / (2 * dL2 * dL3));
     }
-    if (angle == 1) {
+    if (angle == 1)
+    {
         return (180 / M_PI) * std::acos(((dL1 * dL1) + (dL3 * dL3) - (dL2 * dL2)) / (2 * dL1 * dL3));
     }
-    if (angle == 2) {
+    if (angle == 2)
+    {
         return (180 / M_PI) * std::acos(((dL1 * dL1) + (dL2 * dL2) - (dL3 * dL3)) / (2 * dL1 * dL2));
     }
     return 0.0;
 }
 
 // Get area of the triangle
-double Triangle::getArea() {
+double Triangle::getArea()
+{
     return 0.5 * (p1.getX() * (p2.getY() - p3.getY()) + p2.getX() * (p3.getY() - p1.getY()) + p3.getX() * (p1.getY() - p2.getY()));
 }
 
 // Check if a point is inside the triangle
-bool Triangle::contains(Point pTargetPoint) {
+bool Triangle::contains(Point pTargetPoint)
+{
     double dTpx = pTargetPoint.getX();
     double dTpy = pTargetPoint.getY();
 
@@ -95,7 +107,8 @@ bool Triangle::contains(Point pTargetPoint) {
 }
 
 // Find the path to the triangle containing the point
-int Triangle::findPathToContainingTriangle(Point pTargetPoint) {
+int Triangle::findPathToContainingTriangle(Point pTargetPoint)
+{
     double dTpx = pTargetPoint.getX();
     double dTpy = pTargetPoint.getY();
 
@@ -111,7 +124,8 @@ int Triangle::findPathToContainingTriangle(Point pTargetPoint) {
 }
 
 // Get a specific point of the triangle
-Point Triangle::getPoint(int nPoint) {
+Point Triangle::getPoint(int nPoint)
+{
     if (nPoint == 1) return p1;
     if (nPoint == 2) return p2;
     if (nPoint == 3) return p3;
@@ -119,7 +133,8 @@ Point Triangle::getPoint(int nPoint) {
 }
 
 // Print the points of the triangle
-void Triangle::printPoints() {
+void Triangle::printPoints()
+{
     std::ostringstream oss; // Create a string stream
     oss << "Point 1: (" << p1.getX() << ", " << p1.getY() << "), "
         << "Point 2: (" << p2.getX() << ", " << p2.getY() << "), "
@@ -129,7 +144,8 @@ void Triangle::printPoints() {
 }
 
 // Get the circumcenter of the triangle
-Point Triangle::getCircumcenter() {
+Point Triangle::getCircumcenter()
+{
     double dX1 = p1.getX(), dY1 = p1.getY();
     double dX2 = p2.getX(), dY2 = p2.getY();
     double dX3 = p3.getX(), dY3 = p3.getY();
@@ -145,15 +161,21 @@ Point Triangle::getCircumcenter() {
     // Determine perpendicular slopes
     double dPerpSlopeAB, dPerpSlopeBC;
 
-    if (dSlopeAB == 0) {
+    if (dSlopeAB == 0)
+    {
         dPerpSlopeAB = INFINITY; // Perpendicular to horizontal line is vertical
-    } else {
+    }
+    else
+    {
         dPerpSlopeAB = -1 / dSlopeAB;
     }
 
-    if (dSlopeBC == 0) {
+    if (dSlopeBC == 0)
+    {
         dPerpSlopeBC = INFINITY; // Perpendicular to horizontal line is vertical
-    } else {
+    }
+    else
+    {
         dPerpSlopeBC = -1 / dSlopeBC;
     }
 
@@ -162,28 +184,39 @@ Point Triangle::getCircumcenter() {
     bool bIsVerticalBC = (dPerpSlopeBC == INFINITY);
 
     // Form the equations of the perpendicular bisectors
-    if (bIsVerticalAB) {
+    if (bIsVerticalAB)
+    {
         dIntercept1 = midAB.getX();
-    } else {
+    }
+    else
+    {
         dIntercept1 = midAB.getY() - dPerpSlopeAB * midAB.getX();
     }
 
-    if (bIsVerticalBC) {
+    if (bIsVerticalBC)
+    {
         dIntercept2 = midBC.getX();
-    } else {
+    }
+    else
+    {
         dIntercept2 = midBC.getY() - dPerpSlopeBC * midBC.getX();
     }
 
     double dCircumcenterX, dCircumcenterY;
 
     // Solve the equations to find the intersection point (circumcenter)
-    if (bIsVerticalAB) {
+    if (bIsVerticalAB)
+    {
         dCircumcenterX = dIntercept1;
         dCircumcenterY = dPerpSlopeBC * dCircumcenterX + dIntercept2;
-    } else if (bIsVerticalBC) {
+    }
+    else if (bIsVerticalBC)
+    {
         dCircumcenterX = dIntercept2;
         dCircumcenterY = dPerpSlopeAB * dCircumcenterX + dIntercept1;
-    } else {
+    }
+    else
+    {
         dCircumcenterX = (dIntercept2 - dIntercept1) / (dPerpSlopeAB - dPerpSlopeBC);
         dCircumcenterY = dPerpSlopeAB * dCircumcenterX + dIntercept1;
     }
@@ -192,7 +225,8 @@ Point Triangle::getCircumcenter() {
 }
 
 // Check if a point is inside the circumcircle
-bool Triangle::isInCircumcircle(Point p) {
+bool Triangle::isInCircumcircle(Point p)
+{
     Point circumcenter = getCircumcenter();
     double dRadius = circumcenter.findDistance(getPoint(1)); // Calculate the radius
     double dPointDistance = circumcenter.findDistance(p); // Calculate the distance from the point to the circumcenter
@@ -201,7 +235,8 @@ bool Triangle::isInCircumcircle(Point p) {
 }
 
 // Getter for neighbourIndices
-int Triangle::getNeighbourIndex(int index) {
+int Triangle::getNeighbourIndex(int index)
+{
     if (index >= 0 && index < 3) {
         return neighbourIndices[index];
     }
@@ -209,23 +244,29 @@ int Triangle::getNeighbourIndex(int index) {
 }
 
 // Setter for neighbourIndices
-void Triangle::setNeighbourIndex(int index, int value) {
-    if (index >= 0 && index < 3) {
+void Triangle::setNeighbourIndex(int index, int value)
+{
+    if (index >= 0 && index < 3)
+    {
         neighbourIndices[index] = value;
     }
 }
 
 // Getter for pointIndices
-int Triangle::getPointIndex(int index) {
-    if (index >= 0 && index < 3) {
+int Triangle::getPointIndex(int index)
+{
+    if (index >= 0 && index < 3)
+    {
         return pointIndices[index];
     }
     return -1; // Return -1 for invalid index
 }
 
 // Setter for pointIndices
-void Triangle::setPointIndex(int index, int value) {
-    if (index >= 0 && index < 3) {
+void Triangle::setPointIndex(int index, int value)
+{
+    if (index >= 0 && index < 3)
+    {
         pointIndices[index] = value;
     }
 }
