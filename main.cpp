@@ -4,13 +4,18 @@
 #include "mesh.h"
 
 int main() {
+
     Point p1(0.0, 0.0), p2(30.0, 0.0), p3(15.0, 25.981);
+
+    Point p4(5.0, 3.0);
 
     Triangle tri1(p2, p1, p3);
 
-    std::cout << "The length of the side 'a' is: " << tri1.getLength('a') << std::endl;
-    std::cout << "The length of the side 'b' is: " << tri1.getLength('b') << std::endl;
-    std::cout << "The length of the side 'c' is: " << tri1.getLength('c') << std::endl;
+
+
+    std::cout << "The length of the side '0' is: " << tri1.getLength(0) << std::endl;
+    std::cout << "The length of the side '1' is: " << tri1.getLength(1) << std::endl;
+    std::cout << "The length of the side '2' is: " << tri1.getLength(2) << std::endl;
 
     std::cout << std::endl;
 
@@ -19,14 +24,19 @@ int main() {
 
     std::cout << std::endl;
 
-    std::cout << "Angle A: " << tri1.getAng('A') << std::endl;
-    std::cout << "Angle B: " << tri1.getAng('B') << std::endl;
-    std::cout << "Angle C: " << tri1.getAng('C') << std::endl;
-    std::cout << "Sum of all angles in this triangle is: " << tri1.getAng('A') + tri1.getAng('B') + tri1.getAng('C') << std::endl;
+    std::cout << "Angle A: " << tri1.getAng(0) << std::endl;
+    std::cout << "Angle B: " << tri1.getAng(1) << std::endl;
+    std::cout << "Angle C: " << tri1.getAng(2) << std::endl;
+    std::cout << "Sum of all angles in this triangle is: " << tri1.getAng(0) + tri1.getAng(1) + tri1.getAng(2) << std::endl;
 
     std::cout << p1.findSlope(p2) << std::endl;
     std::cout << p1.betweenPoints(p2, Point(2.0, 2.5)) << std::endl;
 
+
+    std::cout << tri1.contains(p4) << std::endl;
+
+
+    /*
 
     std::vector<Point> vecPoints = {
         Point(7.5, 2.0), Point(15.0, 2.0),
@@ -39,7 +49,7 @@ int main() {
 
 
     };
-    /*
+
     Mesh m;
     m.setPoints(vecPoints);
     m.buildMesh();

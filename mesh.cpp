@@ -57,30 +57,8 @@ void Mesh::buildMesh()
                 t = vecTriangles.erase(t);
 
                 // Handle neighboring triangles
-                for (auto triNeighbour : t->neighbours(vecTriangles))
-                {
-                    if (triNeighbour.isInCircumcircle(*p))
-                    {
-                        triNeighbour.printPoints();
-                        Triangle tri4 = Triangle(triNeighbour.getPoint(1), triNeighbour.getPoint(2), *p);
-                        Triangle tri5 = Triangle(triNeighbour.getPoint(1), triNeighbour.getPoint(3), *p);
-                        Triangle tri6 = Triangle(triNeighbour.getPoint(2), triNeighbour.getPoint(3), *p);
-
-                        std::cout << "Triangle 4 has coordinates: ";
-                        tri4.printPoints();
-                        vecNewTriangles.push_back(tri4);
-
-                        std::cout << "Triangle 5 has coordinates: ";
-                        tri5.printPoints();
-                        vecNewTriangles.push_back(tri5);
-
-                        std::cout << "Triangle 6 has coordinates: ";
-                        tri6.printPoints();
-                        vecNewTriangles.push_back(tri6);
 
 
-                    }
-                }
             }
             else
             {
