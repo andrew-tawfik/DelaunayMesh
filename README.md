@@ -1,35 +1,17 @@
-# ToDoList
-
-### June 27
-
-getNeighbours from sides ('A', 'B', 'C')
-
-findTriangle function using contains:
-
-- looks in current triangle, checks if all determinant are negative 
-- if any are positive check that sides neighbour
-- this is the shortest path
+## Triangle Mesh Project
+This project is a C++ implementation of a triangle mesh generator. 
+The program defines a Point class for representing points in 2D space, a Triangle class with various geometric functions, and a Mesh class that builds and manages a mesh of triangles. 
 
 
-### June 28
+### Program Workflow
+1. Find the Triangle Containing the Point:
+    - Use determinant signs to determine which triangle contains a point.
+    - If the point is not in the current triangle, check neighboring triangles.
+2. Create New Triangles:
+    - Create new triangles by connecting the point to the vertices of the containing triangle.
+    - Update the mesh with the new triangles.
 
-Triangle class:
-
-  - need to implement pointIndices array
-  - need to remove the array
-  - make sure that the circumcirle method also work for right-angled triangles
-
-Mesh class :
-
-1. Each triangle created needs to have 
-- an index
-- array of pointIndices
-- array of neighbourIndices
-
-2. Program Workflow
-- Find in which triangle does the point lie inside from determinant signs
-- createTriangles()
-- Check if the point lies inside neighbour circumcircles 
-- if True, create Triangles
-
-3. 
+3. Check Neighbors:
+    - Check if the point lies inside the circumcircles of neighboring triangles.
+    - If true, create additional triangles and update neighbors.
+    
