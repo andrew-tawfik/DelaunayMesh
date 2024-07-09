@@ -1,6 +1,5 @@
 #include "mesh.h"
 #include <iostream>
-#include <algorithm> // for std::find_if
 
 Mesh::Mesh(std::vector<Point> points): vecPoints(points)
 {
@@ -75,6 +74,8 @@ void Mesh::createTriangles(Point& p, Triangle containingTriangle) {
     updateNeighbors();
 
     // Remove the old containing triangle
+
+    // Implement
 
 }
 
