@@ -11,15 +11,36 @@ private:
     std::vector<Point> vecPoints;
     std::vector<Triangle> vecTriangles;
 
+    std::vector <int> triangleIndices;
+    std::vector <int> pointIndices;
+
 public:
-    Mesh();
+    Mesh(std::vector<Point> points);
 
     std::vector<Point> getPoints();
     void setPoints(std::vector<Point> vecPoints);
+
+    std::vector <int> getPointIndices();
+    void setPointIndices(int numPoints);
+
+    std::vector <int> getTriangleIndices();
+    void setTriangleIndices(int numPoints);
+
+
+    Triangle superTriangle();
+
+
     void buildMesh();
-    std::vector<Triangle> sortTriangles(std::vector<Triangle> vecTri);
-    void flipEdge(Triangle triTriangle1, Triangle triTriangle2, Point p);
-    void edgeFlipping(Point p);
+
+    void createTriangles(Point& p, Triangle containingTriangle);  // Create new triangles
+
+    Triangle findContainingTriangle(Point& p);  // Find the triangle that contains the point
+    void checkNeighboringCircumcircles(Point& p);  // Check if the point is in neighbors' circumcircles
+    void updateNeighbors();  // Update neighbors between triangles
+    void printMesh();  // Debugging function to print the mesh
+
+
+
 };
 
 #endif // MESH_H

@@ -140,7 +140,7 @@ void Triangle::printPoints()
         << "Point 2: (" << p2.getX() << ", " << p2.getY() << "), "
         << "Point 3: (" << p3.getX() << ", " << p3.getY() << ")";
 
-    std::cout << oss.str() << std::endl; // Output the concatenated string
+    std::cout << oss.str() << std::endl; // Output the string
 }
 
 // Get the circumcenter of the triangle
@@ -255,20 +255,15 @@ void Triangle::setNeighbourIndex(int index, int value)
 // Getter for pointIndices
 int Triangle::getPointIndex(int index)
 {
-    if (index >= 0 && index < 3)
-    {
-        return pointIndices[index];
-    }
-    return -1; // Return -1 for invalid index
+    return pointIndices[index];
 }
 
 // Setter for pointIndices
 void Triangle::setPointIndex(int index, int value)
 {
-    if (index >= 0 && index < 3)
-    {
-        pointIndices[index] = value;
-    }
+
+    pointIndices[index] = value;
+
 }
 
 
