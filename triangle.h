@@ -8,30 +8,29 @@
 class Triangle {
 public:
     Triangle();
-    Triangle(Point p1, Point p2, Point p3);
+    Triangle(Point pt0, Point pt1, Point pt2);
 
-    double getLength(int side);
+    double getLength(int iSide);
     double getPerimeter();
-    double getAng(int angle);
+    double getAng(int iAngle);
     double getArea();
-    bool contains(Point pTargetPoint);
-    int findPathToContainingTriangle(Point pTargetPoint);
+    bool contains(Point ptTargetPoint);
+    int findPathToContainingTriangle(Point ptTargetPoint);
 
-    Point getPoint(int nPoint);
+    Point getPoint(int iPoint);
     void printPoints();
     Point getCircumcenter();
-    bool isInCircumcircle(Point p);
+    bool isInCircumcircle(Point pt);
 
-    int getNeighbourIndex(int index);
-    void setNeighbourIndex(int index, int value);
-    int getPointIndex(int index);
-    void setPointIndex(int index, int value);
+    int getNeighbourIndex(int iIndex);
+    void setNeighbourIndex(int iIndex, int iValue);
+    int getPointIndex(int iIndex);
+    void setPointIndex(int iIndex, int iValue);
 
 private:
-    Point p1, p2, p3;
-    int neighbourIndices[3];
-    int pointIndices[3];
+    Point pt0, pt1, pt2;
+    int aiNeighbourIndices[3];
+    int aiPointIndices[3];
 };
-
 
 #endif // TRIANGLE_H

@@ -4,98 +4,102 @@
 #include "mesh.h"
 
 int main() {
+    // Create points for the triangles
+    Point pt0(10, 10);
+    Point pt1(13, 10);
+    Point pt2(13, 14);
+    Point pt3(16, 10);
+    Point pt4(13, 6);
 
-    Point p1(0.0, 0.0), p2(30.0, 0.0), p3(15.0, 25.981);
+    // Create Triangle instances
+    Triangle tri0(pt0, pt1, pt2);
+    Triangle tri1(pt1, pt3, pt2); // Neighbor to the right
+    Triangle tri2(pt0, pt4, pt1); // Neighbor below
 
-    Point p4(5.0, 3.0);
+    std::vector <Triangle> vecTriangles;
+    vecTriangles.push_back(tri0);
+    vecTriangles.push_back(tri1);
+    vecTriangles.push_back(tri2);
 
-    Triangle tri1(p2, p1, p3);
-
-
-
-    std::cout << "The length of the side '0' is: " << tri1.getLength(0) << std::endl;
-    std::cout << "The length of the side '1' is: " << tri1.getLength(1) << std::endl;
-    std::cout << "The length of the side '2' is: " << tri1.getLength(2) << std::endl;
-
-    std::cout << std::endl;
-
-    std::cout << "The perimeter of the Triangle is: " << tri1.getPerimeter() << std::endl;
-    std::cout << "The area of the Triangle is: " << tri1.getArea() << std::endl;
-
-    std::cout << std::endl;
-
-    std::cout << "Angle A: " << tri1.getAng(0) << std::endl;
-    std::cout << "Angle B: " << tri1.getAng(1) << std::endl;
-    std::cout << "Angle C: " << tri1.getAng(2) << std::endl;
-    std::cout << "Sum of all angles in this triangle is: " << tri1.getAng(0) + tri1.getAng(1) + tri1.getAng(2) << std::endl;
-
-    std::cout << p1.findSlope(p2) << std::endl;
-    std::cout << p1.betweenPoints(p2, Point(2.0, 2.5)) << std::endl;
+    // Set neighbor indices
+    tri0.setNeighbourIndex(0, 2); // Side 0 of tri0 is neighbor to tri2
+    tri0.setNeighbourIndex(1, 1); // Side 1 of tri0 is neighbor to tri1
 
 
-    std::cout << tri1.contains(p4) << std::endl;
+    tri1.setNeighbourIndex(2, 0); // Side 0 of tri1 is neighbor to tri0
 
+    tri2.setNeighbourIndex(2, 0); // Side 0 of tri2 is neighbor to tri0
 
-    /*
+    // Print initial triangles
+    std::cout << "Initial Triangles:" << std::endl;
+    tri0.printPoints();
+    tri1.printPoints();
+    tri2.printPoints();
 
-    std::vector<Point> vecPoints = {
-        Point(7.5, 2.0), Point(15.0, 2.0),
-
-
-
-        Point(22.5, 2.0), Point(22.5, 7.0),
-        Point(22.5, 12.0), Point(15.0, 12.0),
-        Point(7.5, 12.0), Point(7.5, 7)
-
-
-    };
-
-    Mesh m;
-    m.setPoints(vecPoints);
-    m.buildMesh();
-
-    Point p4(5.0, 5.0), p5(20.0, 20.0);
-
-    Triangle tri2(p1, p2, p4), tri3(p1, p3, p4), tri4(p2, p3, p4), tri5(p1, p2, p5);
-
-    std::vector<Triangle> vecTriangleVector = {tri1, tri2, tri3, tri4, tri5};
-
-    // Print the areas of the triangles
-    for (auto& triangle : vecTriangleVector) {
-        triangle.printPoints();
+    // Test getLength
+    std::cout << "\nLengths of the sides:" << std::endl;
+    for (int nSide = 0; nSide < 3; ++nSide) {
+        std::cout << "Triangle 0, Side " << nSide << ": " << tri0.getLength(nSide) << std::endl;
+        std::cout << "Triangle 1, Side " << nSide << ": " << tri1.getLength(nSide) << std::endl;
+        std::cout << "Triangle 2, Side " << nSide << ": " << tri2.getLength(nSide) << std::endl;
     }
 
-    std::vector<Triangle> vecSortedTriangles = m.sortTriangles(vecTriangleVector);
+    // Test getPerimeter
+    std::cout << "\nPerimeters:" << std::endl;
+    std::cout << "Triangle 0: " << tri0.getPerimeter() << std::endl;
+    std::cout << "Triangle 1: " << tri1.getPerimeter() << std::endl;
+    std::cout << "Triangle 2: " << tri2.getPerimeter() << std::endl;
 
-    // Print the sorted triangles
-    std::cout << "Sorted triangles:" << std::endl;
-    for (auto& triangle : vecSortedTriangles) {
-        triangle.printPoints();
+    // Test getArea
+    std::cout << "\nAreas:" << std::endl;
+    std::cout << "Triangle 0: " << tri0.getArea() << std::endl;
+    std::cout << "Triangle 1: " << tri1.getArea() << std::endl;
+    std::cout << "Triangle 2: " << tri2.getArea() << std::endl;
+
+    // Test getAng
+    std::cout << "\nAngles:" << std::endl;
+    for (int nAngle = 0; nAngle < 3; ++nAngle) {
+        std::cout << "Triangle 0, Angle " << nAngle << ": " << tri0.getAng(nAngle) << " degrees" << std::endl;
+        std::cout << "Triangle 1, Angle " << nAngle << ": " << tri1.getAng(nAngle) << " degrees" << std::endl;
+        std::cout << "Triangle 2, Angle " << nAngle << ": " << tri2.getAng(nAngle) << " degrees" << std::endl;
     }
 
-    std::vector<Triangle> vecTriList;
-    Triangle tri7(Point(0, 0), Point(3, 0), Point(0, 4));
+    // Test contains
+    Point ptInside1(11, 11);
+    Point ptInside2(14, 11);
+    Point ptInside3(11, 9);
+    Point ptOutside(15, 15);
+    std::cout << "\nContains point (11, 11): " << tri0.contains(ptInside1) << std::endl;
+    std::cout << "Contains point (14, 11): " << tri1.contains(ptInside2) << std::endl;
+    std::cout << "Contains point (11, 9): " << tri2.contains(ptInside3) << std::endl;
+    std::cout << "Contains point (15, 15): " << tri0.contains(ptOutside) << std::endl;
 
-    Triangle tri8(Point(0, 4), Point(3, 0), Point(3, 4));
-    vecTriList.push_back(tri8);
+    // Test findPathToContainingTriangle
+    std::cout << "\nPath to containing triangle for point (11, 11): " << tri0.findPathToContainingTriangle(ptInside1) << std::endl;
+    std::cout << "Path to containing triangle for point (14, 11): " << tri0.findPathToContainingTriangle(ptInside2) << std::endl;
+    std::cout << "Path to containing triangle for point (11, 9): " << tri0.findPathToContainingTriangle(ptInside3) << std::endl;
 
-    Triangle tri9(Point(0, 0), Point(2, 2), Point(0, 4));
-    vecTriList.push_back(tri9);
+    // Test getCircumcenter
+    Point ptCircumcenter1 = tri0.getCircumcenter();
+    Point ptCircumcenter2 = tri1.getCircumcenter();
+    Point ptCircumcenter3 = tri2.getCircumcenter();
+    std::cout << "\nCircumcenter of Triangle 0: (" << ptCircumcenter1.getX() << ", " << ptCircumcenter1.getY() << ")" << std::endl;
+    std::cout << "Circumcenter of Triangle 1: (" << ptCircumcenter2.getX() << ", " << ptCircumcenter2.getY() << ")" << std::endl;
+    std::cout << "Circumcenter of Triangle 2: (" << ptCircumcenter3.getX() << ", " << ptCircumcenter3.getY() << ")" << std::endl;
 
-    Triangle tri10(Point(0, 0), Point(3, 4), Point(0, 2));
-    vecTriList.push_back(tri10);
+    // Test isInCircumcircle
+    std::cout << "\nPoint (11, 11) in circumcircle of Triangle 0: " << tri0.isInCircumcircle(ptInside1) << std::endl;
+    std::cout << "Point (14, 11) in circumcircle of Triangle 1: " << tri1.isInCircumcircle(ptInside2) << std::endl;
+    std::cout << "Point (11, 9) in circumcircle of Triangle 2: " << tri2.isInCircumcircle(ptInside3) << std::endl;
 
-    for (auto& triNeighbour : tri7.neighbours(vecTriList)) {
-        triNeighbour.printPoints();
-    }
+    // Print points of each triangle
+    std::cout << "\nTriangle points:" << std::endl;
+    std::cout << "Triangle 0: ";
+    tri0.printPoints();
+    std::cout << "Triangle 1: ";
+    tri1.printPoints();
+    std::cout << "Triangle 2: ";
+    tri2.printPoints();
 
-    std::cout << tri7.neighbours(vecTriList).size() << std::endl;
-
-    Triangle tri6 = Triangle(Point(15, 25.981), Point(0, 0), Point(7.5, 2));
-
-    if (tri6.isInCircumcircle(Point(15, 2))) {
-        std::cout << "Yes" << std::endl;
-    }
-*/
     return 0;
 }

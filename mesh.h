@@ -32,7 +32,7 @@ public:
 
     void buildMesh();
 
-    void createTriangles(Point& p, Triangle containingTriangle);  // Create new triangles
+    void createTriangles(int index, Triangle containingTriangle);  // Create new triangles
 
     Triangle findContainingTriangle(Point& p);  // Find the triangle that contains the point
     void checkNeighboringCircumcircles(Point& p);  // Check if the point is in neighbors' circumcircles
