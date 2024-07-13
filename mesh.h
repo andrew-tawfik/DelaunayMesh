@@ -37,18 +37,18 @@ public:
     void buildMesh();
 
     // Function to create new triangles
-    void createTriangles(int iIndex, Triangle triContainingTriangle);
+    void createTriangles(int iIndex, const Triangle& triContainingTriangle);
 
     // Function to find the triangle that contains a specific point
-    Triangle findContainingTriangle(Point& ptTargetPoint);
+    Triangle findContainingTriangle(const Point& ptTargetPoint) const;
 
     // Function to check if a point is inside neighboring triangles' circumcircles
-    void checkNeighboringCircumcircles(Point& ptTargetPoint);
+    void checkNeighboringCircumcircles(const Point& ptTargetPoint);
 
     // Function to update neighboring relationships between triangles
     void updateNeighbors();
 
     // Function to print the mesh for debugging purposes
-    void printMesh();
+    void printMesh() const;
 };
 #endif // MESH_H

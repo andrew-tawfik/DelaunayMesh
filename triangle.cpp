@@ -23,7 +23,7 @@ Triangle::Triangle() {
 }
 
 // Constructor: initializes the triangle with given points
-Triangle::Triangle(Point pt0, Point pt1, Point pt2) {
+Triangle::Triangle(const Point& pt0, const Point& pt1, Point& pt2){
     if (getArea() >= 0) {
         this->pt0 = pt0;
         this->pt1 = pt1;
@@ -44,7 +44,7 @@ Triangle::Triangle(Point pt0, Point pt1, Point pt2) {
 }
 
 // Get the length of a specified side
-double Triangle::getLength(int iSide) {
+double Triangle::getLength(int iSide) const{
     if (iSide == 0) return pt0.findDistance(pt1);
     if (iSide == 1) return pt1.findDistance(pt2);
     if (iSide == 2) return pt2.findDistance(pt0);
@@ -52,12 +52,12 @@ double Triangle::getLength(int iSide) {
 }
 
 // Get the perimeter of the triangle
-double Triangle::getPerimeter() {
+double Triangle::getPerimeter() const{
     return getLength(0) + getLength(1) + getLength(2);
 }
 
 // Get a specified angle in the triangle
-double Triangle::getAng(int iAngle) {
+double Triangle::getAng(int iAngle) const{
     double dL1 = getLength(0);
     double dL2 = getLength(1);
     double dL3 = getLength(2);
@@ -75,12 +75,12 @@ double Triangle::getAng(int iAngle) {
 }
 
 // Get the area of the triangle
-double Triangle::getArea() {
+double Triangle::getArea() const{
     return 0.5 * (pt0.getX() * (pt1.getY() - pt2.getY()) + pt1.getX() * (pt2.getY() - pt0.getY()) + pt2.getX() * (pt0.getY() - pt1.getY()));
 }
 
 // Check if the triangle contains a given point
-bool Triangle::contains(Point ptTargetPoint) {
+bool Triangle::contains(const Point& ptTargetPoint) const {
     double dTpx = ptTargetPoint.getX();
     double dTpy = ptTargetPoint.getY();
 
@@ -96,7 +96,7 @@ bool Triangle::contains(Point ptTargetPoint) {
 }
 
 // Find the path to the triangle containing a given point
-int Triangle::findPathToContainingTriangle(Point ptTargetPoint) {
+int Triangle::findPathToContainingTriangle(const Point& ptTargetPoint) const {
     double dTpx = ptTargetPoint.getX();
     double dTpy = ptTargetPoint.getY();
 
@@ -117,7 +117,7 @@ int Triangle::findPathToContainingTriangle(Point ptTargetPoint) {
 }
 
 // Get a specific point of the triangle
-Point Triangle::getPoint(int iPoint) {
+Point Triangle::getPoint(int iPoint) const {
     if (iPoint == 0) return pt0;
     if (iPoint == 1) return pt1;
     if (iPoint == 2) return pt2;
@@ -125,7 +125,7 @@ Point Triangle::getPoint(int iPoint) {
 }
 
 // Print the points of the triangle
-void Triangle::printPoints() {
+void Triangle::printPoints() const {
     std::ostringstream oss; // Create a string stream
     oss << "Point 0: (" << pt0.getX() << ", " << pt0.getY() << "), "
         << "Point 1: (" << pt1.getX() << ", " << pt1.getY() << "), "
@@ -135,7 +135,7 @@ void Triangle::printPoints() {
 }
 
 // Get the circumcenter of the triangle
-Point Triangle::getCircumcenter() {
+Point Triangle::getCircumcenter() const {
     double dX1 = pt0.getX(), dY1 = pt0.getY();
     double dX2 = pt1.getX(), dY2 = pt1.getY();
     double dX3 = pt2.getX(), dY3 = pt2.getY();
@@ -198,7 +198,7 @@ Point Triangle::getCircumcenter() {
 }
 
 // Check if a point is inside the circumcircle
-bool Triangle::isInCircumcircle(Point pt) {
+bool Triangle::isInCircumcircle(const Point& pt) const{
     Point ptCircumcenter = getCircumcenter();
     double dRadius = ptCircumcenter.findDistance(getPoint(1)); // Calculate the radius
     double dPointDistance = ptCircumcenter.findDistance(pt); // Calculate the distance from the point to the circumcenter
@@ -207,7 +207,7 @@ bool Triangle::isInCircumcircle(Point pt) {
 }
 
 // Getter for aiNeighbourIndices
-int Triangle::getNeighbourIndex(int iIndex) {
+int Triangle::getNeighbourIndex(int iIndex) const {
     if (iIndex >= 0 && iIndex < 3) {
         return aiNeighbourIndices[iIndex];
     }
@@ -222,7 +222,7 @@ void Triangle::setNeighbourIndex(int iIndex, int iValue) {
 }
 
 // Getter for aiPointIndices
-int Triangle::getPointIndex(int iIndex) {
+int Triangle::getPointIndex(int iIndex) const {
     if (iIndex >= 0 && iIndex < 3) {
         return aiPointIndices[iIndex];
     }
