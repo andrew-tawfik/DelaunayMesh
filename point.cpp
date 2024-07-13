@@ -2,38 +2,34 @@
 #include <cmath>
 #include <iostream>
 
-// Default constructor
+// Default constructor: initializes the point at (0.0, 0.0)
 Point::Point() {}
 
-// Parameterized constructor
+// Parameterized constructor: initializes the point at (fx, fy)
 Point::Point(float fx, float fy) : fx(fx), fy(fy) {}
 
-// Getter for x
-float Point::getX()
-{
+// Getter for x coordinate
+float Point::getX() {
     return fx;
 }
 
-// Setter for x
-void Point::setX(float fx)
-{
+// Setter for x coordinate
+void Point::setX(float fx) {
     this->fx = fx;
 }
 
-// Getter for y
-float Point::getY()
-{
+// Getter for y coordinate
+float Point::getY() {
     return fy;
 }
 
-// Setter for y
-void Point::setY(float fy)
-{
+// Setter for y coordinate
+void Point::setY(float fy) {
     this->fy = fy;
 }
 
-double Point::findDistance(Point p2)
-{
+// Function to find the distance to another point
+double Point::findDistance(Point p2) {
     double dx1 = fx;
     double dy1 = fy;
 
@@ -48,8 +44,8 @@ double Point::findDistance(Point p2)
     return dDistance;
 }
 
-double Point::findSlope(Point p2)
-{
+// Function to find the slope to another point
+double Point::findSlope(Point p2) {
     double dx1 = fx;
     double dy1 = fy;
 
@@ -61,29 +57,23 @@ double Point::findSlope(Point p2)
     return dSlope;
 }
 
-bool Point::betweenPoints(Point p2, Point pTargetPoint)
-{
+// Function to check if a target point is between the current point and another point
+bool Point::betweenPoints(Point p2, Point pTargetPoint) {
     double db = p2.getY() - (p2.getX() * findSlope(p2));
     double dtpx = pTargetPoint.getX();
     double dtpy = pTargetPoint.getY();
 
-    if (dtpy == findSlope(p2) * dtpx + db)
-    {
-        if ((dtpx >= (std::fmin(getX(), p2.getX()))) && (dtpx <= (std::fmax(getX(), p2.getX()))))
-        {
-            if ((dtpy >= (std::fmin(getY(), p2.getY()))) && (dtpy <= (std::fmax(getY(), p2.getY()))))
-            {
+    if (dtpy == findSlope(p2) * dtpx + db) {
+        if ((dtpx >= (std::fmin(getX(), p2.getX()))) && (dtpx <= (std::fmax(getX(), p2.getX())))) {
+            if ((dtpy >= (std::fmin(getY(), p2.getY()))) && (dtpy <= (std::fmax(getY(), p2.getY())))) {
                 return true;
             }
         }
     }
-    else
-    {
-        return false;
-    }
+    return false;
 }
 
-bool Point::equals(Point pOther)
-{
+// Function to check if the current point is equal to another point
+bool Point::equals(Point pOther) {
     return fx == pOther.getX() && fy == pOther.getY();
 }

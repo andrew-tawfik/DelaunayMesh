@@ -1,41 +1,52 @@
 #include "mesh.h"
 #include <iostream>
 
-Mesh::Mesh(std::vector<Point> points): vecPoints(points)
-{
-    // Create the super triangle and initialize the triangles list
-    Triangle initialTriangle = superTriangle();
-    int numPoints = vecPoints.size() + 3;
-    setPointIndices(numPoints);
-    setTriangleIndices(numPoints);
+// Constructor: initializes the mesh with a given set of points
+Mesh::Mesh(const std::vector<Point>& vecPt) {
+    setShape(vecPt);
+    setPointIndices(vecPt.size());
+    setTriangleIndices(vecPt.size());
 }
 
-
-
-std::vector<int> Mesh::getPointIndices() {
-    return pointIndices;
+// Sets the shape of the mesh with a given vector of points
+void Mesh::setShape(const std::vector<Point>& vecPt) {
+    vecPtShape = vecPt;
 }
 
-void Mesh::setPointIndices(int numPoints) {
-    pointIndices.resize(numPoints);
-    for (int i = 3; i < numPoints; ++i) {
-        pointIndices[i] = i;
+// Returns the shape of the mesh as a vector of points
+std::vector<Point> Mesh::getShape() const {
+    return vecPtShape;
+}
+
+// Returns the indices of points in the mesh
+std::vector<int> Mesh::getPointIndices() const {
+    return viPointIndices;
+}
+
+// Sets the indices of points in the mesh, adding 3 for the super triangle
+void Mesh::setPointIndices(int iNumPoints) {
+    iNumPoints += 3;
+    viPointIndices.resize(iNumPoints);
+    for (int i = 0; i < iNumPoints; ++i) {
+        viPointIndices[i] = i;
     }
 }
 
-std::vector<int> Mesh::getTriangleIndices() {
-    return triangleIndices;
+// Returns the indices of triangles in the mesh
+std::vector<int> Mesh::getTriangleIndices() const {
+    return viTriangleIndices;
 }
 
+// Sets the indices of triangles in the mesh, calculating the number based on points
 void Mesh::setTriangleIndices(int numPoints) {
-
-    int numTriangles = 2 * numPoints + 1;
-    triangleIndices.resize(numTriangles);
-    for (int i = 0; i < numTriangles; ++i) {
-        triangleIndices[i] = i;
+    int iNumTriangles = 2 * numPoints + 1;
+    viTriangleIndices.resize(iNumTriangles);
+    for (int i = 0; i < iNumTriangles; ++i) {
+        viTriangleIndices[i] = i;
     }
 }
 
+// Creates a super triangle that encloses all points in the mesh
 Triangle Mesh::superTriangle() {
     Point p0(0, 0);
     Point p1(30, 0);
@@ -46,65 +57,11 @@ Triangle Mesh::superTriangle() {
     triSuper.setPointIndex(1, 1);
     triSuper.setPointIndex(2, 2);
 
+    for (int i = 0; i < 3; ++i) {
+        viPointIndices[i] = i;
+    }
+
     return triSuper;
 }
 
-/*
-void Mesh::buildMesh() {
-    std::vector<Triangle> vecNewTriangles;
 
-    for (auto& p : vecPoints) {
-        vecNewTriangles.clear();
-        Triangle containingTriangle = findContainingTriangle(p);
-        //if (containingTriangle)
-
-        createTriangles(p, containingTriangle);
-        checkNeighboringCircumcircles(p);
-
-    }
-}
-
-Triangle Mesh::findContainingTriangle(Point& p) {
-    // Implement
-}
-
-
-void Mesh::createTriangles(int pIndex, Triangle containingTriangle) {
-
-
-    // Create new triangles by connecting the point to the vertices of the containing triangle
-
-    Triangle t2(containingTriangle.getPoint(1), containingTriangle.getPoint(3), p);
-    Triangle t3(containingTriangle.getPoint(2), containingTriangle.getPoint(3), p);
-
-    // Update the containing triangles points
-    containingTriangle.setPointIndex(2, pIndex);
-
-    vecTriangles.push_back(t1);
-    vecTriangles.push_back(t2);
-    vecTriangles.push_back(t3);
-
-    // Update neighbors for new triangles
-
-    updateNeighbors();
-
-    // Remove the old containing triangle
-
-    // Implement
-
-}
-
-void Mesh::checkNeighboringCircumcircles( Point& p) {
-    // Implement
-}
-
-void Mesh::updateNeighbors() {
-    // Implement
-}
-
-void Mesh::printMesh()  {
-    for (auto& triangle : vecTriangles) {
-        triangle.printPoints();
-    }
-}
-*/

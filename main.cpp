@@ -4,6 +4,9 @@
 #include "mesh.h"
 
 int main() {
+
+    // Triangle Class Testing
+
     // Create points for the triangles
     Point pt0(10, 10);
     Point pt1(13, 10);
@@ -100,6 +103,42 @@ int main() {
     tri1.printPoints();
     std::cout << "Triangle 2: ";
     tri2.printPoints();
+
+
+    // Mesh Class Testing
+
+
+    std::vector<Point> vecPt = {
+        Point(7.5, 2.0), Point(15.0, 2.0),
+        Point(22.5, 2.0), Point(22.5, 7.0),
+        Point(22.5, 12.0), Point(15.0, 12.0),
+        Point(7.5, 12.0), Point(7.5, 7)
+    };
+
+    Mesh m(vecPt);
+
+    // Test getPoints
+    std::cout << "\nMesh Points:" << std::endl;
+    std::vector<Point> meshPoints = m.getShape();
+    for (auto& point : meshPoints) {
+        std::cout << "(" << point.getX() << ", " << point.getY() << ")" << std::endl;
+    }
+
+    // Test getPointIndices
+    std::cout << "\nMesh Point Indices:" << std::endl;
+    std::vector<int> meshPointIndices = m.getPointIndices();
+    for (int index : meshPointIndices) {
+        std::cout << index << " ";
+    }
+    std::cout << std::endl;
+
+    // Test getTriangleIndices
+    std::cout << "\nMesh Triangle Indices:" << std::endl;
+    std::vector<int> meshTriangleIndices = m.getTriangleIndices();
+    for (int index : meshTriangleIndices) {
+        std::cout << index << " ";
+    }
+    std::cout << std::endl;
 
     return 0;
 }
