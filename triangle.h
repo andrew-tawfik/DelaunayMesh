@@ -17,7 +17,7 @@ public:
     Triangle();
 
     // Constructor to initialize a triangle with three points
-    Triangle(const Point& pt0, const Point& pt1, Point& pt2);
+    Triangle(const Point& pt0, const Point& pt1, const Point& pt2);
 
     // Function to get the length of a specified side
     double getLength(int iSide) const;

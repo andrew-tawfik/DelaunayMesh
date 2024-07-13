@@ -3,7 +3,8 @@
 #include <iostream>
 #include "mesh.h"
 
-int main() {
+int main()
+{
 
     // Triangle Class Testing
 
@@ -41,7 +42,8 @@ int main() {
 
     // Test getLength
     std::cout << "\nLengths of the sides:" << std::endl;
-    for (int nSide = 0; nSide < 3; ++nSide) {
+    for (int nSide = 0; nSide < 3; ++nSide)
+    {
         std::cout << "Triangle 0, Side " << nSide << ": " << tri0.getLength(nSide) << std::endl;
         std::cout << "Triangle 1, Side " << nSide << ": " << tri1.getLength(nSide) << std::endl;
         std::cout << "Triangle 2, Side " << nSide << ": " << tri2.getLength(nSide) << std::endl;
@@ -61,7 +63,8 @@ int main() {
 
     // Test getAng
     std::cout << "\nAngles:" << std::endl;
-    for (int nAngle = 0; nAngle < 3; ++nAngle) {
+    for (int nAngle = 0; nAngle < 3; ++nAngle)
+    {
         std::cout << "Triangle 0, Angle " << nAngle << ": " << tri0.getAng(nAngle) << " degrees" << std::endl;
         std::cout << "Triangle 1, Angle " << nAngle << ": " << tri1.getAng(nAngle) << " degrees" << std::endl;
         std::cout << "Triangle 2, Angle " << nAngle << ": " << tri2.getAng(nAngle) << " degrees" << std::endl;
@@ -108,7 +111,8 @@ int main() {
     // Mesh Class Testing
 
 
-    std::vector<Point> vecPt = {
+    std::vector<Point> vecPt =
+    {
         Point(7.5, 2.0), Point(15.0, 2.0),
         Point(22.5, 2.0), Point(22.5, 7.0),
         Point(22.5, 12.0), Point(15.0, 12.0),
@@ -120,14 +124,16 @@ int main() {
     // Test getPoints
     std::cout << "\nMesh Points:" << std::endl;
     std::vector<Point> meshPoints = m.getShape();
-    for (auto& point : meshPoints) {
+    for (const auto& point : meshPoints)
+    {
         std::cout << "(" << point.getX() << ", " << point.getY() << ")" << std::endl;
     }
 
     // Test getPointIndices
     std::cout << "\nMesh Point Indices:" << std::endl;
     std::vector<int> meshPointIndices = m.getPointIndices();
-    for (int index : meshPointIndices) {
+    for (int index : meshPointIndices)
+    {
         std::cout << index << " ";
     }
     std::cout << std::endl;
@@ -135,7 +141,8 @@ int main() {
     // Test getTriangleIndices
     std::cout << "\nMesh Triangle Indices:" << std::endl;
     std::vector<int> meshTriangleIndices = m.getTriangleIndices();
-    for (int index : meshTriangleIndices) {
+    for (int index : meshTriangleIndices)
+    {
         std::cout << index << " ";
     }
     std::cout << std::endl;
