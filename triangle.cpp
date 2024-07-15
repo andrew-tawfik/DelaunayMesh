@@ -277,3 +277,12 @@ void Triangle::setPointIndex(int iIndex, int iValue)
         aiPointIndices[iIndex] = iValue;
     }
 }
+
+int Triangle::getIndex() const
+{
+    return iIndex;
+}
+void Triangle::setIndex(int iValue)
+{
+    this->iIndex = iValue;
+}

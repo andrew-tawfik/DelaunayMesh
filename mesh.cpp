@@ -1,5 +1,7 @@
 #include "mesh.h"
 #include <iostream>
+#include <random>
+#include <stack>
 
 // Constructor: initializes the mesh with a given set of points
 Mesh::Mesh(const std::vector<Point>& vecPt)
@@ -19,6 +21,18 @@ void Mesh::setShape(const std::vector<Point>& vecPt)
 std::vector<Point> Mesh::getShape() const
 {
     return vecPtShape;
+}
+
+// Sets the shape of the mesh with a given vector of points
+void Mesh::setTriVector(const std::vector<Triangle>& vecTri)
+{
+    vecTriangles = vecTri;
+}
+
+// Returns the shape of the mesh as a vector of points
+std::vector<Triangle> Mesh::getTriVector() const
+{
+    return vecTriangles;
 }
 
 // Returns the indices of points in the mesh
@@ -73,6 +87,63 @@ Triangle Mesh::superTriangle()
     }
 
     return triSuper;
+}
+
+// Builds mesh from points and triangles
+void Mesh::buildMesh()
+{
+    Triangle triSuper = superTriangle();
+    vecTriangles.push_back(triSuper);
+
+
+    for (const auto& p : vecPtShape)
+    {
+
+        int iTriIndex = findContainingTriangle(p);
+        createTriangles(iTriIndex);
+    }
+}
+
+// Create new triangles
+void Mesh::createTriangles(int iIndex)
+{}
+
+int Mesh::findContainingTriangle(const Point& ptTargetPoint) const
+{
+    // Initialize random number generator
+    static std::random_device rd;  // Seed
+    static std::mt19937 gen(rd()); // Mersenne Twister RNG
+
+    int iMaxIndex = vecTriangles.size() - 1;
+    // Size of vecTriangles should change everytime method is called
+    std::uniform_int_distribution<> dis(0, iMaxIndex);
+
+    // Get a randomized triangle from vecTriangles
+    int randomIndex = dis(gen);
+
+    std::stack<int> stack;
+    stack.push(randomIndex);
+
+    while (!stack.empty())
+    {
+        int currentIndex = stack.top();
+        stack.pop();
+
+        const Triangle& currentTri = vecTriangles[currentIndex];
+        int result = currentTri.findPathToContainingTriangle(ptTargetPoint);
+
+        if (result == -1) // -1 indicates that the currentTri contains ptTargetPoint
+        {
+            return currentTri.getIndex();
+        }
+        else
+        {
+            stack.push(result);
+        }
+    }
+
+    // If no containing triangle is found, return -1 or handle error appropriately
+    return -1;
 }
 
 

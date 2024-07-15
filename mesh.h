@@ -8,8 +8,9 @@
 // Class representing a 2D mesh composed of points and triangles
 class Mesh {
 private:
+
     std::vector<Point> vecPtShape;  // Vector of points defining the shape
-    std::vector<Triangle> vecTriShape;  // Vector of triangles defining the shape
+    std::vector<Triangle> vecTriangles;  // Vector of triangles defining the shape
 
     std::vector<int> viTriangleIndices;  // Indices of triangles in the mesh
     std::vector<int> viPointIndices;  // Indices of points in the mesh
@@ -21,6 +22,10 @@ public:
     // Getters and setters for the shape
     std::vector<Point> getShape() const;
     void setShape(const std::vector<Point>& vecPt);
+
+    // Getters and setters for the vector of Triangles (for testing purposes only)
+    void setTriVector(const std::vector<Triangle>& vecTri);
+    std::vector<Triangle> getTriVector() const;
 
     // Getters and setters for point indices
     std::vector<int> getPointIndices() const;
@@ -37,10 +42,10 @@ public:
     void buildMesh();
 
     // Function to create new triangles
-    void createTriangles(int iIndex, const Triangle& triContainingTriangle);
+    void createTriangles(int iIndex);
 
     // Function to find the triangle that contains a specific point
-    Triangle findContainingTriangle(const Point& ptTargetPoint) const;
+    int findContainingTriangle(const Point& ptTargetPoint) const;
 
     // Function to check if a point is inside neighboring triangles' circumcircles
     void checkNeighboringCircumcircles(const Point& ptTargetPoint);

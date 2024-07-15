@@ -9,6 +9,7 @@
 class Triangle {
 private:
     Point pt0, pt1, pt2;  // Points defining the triangle
+    int iIndex; // Index of the triangle
     int aiNeighbourIndices[3];  // Indices of neighboring triangles
     int aiPointIndices[3];  // Indices of points in the triangle
 
@@ -56,6 +57,9 @@ public:
     // Getter and setter for point indices
     int getPointIndex(int iIndex) const;
     void setPointIndex(int iIndex, int iValue);
+
+    int getIndex() const;
+    void setIndex(int iValue);
 
 };
 

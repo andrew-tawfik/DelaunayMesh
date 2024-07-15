@@ -20,10 +20,9 @@ int main()
     Triangle tri1(pt1, pt3, pt2); // Neighbor to the right
     Triangle tri2(pt0, pt4, pt1); // Neighbor below
 
-    std::vector <Triangle> vecTriangles;
-    vecTriangles.push_back(tri0);
-    vecTriangles.push_back(tri1);
-    vecTriangles.push_back(tri2);
+    tri0.setIndex(0);
+    tri1.setIndex(1);
+    tri2.setIndex(2);
 
     // Set neighbor indices
     tri0.setNeighbourIndex(0, 2); // Side 0 of tri0 is neighbor to tri2
@@ -33,6 +32,11 @@ int main()
     tri1.setNeighbourIndex(2, 0); // Side 0 of tri1 is neighbor to tri0
 
     tri2.setNeighbourIndex(2, 0); // Side 0 of tri2 is neighbor to tri0
+
+    std::vector <Triangle> vecTriangles;
+    vecTriangles.push_back(tri0);
+    vecTriangles.push_back(tri1);
+    vecTriangles.push_back(tri2);
 
     // Print initial triangles
     std::cout << "Initial Triangles:" << std::endl;
@@ -82,8 +86,8 @@ int main()
 
     // Test findPathToContainingTriangle
     std::cout << "\nPath to containing triangle for point (11, 11): " << tri0.findPathToContainingTriangle(ptInside1) << std::endl;
-    std::cout << "Path to containing triangle for point (14, 11): " << tri0.findPathToContainingTriangle(ptInside2) << std::endl;
-    std::cout << "Path to containing triangle for point (11, 9): " << tri0.findPathToContainingTriangle(ptInside3) << std::endl;
+    std::cout << "Path to containing triangle for point (14, 11): " << tri0.findPathToContainingTriangle(ptInside3) << std::endl;
+    std::cout << "Path to containing triangle for point (11, 9): " << tri2.findPathToContainingTriangle(ptInside1) << std::endl;
 
     // Test getCircumcenter
     Point ptCircumcenter1 = tri0.getCircumcenter();
@@ -110,8 +114,8 @@ int main()
 
     // Mesh Class Testing
 
-
-    std::vector<Point> vecPt =
+    //Points form a rectangle
+    std::vector<Point> vecPtRectangle =
     {
         Point(7.5, 2.0), Point(15.0, 2.0),
         Point(22.5, 2.0), Point(22.5, 7.0),
@@ -119,7 +123,8 @@ int main()
         Point(7.5, 12.0), Point(7.5, 7)
     };
 
-    Mesh m(vecPt);
+    //Create mesh object of a Rectangle
+    Mesh m(vecPtRectangle);
 
     // Test getPoints
     std::cout << "\nMesh Points:" << std::endl;
@@ -146,6 +151,13 @@ int main()
         std::cout << index << " ";
     }
     std::cout << std::endl;
+
+
+    // Test findContainingTriangle
+    m.setTriVector(vecTriangles);
+    std::cout << m.findContainingTriangle(ptInside1) << std::endl;
+
+
 
     return 0;
 }
