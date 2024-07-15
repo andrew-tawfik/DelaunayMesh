@@ -86,6 +86,8 @@ Triangle Mesh::superTriangle()
         viPointIndices[i] = i;
     }
 
+    triSuper.setIndex(0);
+
     return triSuper;
 }
 
@@ -96,49 +98,89 @@ void Mesh::buildMesh()
     vecTriangles.push_back(triSuper);
 
 
+    int iPointIndex = 0;
     for (const auto& p : vecPtShape)
     {
 
         int iTriIndex = findContainingTriangle(p);
-        createTriangles(iTriIndex);
+        createTriangles(iTriIndex, iPointIndex);
+
+        iPointIndex += 1;
     }
 }
 
-// Create new triangles
-void Mesh::createTriangles(int iIndex)
-{}
+void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
+{
+    // Ensure indices are valid
+    if (iTriangleIndex < 0 || iTriangleIndex >= vecTriangles.size() || iPointIndex < 0 || iPointIndex >= vecPtShape.size())
+    {
+        std::cerr << "Invalid indices provided to createTriangles." << std::endl;
+        return;
+    }
 
+    // Get references to the target point and current triangle
+    const Point& ptTargetPoint = vecPtShape[iPointIndex];
+    Triangle& triCurrent = vecTriangles[iTriangleIndex];
+
+    // Create two new triangles
+    Triangle triNewTriangle1(triCurrent.getPoint(0), triCurrent.getPoint(1), ptTargetPoint);
+    Triangle triNewTriangle2(triCurrent.getPoint(1), triCurrent.getPoint(2), ptTargetPoint);
+
+    // Set indices for the new triangles
+    triNewTriangle1.setIndex(vecTriangles.size());
+    triNewTriangle2.setIndex(vecTriangles.size() + 1);
+
+    // Set point indices for the new triangles
+    triNewTriangle1.setPointIndex(0, triCurrent.getPointIndex(0));
+    triNewTriangle1.setPointIndex(1, triCurrent.getPointIndex(1));
+    triNewTriangle1.setPointIndex(2, iPointIndex);
+
+    triNewTriangle2.setPointIndex(0, triCurrent.getPointIndex(1));
+    triNewTriangle2.setPointIndex(1, triCurrent.getPointIndex(2));
+    triNewTriangle2.setPointIndex(2, iPointIndex);
+
+    // Update the current triangle with the new point and point index
+    triCurrent.setPointIndex(1, iPointIndex);
+    triCurrent.setPoint(1, ptTargetPoint);
+
+    // Add the new triangles to the vector
+    vecTriangles.push_back(triNewTriangle1);
+    vecTriangles.push_back(triNewTriangle2);
+}
+
+// Finds the index of the triangle containing the target point
 int Mesh::findContainingTriangle(const Point& ptTargetPoint) const
 {
     // Initialize random number generator
     static std::random_device rd;  // Seed
     static std::mt19937 gen(rd()); // Mersenne Twister RNG
 
-    int iMaxIndex = vecTriangles.size() - 1;
+
     // Size of vecTriangles should change everytime method is called
-    std::uniform_int_distribution<> dis(0, iMaxIndex);
+    std::uniform_int_distribution<> dis(0, vecTriangles.size() - 1);
 
     // Get a randomized triangle from vecTriangles
-    int randomIndex = dis(gen);
+    int iRandomIndex = dis(gen);
 
+    // Initialize stack for dfs
     std::stack<int> stack;
-    stack.push(randomIndex);
+    stack.push(iRandomIndex);
 
     while (!stack.empty())
     {
-        int currentIndex = stack.top();
+        int iCurrentIndex = stack.top();
         stack.pop();
 
-        const Triangle& currentTri = vecTriangles[currentIndex];
-        int result = currentTri.findPathToContainingTriangle(ptTargetPoint);
+        const Triangle& triCurrent = vecTriangles[iCurrentIndex];
+        int iResult = triCurrent.findPathToContainingTriangle(ptTargetPoint);
 
-        if (result == -1) // -1 indicates that the currentTri contains ptTargetPoint
+        if (iResult == -1) // -1 indicates that the currentTri contains ptTargetPoint
         {
-            return currentTri.getIndex();
+            return triCurrent.getIndex();
         }
         else
         {
-            stack.push(result);
+            stack.push(iResult);
         }
     }
 

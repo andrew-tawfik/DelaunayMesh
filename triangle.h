@@ -41,6 +41,9 @@ public:
     // Function to get a specified point of the triangle
     Point getPoint(int iPoint) const;
 
+    // Function to set new points based
+    void setPoint(int iPoint, const Point& newPoint);
+
     // Function to print the points of the triangle
     void printPoints() const;
 

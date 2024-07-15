@@ -42,9 +42,9 @@ public:
     void buildMesh();
 
     // Function to create new triangles
-    void createTriangles(int iIndex);
+    void createTriangles(int iTriangleIndex, int iPointIndex);
 
-    // Function to find the triangle that contains a specific point
+    // Function to finds the index the triangle that contains a specific point
     int findContainingTriangle(const Point& ptTargetPoint) const;
 
     // Function to check if a point is inside neighboring triangles' circumcircles

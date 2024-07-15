@@ -131,6 +131,15 @@ int Triangle::findPathToContainingTriangle(const Point& ptTargetPoint) const
     return -1; // Return -1 if no positive determinant is found
 }
 
+void Triangle::setPoint(int iPoint, const Point& newPoint)
+{
+    if (iPoint == 0) this->pt0 = newPoint;
+    if (iPoint == 1) this->pt1 = newPoint;
+    if (iPoint == 2) this->pt2 = newPoint;
+
+}
+
+
 // Get a specific point of the triangle
 Point Triangle::getPoint(int iPoint) const
 {
@@ -278,10 +287,13 @@ void Triangle::setPointIndex(int iIndex, int iValue)
     }
 }
 
+//Getter for iIndex
 int Triangle::getIndex() const
 {
     return iIndex;
 }
+
+//Setter for iIndex
 void Triangle::setIndex(int iValue)
 {
     this->iIndex = iValue;
