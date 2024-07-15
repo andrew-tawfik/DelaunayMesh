@@ -155,6 +155,7 @@ int main()
 
     // Test findContainingTriangle
     m.setTriVector(vecTriangles);
+    std::cout << "\nTarget point is inside Triangle at index: " ;
     std::cout << m.findContainingTriangle(ptInside1) << std::endl;
 
 
