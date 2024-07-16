@@ -112,8 +112,7 @@ void Mesh::buildMesh()
 void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
 {
     // Ensure indices are valid
-    if (iTriangleIndex < 0 || iTriangleIndex >= vecTriangles.size() || iPointIndex < 0 || iPointIndex >= vecPtShape.size())
-    {
+    if (iTriangleIndex < 0 || iTriangleIndex >= vecTriangles.size() || iPointIndex < 0 || iPointIndex >= vecPtShape.size()) {
         std::cerr << "Invalid indices provided to createTriangles." << std::endl;
         return;
     }
@@ -127,8 +126,10 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
     Triangle triNewTriangle2(triCurrent.getPoint(1), triCurrent.getPoint(2), ptTargetPoint);
 
     // Set indices for the new triangles
-    triNewTriangle1.setIndex(vecTriangles.size());
-    triNewTriangle2.setIndex(vecTriangles.size() + 1);
+    int newIndex1 = vecTriangles.size(); //  3
+    int newIndex2 = newIndex1 + 1;       //  4
+    triNewTriangle1.setIndex(newIndex1);
+    triNewTriangle2.setIndex(newIndex2);
 
     // Set point indices for the new triangles
     triNewTriangle1.setPointIndex(0, triCurrent.getPointIndex(0));
@@ -142,6 +143,39 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
     // Update the current triangle with the new point and point index
     triCurrent.setPointIndex(1, iPointIndex);
     triCurrent.setPoint(1, ptTargetPoint);
+
+    // Update neighbors for the new triangles
+    triNewTriangle1.setNeighbourIndex(2, iTriangleIndex);
+    triNewTriangle2.setNeighbourIndex(1, iTriangleIndex);
+
+    // Update neighbors for the current triangle
+
+    triNewTriangle1.setNeighbourIndex(1, newIndex2);
+    triNewTriangle2.setNeighbourIndex(2, newIndex1);
+
+    int oldNeighbourIndex = triCurrent.getNeighbourIndex(1);
+
+    triCurrent.setNeighbourIndex(0, newIndex1);
+    triCurrent.setNeighbourIndex(1, newIndex2);
+
+
+    // Update the neighboring relationships with the old neighbor
+    if (oldNeighbourIndex != -1)
+    {
+        Triangle& oldNeighbour = vecTriangles[oldNeighbourIndex];
+
+        for (int i = 0; i < 3; ++i)
+        {
+            if (oldNeighbour.getNeighbourIndex(i) == iTriangleIndex)
+            {
+                oldNeighbour.setNeighbourIndex(i, newIndex2);
+                break;
+            }
+        }
+
+        triNewTriangle2.setNeighbourIndex(1, oldNeighbourIndex);
+        triNewTriangle2.setNeighbourIndex(0, iTriangleIndex);
+    }
 
     // Add the new triangles to the vector
     vecTriangles.push_back(triNewTriangle1);

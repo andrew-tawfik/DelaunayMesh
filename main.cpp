@@ -106,6 +106,8 @@ int main()
     Mesh k(vecPtRectangle);
     k.setTriVector({ k.superTriangle() });
     k.createTriangles(0, 0);
+    k.createTriangles(2, 1);
+    k.createTriangles(3, 2);
 
     std::vector<Triangle> meshTriangles = k.getTriVector();
     std::cout << "\nThe size of the vector after the createTriangles operation: " << meshTriangles.size() << std::endl;
@@ -114,6 +116,10 @@ int main()
     {
         std::cout << "Triangle " << i << ": ";
         meshTriangles[i].printPoints();
+        std::cout << "\ta) Neighbour at index:  " << meshTriangles[i].getNeighbourIndex(0) << std::endl;
+        std::cout << "\tb) Neighbour at index:  " << meshTriangles[i].getNeighbourIndex(1) << std::endl;
+        std::cout << "\tc) Neighbour at index:  " << meshTriangles[i].getNeighbourIndex(2) << std::endl;
+
     }
 
     return 0;
