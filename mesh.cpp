@@ -6,6 +6,7 @@
 // Constructor: initializes the mesh with a given set of points
 Mesh::Mesh(const std::vector<Point>& vecPt)
 {
+    setTriVector({});
     setShape(vecPt);
     setPointIndices(vecPt.size());
     setTriangleIndices(vecPt.size());
@@ -94,9 +95,12 @@ Triangle Mesh::superTriangle()
 // Builds mesh from points and triangles
 void Mesh::buildMesh()
 {
-    Triangle triSuper = superTriangle();
-    vecTriangles.push_back(triSuper);
 
+    // Triangle triSuper = superTriangle();
+    // vecTriangles.push_back(triSuper);
+
+    std::cout << "Size of triVector: " << vecTriangles.size() <<  std::endl;
+    std::cout << "Size of ptVector : " << vecPtShape.size() <<  std::endl;
 
     int iPointIndex = 0;
     for (const auto& p : vecPtShape)
@@ -106,6 +110,7 @@ void Mesh::buildMesh()
         createTriangles(iTriIndex, iPointIndex);
 
         iPointIndex += 1;
+        std::cout << "Size of triVector after loop: " << iPointIndex << ": " << vecTriangles.size() << std::endl;
     }
 }
 
@@ -126,8 +131,8 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
     Triangle triNewTriangle2(triCurrent.getPoint(1), triCurrent.getPoint(2), ptTargetPoint);
 
     // Set indices for the new triangles
-    int newIndex1 = vecTriangles.size(); //  3
-    int newIndex2 = newIndex1 + 1;       //  4
+    int newIndex1 = vecTriangles.size();
+    int newIndex2 = newIndex1 + 1;
     triNewTriangle1.setIndex(newIndex1);
     triNewTriangle2.setIndex(newIndex2);
 
@@ -149,7 +154,6 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
     triNewTriangle2.setNeighbourIndex(1, iTriangleIndex);
 
     // Update neighbors for the current triangle
-
     triNewTriangle1.setNeighbourIndex(1, newIndex2);
     triNewTriangle2.setNeighbourIndex(2, newIndex1);
 
@@ -222,4 +226,22 @@ int Mesh::findContainingTriangle(const Point& ptTargetPoint) const
     return -1;
 }
 
+void Mesh::checkNeighboringCircumcircles(int iTriangleIndex, int iPointIndex)
+{
+    // Get references to the target point and current triangle
+    const Point& ptTargetPoint = vecPtShape[iPointIndex];
+    const Triangle& triCurrent = vecTriangles[iTriangleIndex];
 
+    // Check neighbour circumcircles
+    for (int i=0; i < 3; ++i)
+    {
+        int iNeighbourIndex = triCurrent.getNeighbourIndex(i);
+        Triangle& triNeighbour = vecTriangles[iNeighbourIndex];
+
+        if (triNeighbour.isInCircumcircle(ptTargetPoint))
+        {
+            return; //update points of triangle
+        }
+
+    }
+}

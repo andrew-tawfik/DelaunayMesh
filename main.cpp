@@ -105,9 +105,14 @@ int main()
     // Test createTriangles
     Mesh k(vecPtRectangle);
     k.setTriVector({ k.superTriangle() });
+    // k.buildMesh();
+
+
     k.createTriangles(0, 0);
     k.createTriangles(2, 1);
     k.createTriangles(3, 2);
+    k.createTriangles(5, 3);
+    k.createTriangles(7, 4);
 
     std::vector<Triangle> meshTriangles = k.getTriVector();
     std::cout << "\nThe size of the vector after the createTriangles operation: " << meshTriangles.size() << std::endl;
