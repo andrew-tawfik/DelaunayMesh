@@ -108,9 +108,19 @@ int main()
     // k.buildMesh();
 
 
-    k.createTriangles(0, 0);
-    k.createTriangles(2, 1);
-    k.checkNeighboringCircumcircles(2, 1);
+    k.createTriangles(0, 3);
+
+    k.createTriangles(2, 4);
+    k.checkNeighboringCircumcircles(2, 4, 2);
+
+    k.createTriangles(3, 5);
+
+    k.createTriangles(5, 6);
+    //k.checkNeighboringCircumcircles(8, 6, 0);
+
+
+
+
 
 
     std::vector<Triangle> meshTriangles = k.getTriVector();

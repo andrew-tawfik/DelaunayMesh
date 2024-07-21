@@ -48,7 +48,7 @@ public:
     int findContainingTriangle(const Point& ptTargetPoint) const;
 
     // Function to check if a point is inside neighboring triangles' circumcircles
-    void checkNeighboringCircumcircles(int iTriangleIndex, int iPointIndex);
+    void checkNeighboringCircumcircles(int iTriangleIndex, int iPointIndex, int iSide);
 
     // Function to update neighboring relationships between triangles
     void updateNeighbors();
