@@ -1,9 +1,10 @@
 #include "mesh.h"
 #include <iostream>
 #include <random>
+#include <algorithm>
 #include <stack>
 
-// Constructor: initializes the mesh with a given set of points
+// Constructor: iCurrentNeighbourtializes the mesh with a given set of points
 Mesh::Mesh(const std::vector<Point>& vecPt)
 {
     setTriVector({});
@@ -214,10 +215,10 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
 */
 }
 
-// Finds the index of the triangle containing the target point
+// Finds the index of the triangle contaiCurrentNeighbourng the target point
 int Mesh::findContainingTriangle(const Point& ptTargetPoint) const
 {
-    // Initialize random number generator
+    // iCurrentNeighbourtialize random number generator
     static std::random_device rd;  // Seed
     static std::mt19937 gen(rd()); // Mersenne Twister RNG
 
@@ -228,7 +229,7 @@ int Mesh::findContainingTriangle(const Point& ptTargetPoint) const
     // Get a randomized triangle from vecTriangles
     int iRandomIndex = dis(gen);
 
-    // Initialize stack for dfs
+    // iCurrentNeighbourtialize stack for dfs
     std::stack<int> stack;
     stack.push(iRandomIndex);
 
@@ -250,7 +251,7 @@ int Mesh::findContainingTriangle(const Point& ptTargetPoint) const
         }
     }
 
-    // If no containing triangle is found, return -1 or handle error appropriately
+    // If no contaiCurrentNeighbourng triangle is found, return -1 or handle error appropriately
     return -1;
 }
 
@@ -280,58 +281,280 @@ void Mesh::checkNeighboringCircumcircles(int iTriangleIndex, int iPointIndex, in
 
     if (triNeighbour.isInCircumcircle(ptTargetPoint))
     {
-        // Backup neighbour indices before modifying
-        const int iNI0 = triCurrent.getNeighbourIndex(0);
-        const int iNI1 = triCurrent.getNeighbourIndex(1);
-        const int iNI2 = triCurrent.getNeighbourIndex(2);
-
-        const int iNeighbourNeighbor0 = triNeighbour.getNeighbourIndex(0);
-        const int iNeighbourNeighbor1 = triNeighbour.getNeighbourIndex(1);
-        const int iNeighbourNeighbor2 = triNeighbour.getNeighbourIndex(2);
-
-        // Log before changing
-        std::cout << "\nBefore swap:" << std::endl;
-        triCurrent.printPoints();
-        triNeighbour.printPoints();
-
-        // Perform edge swap
-        triCurrent.setPoint(2, triNeighbour.getPoint(0));
-        triCurrent.setPointIndex(2, triNeighbour.getPointIndex(0));
-        triCurrent.setNeighbourIndex(1, iNeighbourIndex);
-        triCurrent.setNeighbourIndex(2, iNeighbourNeighbor0);
-
-        triNeighbour.setPoint(1, triCurrent.getPoint(1));
-        triNeighbour.setPointIndex(1, triCurrent.getPointIndex(1));
-        triNeighbour.setNeighbourIndex(0, iNI1);
-        triNeighbour.setNeighbourIndex(1, iTriangleIndex);
-
-        // Update neighboring triangles' indices
-        if (iNeighbourNeighbor0 >= 0) {
-            Triangle& triNeighbour0 = vecTriangles[iNeighbourNeighbor0];
-            for (int i = 0; i < 3; ++i) {
-                if (triNeighbour0.getNeighbourIndex(i) == iNeighbourIndex) {
-                    triNeighbour0.setNeighbourIndex(i, iTriangleIndex);
-                    break;
-                }
-            }
-        }
-
-        if (iNI1 >= 0) {
-            Triangle& triCurrentNeighbour1 = vecTriangles[iNI1];
-            for (int i = 0; i < 3; ++i) {
-                if (triCurrentNeighbour1.getNeighbourIndex(i) == iTriangleIndex) {
-                    triCurrentNeighbour1.setNeighbourIndex(i, iNeighbourIndex);
-                    break;
-                }
-            }
-        }
-
-        // Log after changing
-        std::cout << "After swap:\n";
-        triCurrent.printPoints();
-        triNeighbour.printPoints();
-        std::cout << "The checkNeighbourCircumcircle function worked. " << std::endl;
+        swapEdge(iTriangleIndex, iNeighbourIndex);
     }
 }
 
 
+void Mesh::swapEdge(int iTri1, int iTri2)
+{
+    Triangle& triCurrent = vecTriangles[iTri1];
+    Triangle& triNeighbour = vecTriangles[iTri2];
+
+    int diff1 = -1, diff2 = -1;
+    std::vector<int> shared;
+
+    // Identify shared points
+    for (int i = 0; i < 3; ++i)
+    {
+        for (int j = 0; j < 3; ++j)
+        {
+            int pointCurrent = triCurrent.getPointIndex(i);
+            int pointNeighbour = triNeighbour.getPointIndex(j);
+
+            if (pointCurrent == pointNeighbour)
+            {
+                shared.push_back(pointCurrent);
+            }
+        }
+    }
+
+    // Identify different points
+    for (int i = 0; i < 3; ++i)
+    {
+        int pointCurrent = triCurrent.getPointIndex(i);
+        int pointNeighbour = triNeighbour.getPointIndex(i);
+
+        if (std::find(shared.begin(), shared.end(), pointCurrent) == shared.end())
+        {
+            diff1 = pointCurrent;
+        }
+
+        if (std::find(shared.begin(), shared.end(), pointNeighbour) == shared.end())
+        {
+            diff2 = pointNeighbour;
+        }
+    }
+
+    std::cout << "Shared points: ";
+    for (int sp : shared)
+    {
+        std::cout << sp << " ";
+    }
+    std::cout << std::endl;
+
+    std::cout << "Diff points: " << diff1 << " " << diff2 << std::endl;
+
+    // Log before changing
+    std::cout << "\nBefore swap:" << std::endl;
+    triCurrent.printPoints();
+    triNeighbour.printPoints();
+
+    // Replace one of the shared points in triCurrent with diff2
+    for (int i = 0; i < 3; ++i)
+    {
+        std::cout << "the triCurrent at index " << i << " is: " << triCurrent.getPointIndex(i) << std::endl;
+        if (triCurrent.getPointIndex(i) == shared[0])
+        {
+            triCurrent.setPointIndex(i, diff2);
+            triCurrent.setPoint(i, vecPtShape[diff2]);
+            break;
+        }
+    }
+
+    // Replace one of the shared points in triNeighbour with diff1
+    for (int i = 0; i < 3; ++i)
+    {
+        if (triNeighbour.getPointIndex(i) == shared[1])
+        {
+            triNeighbour.setPointIndex(i, diff1);
+            triNeighbour.setPoint(i, vecPtShape[diff1]);
+            break;
+        }
+    }
+
+    // Log after changing
+    std::cout << "\nAfter swap:" << std::endl;
+    triCurrent.printPoints();
+    triNeighbour.printPoints();
+
+    updateNeighbours(iTri1, iTri2);
+}
+
+void Mesh::updateNeighbours(int iTri1, int iTri2)
+{
+    Triangle& triCurrent = vecTriangles[iTri1];
+    Triangle& triNeighbour = vecTriangles[iTri2];
+
+    const int iOldCurrentNeighbour0 = triCurrent.getNeighbourIndex(0);
+    const int iOldCurrentNeighbour1 = triCurrent.getNeighbourIndex(1);
+    const int iOldCurrentNeighbour2 = triCurrent.getNeighbourIndex(2);
+
+    const int iOldNeighbourNeighbor0 = triNeighbour.getNeighbourIndex(0);
+    const int iOldNeighbourNeighbor1 = triNeighbour.getNeighbourIndex(1);
+    const int iOldNeighbourNeighbor2 = triNeighbour.getNeighbourIndex(2);
+
+    // Update neighbors for triCurrent
+    for (int i = 0; i < 3; ++i)
+    {
+        if (triCurrent.getNeighbourIndex(i) == iTri2)
+        {
+            if (i == 0)
+            {
+                if (iOldCurrentNeighbour0 == iTri2)
+                {
+                    triCurrent.setNeighbourIndex(0, iOldNeighbourNeighbor1);
+                    triCurrent.setNeighbourIndex(2, iOldCurrentNeighbour0);
+                }
+                else if (iOldCurrentNeighbour2 == iTri2)
+                {
+                    triCurrent.setNeighbourIndex(0, iOldCurrentNeighbour2);
+                    triCurrent.setNeighbourIndex(2, iOldNeighbourNeighbor1);
+                }
+            }
+            else if (i == 1)
+            {
+                if (iOldCurrentNeighbour0 == iTri2)
+                {
+                    triCurrent.setNeighbourIndex(1, iOldNeighbourNeighbor2);
+                    triCurrent.setNeighbourIndex(0, iOldCurrentNeighbour1);
+                }
+                else if (iOldCurrentNeighbour1 == iTri2)
+                {
+                    triCurrent.setNeighbourIndex(0, iOldCurrentNeighbour1);
+                    triCurrent.setNeighbourIndex(1, iOldNeighbourNeighbor2);
+                }
+            }
+            else if (i == 2)
+            {
+                if (iOldCurrentNeighbour1 == iTri2)
+                {
+                    triCurrent.setNeighbourIndex(2, iOldNeighbourNeighbor0);
+                    triCurrent.setNeighbourIndex(1, iOldCurrentNeighbour2);
+                }
+                else if (iOldCurrentNeighbour2 == iTri2)
+                {
+                    triCurrent.setNeighbourIndex(1, iOldCurrentNeighbour2);
+                    triCurrent.setNeighbourIndex(2, iOldNeighbourNeighbor0);
+                }
+            }
+        }
+    }
+
+    // Update neighbors for triNeighbour
+    for (int i = 0; i < 3; ++i)
+    {
+        if (triNeighbour.getNeighbourIndex(i) == iTri1)
+        {
+            if (i == 0)
+            {
+                if (iOldNeighbourNeighbor0 == iTri1)
+                {
+                    triNeighbour.setNeighbourIndex(0, iOldCurrentNeighbour2);
+                    triNeighbour.setNeighbourIndex(2, iOldNeighbourNeighbor0);
+                }
+                else if (iOldNeighbourNeighbor2 == iTri1)
+                {
+                    triNeighbour.setNeighbourIndex(0, iOldNeighbourNeighbor2);
+                    triNeighbour.setNeighbourIndex(2, iOldCurrentNeighbour1);
+                }
+            }
+            else if (i == 1)
+            {
+                if (iOldNeighbourNeighbor0 == iTri1)
+                {
+                    triNeighbour.setNeighbourIndex(1, iOldCurrentNeighbour0);
+                    triNeighbour.setNeighbourIndex(0, iOldNeighbourNeighbor1);
+                }
+                else if (iOldNeighbourNeighbor1 == iTri1)
+                {
+                    triNeighbour.setNeighbourIndex(0, iOldNeighbourNeighbor1);
+                    triNeighbour.setNeighbourIndex(1, iOldCurrentNeighbour2);
+                }
+            }
+            else if (i == 2)
+            {
+                if (iOldNeighbourNeighbor1 == iTri1)
+                {
+                    triNeighbour.setNeighbourIndex(2, iOldCurrentNeighbour1);
+                    triNeighbour.setNeighbourIndex(1, iOldNeighbourNeighbor0);
+                }
+                else if (iOldNeighbourNeighbor2 == iTri1)
+                {
+                    triNeighbour.setNeighbourIndex(1, iOldNeighbourNeighbor2);
+                    triNeighbour.setNeighbourIndex(2, iOldCurrentNeighbour0);
+                }
+            }
+        }
+    }
+
+    // Update neighbors for neighboring triangles of triCurrent
+    if (iOldCurrentNeighbour0 != -1 && iOldCurrentNeighbour0 != iTri2)
+    {
+        Triangle& oldNeighbour0 = vecTriangles[iOldCurrentNeighbour0];
+        for (int i = 0; i < 3; ++i)
+        {
+            if (oldNeighbour0.getNeighbourIndex(i) == iTri1)
+            {
+                oldNeighbour0.setNeighbourIndex(i, iTri2);
+                break;
+            }
+        }
+    }
+
+    if (iOldCurrentNeighbour1 != -1 && iOldCurrentNeighbour1 != iTri2)
+    {
+        Triangle& oldNeighbour1 = vecTriangles[iOldCurrentNeighbour1];
+        for (int i = 0; i < 3; ++i)
+        {
+            if (oldNeighbour1.getNeighbourIndex(i) == iTri1)
+            {
+                oldNeighbour1.setNeighbourIndex(i, iTri2);
+                break;
+            }
+        }
+    }
+
+    if (iOldCurrentNeighbour2 != -1 && iOldCurrentNeighbour2 != iTri2)
+    {
+        Triangle& oldNeighbour2 = vecTriangles[iOldCurrentNeighbour2];
+        for (int i = 0; i < 3; ++i)
+        {
+            if (oldNeighbour2.getNeighbourIndex(i) == iTri1)
+            {
+                oldNeighbour2.setNeighbourIndex(i, iTri2);
+                break;
+            }
+        }
+    }
+
+    // Update neighbors for neighboring triangles of triNeighbour
+    if (iOldNeighbourNeighbor0 != -1 && iOldNeighbourNeighbor0 != iTri1)
+    {
+        Triangle& oldNeighbour0 = vecTriangles[iOldNeighbourNeighbor0];
+        for (int i = 0; i < 3; ++i)
+        {
+            if (oldNeighbour0.getNeighbourIndex(i) == iTri2)
+            {
+                oldNeighbour0.setNeighbourIndex(i, iTri1);
+                break;
+            }
+        }
+    }
+
+    if (iOldNeighbourNeighbor1 != -1 && iOldNeighbourNeighbor1 != iTri1)
+    {
+        Triangle& oldNeighbour1 = vecTriangles[iOldNeighbourNeighbor1];
+        for (int i = 0; i < 3; ++i)
+        {
+            if (oldNeighbour1.getNeighbourIndex(i) == iTri2)
+            {
+                oldNeighbour1.setNeighbourIndex(i, iTri1);
+                break;
+            }
+        }
+    }
+
+    if (iOldNeighbourNeighbor2 != -1 && iOldNeighbourNeighbor2 != iTri1)
+    {
+        Triangle& oldNeighbour2 = vecTriangles[iOldNeighbourNeighbor2];
+        for (int i = 0; i < 3; ++i)
+        {
+            if (oldNeighbour2.getNeighbourIndex(i) == iTri2)
+            {
+                oldNeighbour2.setNeighbourIndex(i, iTri1);
+                break;
+            }
+        }
+    }
+}

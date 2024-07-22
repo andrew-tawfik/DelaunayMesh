@@ -51,7 +51,9 @@ public:
     void checkNeighboringCircumcircles(int iTriangleIndex, int iPointIndex, int iSide);
 
     // Function to update neighboring relationships between triangles
-    void updateNeighbors();
+    void swapEdge(int iTri1, int iTri2);
+
+    void updateNeighbours(int iTri1, int iTri2);
 
     // Function to print the mesh for debugging purposes
     void printMesh() const;

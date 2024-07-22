@@ -59,6 +59,7 @@ public:
 
     // Getter and setter for point indices
     int getPointIndex(int iIndex) const;
+    int getPointIndex() const;
     void setPointIndex(int iIndex, int iValue);
 
     int getIndex() const;
