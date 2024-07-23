@@ -53,7 +53,7 @@ public:
     // Function to update neighboring relationships between triangles
     void swapEdge(int iTri1, int iTri2);
 
-    void updateNeighbours(int iTri1, int iTri2);
+    void updateNeighbours(int oldNeighborIndex, int oldTriangleIndex, int newTriangleIndex);
 
     // Function to print the mesh for debugging purposes
     void printMesh() const;

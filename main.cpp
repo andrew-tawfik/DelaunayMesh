@@ -49,8 +49,8 @@ int main()
 
     k.createTriangles(3, 5);
 
-    //k.createTriangles(5, 6);
-    //k.checkNeighboringCircumcircles(8, 6, 0);
+    k.createTriangles(5, 6);
+    k.checkNeighboringCircumcircles(8, 6, 0);
 
     //k.createTriangles(7, 7);
     //k.checkNeighboringCircumcircles(10, 7, 0);

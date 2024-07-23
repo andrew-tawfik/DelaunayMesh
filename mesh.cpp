@@ -326,28 +326,43 @@ void Mesh::swapEdge(int iTri1, int iTri2)
         }
     }
 
-    std::cout << "Shared points: ";
-    for (int sp : shared)
-    {
-        std::cout << sp << " ";
-    }
-    std::cout << std::endl;
+    const int iCurrentN0 = triCurrent.getNeighbourIndex(0);
+    const int iCurrentN1 = triCurrent.getNeighbourIndex(1);
+    const int iCurrentN2 = triCurrent.getNeighbourIndex(2);
 
-    std::cout << "Diff points: " << diff1 << " " << diff2 << std::endl;
-
-    // Log before changing
-    std::cout << "\nBefore swap:" << std::endl;
-    triCurrent.printPoints();
-    triNeighbour.printPoints();
+    const int iNeighbourN0 = triNeighbour.getNeighbourIndex(0);
+    const int iNeighbourN1 = triNeighbour.getNeighbourIndex(1);
+    const int iNeighbourN2 = triNeighbour.getNeighbourIndex(2);
 
     // Replace one of the shared points in triCurrent with diff2
     for (int i = 0; i < 3; ++i)
     {
-        std::cout << "the triCurrent at index " << i << " is: " << triCurrent.getPointIndex(i) << std::endl;
         if (triCurrent.getPointIndex(i) == shared[0])
         {
             triCurrent.setPointIndex(i, diff2);
             triCurrent.setPoint(i, vecPtShape[diff2]);
+
+            if (i == 0)
+            {
+                // edge 0
+                triCurrent.setNeighbourIndex(0, iTri2);
+                // edge 2
+                triCurrent.setNeighbourIndex(2, iNeighbourN2);
+            }
+            else if (i == 1)
+            {
+                // edge 0
+                triCurrent.setNeighbourIndex(0, iNeighbourN1);
+                // edge 1
+                triCurrent.setNeighbourIndex(1, iTri2);
+            }
+            else if (i == 2)
+            {
+                // edge 1
+                triCurrent.setNeighbourIndex(1, iTri2);
+                // edge 2
+                triCurrent.setNeighbourIndex(2, iNeighbourN0);
+            }
             break;
         }
     }
@@ -359,75 +374,74 @@ void Mesh::swapEdge(int iTri1, int iTri2)
         {
             triNeighbour.setPointIndex(i, diff1);
             triNeighbour.setPoint(i, vecPtShape[diff1]);
+
+            if (i == 0)
+            {
+                // edge 0
+                triNeighbour.setNeighbourIndex(0, iCurrentN2);
+                // edge 2
+                triNeighbour.setNeighbourIndex(2, iTri1);
+            }
+            else if (i == 1)
+            {
+                // edge 0
+                triNeighbour.setNeighbourIndex(0, iTri1);
+                // edge 1
+                triNeighbour.setNeighbourIndex(1, iCurrentN0);
+            }
+            else if (i == 2)
+            {
+                // edge 1
+                triNeighbour.setNeighbourIndex(1, iCurrentN0);
+                // edge 2
+                triNeighbour.setNeighbourIndex(2, iTri1);
+            }
             break;
         }
     }
 
-    // Log after changing
-    std::cout << "\nAfter swap:" << std::endl;
-    triCurrent.printPoints();
-    triNeighbour.printPoints();
 
-    updateNeighbours(iTri1, iTri2);
+    // Update old neighbors
+    updateNeighbours(iCurrentN0, iTri1, iTri2);
+    updateNeighbours(iCurrentN1, iTri1, iTri2);
+    updateNeighbours(iCurrentN2, iTri1, iTri2);
+    updateNeighbours(iNeighbourN0, iTri2, iTri1);
+    updateNeighbours(iNeighbourN1, iTri2, iTri1);
+    updateNeighbours(iNeighbourN2, iTri2, iTri1);
+
 }
 
-void Mesh::updateNeighbours(int iTri1, int iTri2)
+
+void Mesh::updateNeighbours(int oldNeighborIndex, int oldTriangleIndex, int newTriangleIndex)
 {
-    Triangle& triCurrent = vecTriangles[iTri1];
-    Triangle& triNeighbour = vecTriangles[iTri2];
-
-    int oldNeighboursCurrent[3] = { triCurrent.getNeighbourIndex(0), triCurrent.getNeighbourIndex(1), triCurrent.getNeighbourIndex(2) };
-    int oldNeighboursNeighbour[3] = { triNeighbour.getNeighbourIndex(0), triNeighbour.getNeighbourIndex(1), triNeighbour.getNeighbourIndex(2) };
-
-    // Update neighbors for triCurrent
-    for (int i = 0; i < 3; ++i)
+    if (oldNeighborIndex != -1 && oldNeighborIndex != oldTriangleIndex && oldNeighborIndex != newTriangleIndex)
     {
-        if (oldNeighboursCurrent[i] == iTri2)
-        {
-            triCurrent.setNeighbourIndex(i, -1);
-        }
-    }
+        Triangle& oldNeighbor = vecTriangles[oldNeighborIndex];
+        const Triangle& triCurrent = vecTriangles[oldTriangleIndex];
 
-    // Update neighbors for triNeighbour
-    for (int i = 0; i < 3; ++i)
-    {
-        if (oldNeighboursNeighbour[i] == iTri1)
+        // Determine if the neighbor needs to be updated
+        bool needsUpdate = true;
+        for (int i = 0; i < 3; ++i)
         {
-            triNeighbour.setNeighbourIndex(i, -1);
-        }
-    }
-
-    // Update neighboring relationships
-    for (int i = 0; i < 3; ++i)
-    {
-        if (oldNeighboursCurrent[i] != -1 && oldNeighboursCurrent[i] != iTri2)
-        {
-            Triangle& oldNeighbour = vecTriangles[oldNeighboursCurrent[i]];
-            for (int j = 0; j < 3; ++j)
+            if (triCurrent.getNeighbourIndex(i) == oldNeighborIndex)
             {
-                if (oldNeighbour.getNeighbourIndex(j) == iTri1)
-                {
-                    oldNeighbour.setNeighbourIndex(j, iTri2);
-                    break;
-                }
+                needsUpdate = false;
+                break;
             }
         }
 
-        if (oldNeighboursNeighbour[i] != -1 && oldNeighboursNeighbour[i] != iTri1)
+        // Update the neighbor if needed
+        if (needsUpdate)
         {
-            Triangle& oldNeighbour = vecTriangles[oldNeighboursNeighbour[i]];
-            for (int j = 0; j < 3; ++j)
+            for (int i = 0; i < 3; ++i)
             {
-                if (oldNeighbour.getNeighbourIndex(j) == iTri2)
+                if (oldNeighbor.getNeighbourIndex(i) == oldTriangleIndex)
                 {
-                    oldNeighbour.setNeighbourIndex(j, iTri1);
+                    oldNeighbor.setNeighbourIndex(i, newTriangleIndex);
                     break;
                 }
             }
         }
     }
-
-    // Set new neighbors
-    triCurrent.setNeighbourIndex(std::find(std::begin(oldNeighboursCurrent), std::end(oldNeighboursCurrent), iTri2) - std::begin(oldNeighboursCurrent), iTri2);
-    triNeighbour.setNeighbourIndex(std::find(std::begin(oldNeighboursNeighbour), std::end(oldNeighboursNeighbour), iTri1) - std::begin(oldNeighboursNeighbour), iTri1);
 }
+
