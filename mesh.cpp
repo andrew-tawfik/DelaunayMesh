@@ -334,6 +334,10 @@ void Mesh::swapEdge(int iTri1, int iTri2)
     const int iNeighbourN1 = triNeighbour.getNeighbourIndex(1);
     const int iNeighbourN2 = triNeighbour.getNeighbourIndex(2);
 
+    const int iCurrentPt0 = triCurrent.getPointIndex(0);
+    const int iCurrentPt1 = triCurrent.getPointIndex(1);
+    const int iCurrentPt2 = triCurrent.getPointIndex(2);
+
     // Replace one of the shared points in triCurrent with diff2
     for (int i = 0; i < 3; ++i)
     {
@@ -342,28 +346,73 @@ void Mesh::swapEdge(int iTri1, int iTri2)
             triCurrent.setPointIndex(i, diff2);
             triCurrent.setPoint(i, vecPtShape[diff2]);
 
+            // Determine the shared edge and new edge after swap
+            int sharedEdge = -1, newEdge = -1;
+            for (int j = 0; j < 3; ++j)
+            {
+                if (((triCurrent.getPointIndex(j) == diff1 && triCurrent.getPointIndex((j + 1) % 3) == diff2)) || ((triCurrent.getPointIndex(j) == diff2 && triCurrent.getPointIndex((j + 1) % 3) == diff1)))
+                {
+                    sharedEdge = j;
+                }
+            }
+
             if (i == 0)
             {
-                // edge 0
-                triCurrent.setNeighbourIndex(0, iTri2);
-                // edge 2
-                triCurrent.setNeighbourIndex(2, iNeighbourN2);
+                if (sharedEdge == 0)
+                {
+                    newEdge = 2;
+                }
+                else if (sharedEdge == 2)
+                {
+                    newEdge = 0;
+                }
             }
+
             else if (i == 1)
             {
-                // edge 0
-                triCurrent.setNeighbourIndex(0, iNeighbourN1);
-                // edge 1
-                triCurrent.setNeighbourIndex(1, iTri2);
+                if (sharedEdge == 0)
+                {
+                    newEdge = 1;
+                }
+                else if (sharedEdge == 1)
+                {
+                    newEdge = 0;
+                }
             }
+
             else if (i == 2)
             {
-                // edge 1
-                triCurrent.setNeighbourIndex(1, iTri2);
-                // edge 2
-                triCurrent.setNeighbourIndex(2, iNeighbourN0);
+                if (sharedEdge == 1)
+                {
+                    newEdge = 2;
+                }
+                else if (sharedEdge == 2)
+                {
+                    newEdge = 1;
+                }
             }
+
+            // Find which neighbor from triNeighbour was stolen
+            int stolenEdge = -1;
+            if ((triNeighbour.getPointIndex(0) == shared[1] && triNeighbour.getPointIndex(1) == diff2) || (triNeighbour.getPointIndex(1) == shared[1] && triNeighbour.getPointIndex(0) == diff2))
+            {
+                stolenEdge = iNeighbourN0;
+            }
+            else if ((triNeighbour.getPointIndex(1) == shared[1] && triNeighbour.getPointIndex(2) == diff2) || (triNeighbour.getPointIndex(2) == shared[1] && triNeighbour.getPointIndex(1) == diff2))
+            {
+                stolenEdge = iNeighbourN1;
+            }
+            else if ((triNeighbour.getPointIndex(2) == shared[1] && triNeighbour.getPointIndex(0) == diff2) || (triNeighbour.getPointIndex(0) == shared[1] && triNeighbour.getPointIndex(2) == diff2) )
+            {
+                stolenEdge = iNeighbourN2;
+            }
+
+            // Update the neighbor indices
+            triCurrent.setNeighbourIndex(sharedEdge, iTri2);
+            triCurrent.setNeighbourIndex(newEdge, stolenEdge);
             break;
+
+            \
         }
     }
 
@@ -375,27 +424,72 @@ void Mesh::swapEdge(int iTri1, int iTri2)
             triNeighbour.setPointIndex(i, diff1);
             triNeighbour.setPoint(i, vecPtShape[diff1]);
 
+            // Determine the shared edge and new edge after swap
+            int sharedEdge = -1, newEdge = -1;
+            for (int j = 0; j < 3; ++j)
+            {
+                if ((triNeighbour.getPointIndex(j) == diff1 && triNeighbour.getPointIndex((j + 1) % 3) == diff2) || (triNeighbour.getPointIndex(j) == diff2 && triNeighbour.getPointIndex((j + 1) % 3) == diff1))
+                {
+                    sharedEdge = j;
+                }
+            }
+
+
+
             if (i == 0)
             {
-                // edge 0
-                triNeighbour.setNeighbourIndex(0, iCurrentN2);
-                // edge 2
-                triNeighbour.setNeighbourIndex(2, iTri1);
+                if (sharedEdge == 0)
+                {
+                    newEdge = 2;
+                }
+                else if (sharedEdge == 2)
+                {
+                    newEdge = 0;
+                }
             }
+
             else if (i == 1)
             {
-                // edge 0
-                triNeighbour.setNeighbourIndex(0, iTri1);
-                // edge 1
-                triNeighbour.setNeighbourIndex(1, iCurrentN0);
+                if (sharedEdge == 0)
+                {
+                    newEdge = 1;
+                }
+                else if (sharedEdge == 1)
+                {
+                    newEdge = 0;
+                }
             }
+
             else if (i == 2)
             {
-                // edge 1
-                triNeighbour.setNeighbourIndex(1, iCurrentN0);
-                // edge 2
-                triNeighbour.setNeighbourIndex(2, iTri1);
+                if (sharedEdge == 1)
+                {
+                    newEdge = 2;
+                }
+                else if (sharedEdge == 2)
+                {
+                    newEdge = 1;
+                }
             }
+
+            // Find which neighbor from triCurrent was stolen
+            int stolenEdge = -1;
+            if ((iCurrentPt0 == diff1 && iCurrentPt1 == shared[0]) || (iCurrentPt1 == diff1 && iCurrentPt0 == shared[0]))
+            {
+                stolenEdge = iCurrentN0;
+            }
+            else if ((iCurrentPt1 == diff1 && iCurrentPt2 == shared[0]) || (iCurrentPt2 == diff1 && iCurrentPt1 == shared[0]))
+            {
+                stolenEdge = iCurrentN1;
+            }
+            else if ((iCurrentPt2 == diff1 && iCurrentPt0 == shared[0]) || (iCurrentPt0 == diff1 && iCurrentPt2 == shared[0]))
+            {
+                stolenEdge = iCurrentN2;
+            }
+
+            // Update the neighbor indices
+            triNeighbour.setNeighbourIndex(sharedEdge, iTri1);
+            triNeighbour.setNeighbourIndex(newEdge, stolenEdge);
             break;
         }
     }
@@ -408,7 +502,6 @@ void Mesh::swapEdge(int iTri1, int iTri2)
     updateNeighbours(iNeighbourN0, iTri2, iTri1);
     updateNeighbours(iNeighbourN1, iTri2, iTri1);
     updateNeighbours(iNeighbourN2, iTri2, iTri1);
-
 }
 
 
