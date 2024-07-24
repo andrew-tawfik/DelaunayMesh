@@ -298,3 +298,55 @@ void Triangle::setIndex(int iValue)
 {
     this->iIndex = iValue;
 }
+
+// Determines whether a point is on the perimeter of the triangle
+int Triangle::onEdge(const Point& pt) const
+{
+
+    // Check if pt is on the line segment 0
+    double crossProduct = (pt.getY() - pt0.getY()) * (pt1.getX() - pt0.getX()) - (pt.getX() - pt0.getX()) * (pt1.getY() - pt0.getY());
+    if (std::abs(crossProduct) < 1e-7) // Check for collinearity
+    {
+        double dotProduct = (pt.getX() - pt0.getX()) * (pt1.getX() - pt0.getX()) + (pt.getY() - pt0.getY()) * (pt1.getY() - pt0.getY());
+        if (dotProduct >= 0)
+        {
+            double squaredLength = (pt1.getX() - pt0.getX()) * (pt1.getX() - pt0.getX()) + (pt1.getY() - pt0.getY()) * (pt1.getY() - pt0.getY());
+            if (dotProduct <= squaredLength)
+            {
+                return 0;
+            }
+        }
+    }
+
+    // Check if pt is on the line segment 1
+    crossProduct = (pt.getY() - pt1.getY()) * (pt2.getX() - pt1.getX()) - (pt.getX() - pt1.getX()) * (pt2.getY() - pt1.getY());
+    if (std::abs(crossProduct) < 1e-7) // Check for collinearity
+    {
+        double dotProduct = (pt.getX() - pt1.getX()) * (pt2.getX() - pt1.getX()) + (pt.getY() - pt1.getY()) * (pt2.getY() - pt1.getY());
+        if (dotProduct >= 0)
+        {
+            double squaredLength = (pt2.getX() - pt1.getX()) * (pt2.getX() - pt1.getX()) + (pt2.getY() - pt1.getY()) * (pt2.getY() - pt1.getY());
+            if (dotProduct <= squaredLength)
+            {
+                return 1;
+            }
+        }
+    }
+
+    // Check if pt is on the line segment 2
+    crossProduct = (pt.getY() - pt2.getY()) * (pt0.getX() - pt2.getX()) - (pt.getX() - pt2.getX()) * (pt0.getY() - pt2.getY());
+    if (std::abs(crossProduct) < 1e-7) // Check for collinearity
+    {
+        double dotProduct = (pt.getX() - pt2.getX()) * (pt0.getX() - pt2.getX()) + (pt.getY() - pt2.getY()) * (pt0.getY() - pt2.getY());
+        if (dotProduct >= 0)
+        {
+            double squaredLength = (pt0.getX() - pt2.getX()) * (pt0.getX() - pt2.getX()) + (pt0.getY() - pt2.getY()) * (pt0.getY() - pt2.getY());
+            if (dotProduct <= squaredLength)
+            {
+                return 2;
+            }
+        }
+    }
+
+    return -1;
+}

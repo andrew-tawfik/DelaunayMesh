@@ -106,7 +106,7 @@ void Mesh::buildMesh()
     std::cout << "Size of triVector: " << vecTriangles.size() <<  std::endl;
     std::cout << "Size of ptVector : " << vecPtShape.size() <<  std::endl;
 
-    int iPointIndex = 0;
+    int iPointIndex = 3;
     for (const auto& p : vecPtShape)
     {
 
@@ -130,89 +130,165 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
     const Point& ptTargetPoint = vecPtShape[iPointIndex];
     Triangle& triCurrent = vecTriangles[iTriangleIndex]; // 2
 
-    triCurrent.printPoints();
-    // Create two new triangles
-    Triangle triNewTriangle1(triCurrent.getPoint(0), triCurrent.getPoint(1), ptTargetPoint); // 3
-    Triangle triNewTriangle2(triCurrent.getPoint(1), triCurrent.getPoint(2), ptTargetPoint); // 4
-
-    // Set indices for the new triangles
-    int newIndex1 = vecTriangles.size();
-    int newIndex2 = newIndex1 + 1;
-    triNewTriangle1.setIndex(newIndex1);
-    triNewTriangle2.setIndex(newIndex2);
-
-    // Set point indices for the new triangles
-    triNewTriangle1.setPointIndex(0, triCurrent.getPointIndex(0));
-    triNewTriangle1.setPointIndex(1, triCurrent.getPointIndex(1));
-    triNewTriangle1.setPointIndex(2, iPointIndex);
-
-    triNewTriangle2.setPointIndex(0, triCurrent.getPointIndex(1));
-    triNewTriangle2.setPointIndex(1, triCurrent.getPointIndex(2));
-    triNewTriangle2.setPointIndex(2, iPointIndex);
-
-    // Update the current triangle with the new point and point index
-    triCurrent.setPointIndex(1, iPointIndex);
-    triCurrent.setPoint(1, ptTargetPoint);
-
-    // Update neighbors for the new triangles
-    triNewTriangle1.setNeighbourIndex(2, iTriangleIndex);
-    triNewTriangle2.setNeighbourIndex(1, iTriangleIndex);
-
-    // Update neighbors for the current triangle
-    triNewTriangle1.setNeighbourIndex(1, newIndex2);
-    triNewTriangle2.setNeighbourIndex(2, newIndex1);
-
-    int oldNeighbourIndex = triCurrent.getNeighbourIndex(1);
-
-    triCurrent.setNeighbourIndex(0, newIndex1);
-    triCurrent.setNeighbourIndex(1, newIndex2);
-
-
-    // Update the neighboring relationships with the old neighbor
-    if (oldNeighbourIndex != -1)
+    if (triCurrent.onEdge(ptTargetPoint) < 0)
     {
-        Triangle& oldNeighbour = vecTriangles[oldNeighbourIndex];
 
-        for (int i = 0; i < 3; ++i)
+        triCurrent.printPoints();
+        // Create two new triangles
+        Triangle triNewTriangle1(triCurrent.getPoint(0), triCurrent.getPoint(1), ptTargetPoint); // 3
+        Triangle triNewTriangle2(triCurrent.getPoint(1), triCurrent.getPoint(2), ptTargetPoint); // 4
+
+        // Set indices for the new triangles
+        int newIndex1 = vecTriangles.size();
+        int newIndex2 = newIndex1 + 1;
+        triNewTriangle1.setIndex(newIndex1);
+        triNewTriangle2.setIndex(newIndex2);
+
+        // Set point indices for the new triangles
+        triNewTriangle1.setPointIndex(0, triCurrent.getPointIndex(0));
+        triNewTriangle1.setPointIndex(1, triCurrent.getPointIndex(1));
+        triNewTriangle1.setPointIndex(2, iPointIndex);
+
+        triNewTriangle2.setPointIndex(0, triCurrent.getPointIndex(1));
+        triNewTriangle2.setPointIndex(1, triCurrent.getPointIndex(2));
+        triNewTriangle2.setPointIndex(2, iPointIndex);
+
+        // Update the current triangle with the new point and point index
+        triCurrent.setPointIndex(1, iPointIndex);
+        triCurrent.setPoint(1, ptTargetPoint);
+
+        // Update neighbors for the new triangles
+        triNewTriangle1.setNeighbourIndex(2, iTriangleIndex);
+        triNewTriangle2.setNeighbourIndex(1, iTriangleIndex);
+
+        // Update neighbors for the current triangle
+        triNewTriangle1.setNeighbourIndex(1, newIndex2);
+        triNewTriangle2.setNeighbourIndex(2, newIndex1);
+
+        int oldNeighbourIndex = triCurrent.getNeighbourIndex(1);
+
+        triCurrent.setNeighbourIndex(0, newIndex1);
+        triCurrent.setNeighbourIndex(1, newIndex2);
+
+
+        // Update the neighboring relationships with the old neighbor
+        if (oldNeighbourIndex != -1)
         {
-            if (oldNeighbour.getNeighbourIndex(i) == iTriangleIndex)
+            Triangle& oldNeighbour = vecTriangles[oldNeighbourIndex];
+
+            for (int i = 0; i < 3; ++i)
             {
-                oldNeighbour.setNeighbourIndex(i, newIndex2);
-                break;
+                if (oldNeighbour.getNeighbourIndex(i) == iTriangleIndex)
+                {
+                    oldNeighbour.setNeighbourIndex(i, newIndex2);
+                    break;
+                }
             }
+
+            triNewTriangle2.setNeighbourIndex(0, oldNeighbourIndex);
+            triNewTriangle2.setNeighbourIndex(1, iTriangleIndex);
         }
 
-        triNewTriangle2.setNeighbourIndex(0, oldNeighbourIndex);
-        triNewTriangle2.setNeighbourIndex(1, iTriangleIndex);
+        // Add the new triangles to the vector
+        vecTriangles.push_back(triNewTriangle1);
+        vecTriangles.push_back(triNewTriangle2);
+
+        // Keep track of old neighbours checkNeighbourCircumcircles function
+
+        const Triangle& triFirst = vecTriangles[iTriangleIndex];
+        const Triangle& triNeighbour0 = vecTriangles[triFirst.getNeighbourIndex(2)];
+        const Triangle& triNeighbour1 = vecTriangles[triNewTriangle1.getNeighbourIndex(0)];
+        const Triangle& triNeighbour2 = vecTriangles[triNewTriangle2.getNeighbourIndex(0)];
+
+
+        if (triNeighbour0.isInCircumcircle(ptTargetPoint))
+        {
+            checkNeighboringCircumcircles(iTriangleIndex, iPointIndex, 2);
+
+        }
+
+        if (triNeighbour1.isInCircumcircle(ptTargetPoint))
+        {
+            checkNeighboringCircumcircles(newIndex1,iPointIndex, 0);
+        }
+
+        if (triNeighbour2.isInCircumcircle(ptTargetPoint))
+            checkNeighboringCircumcircles(newIndex2, iPointIndex, 0);
+
     }
 
-    // Add the new triangles to the vector
-    vecTriangles.push_back(triNewTriangle1);
-    vecTriangles.push_back(triNewTriangle2);
-
-    // Keep track of old neighbours checkNeighbourCircumcircles function
-/*
-    const Triangle& triFirst = vecTriangles[iTriangleIndex];
-    const Triangle& triNeighbour0 = vecTriangles[triFirst.getNeighbourIndex(2)];
-    const Triangle& triNeighbour1 = vecTriangles[triNewTriangle1.getNeighbourIndex(0)];
-    const Triangle& triNeighbour2 = vecTriangles[triNewTriangle2.getNeighbourIndex(0)];
-
-
-    if (triNeighbour0.isInCircumcircle(ptTargetPoint))
+    else
     {
-        checkNeighboringCircumcircles(iTriangleIndex, iPointIndex, 2);
+        // Triangle gets split in half
+        Triangle triNewTriangle1;
+        int newIndex1 = vecTriangles.size();
+        triNewTriangle1.setIndex(newIndex1);
 
+        if(triCurrent.onEdge(ptTargetPoint) == 0)
+        {
+            triNewTriangle1.setPoint(0, triCurrent.getPoint(1));
+            triNewTriangle1.setPoint(1, triCurrent.getPoint(2));
+            triNewTriangle1.setPoint(2, ptTargetPoint);
+
+            triNewTriangle1.setPointIndex(0, triCurrent.getPointIndex(1));
+            triNewTriangle1.setPointIndex(1, triCurrent.getPointIndex(2));
+            triNewTriangle1.setPointIndex(2, iPointIndex);
+
+            triNewTriangle1.setNeighbourIndex(1, iTriangleIndex);
+            triNewTriangle1.setNeighbourIndex(0, triCurrent.getNeighbourIndex(1));
+
+            triCurrent.setPointIndex(1, iPointIndex);
+            triCurrent.setPoint(1, ptTargetPoint);
+            triCurrent.setNeighbourIndex(1, newIndex1);
+            triCurrent.setNeighbourIndex(0, -1);
+        }
+
+        else if (triCurrent.onEdge(ptTargetPoint) == 1)
+        {
+            triNewTriangle1.setPoint(0, triCurrent.getPoint(0));
+            triNewTriangle1.setPoint(1, triCurrent.getPoint(1));
+            triNewTriangle1.setPoint(2, ptTargetPoint);
+
+            triNewTriangle1.setPointIndex(0, triCurrent.getPointIndex(0));
+            triNewTriangle1.setPointIndex(1, triCurrent.getPointIndex(1));
+            triNewTriangle1.setPointIndex(2, iPointIndex);
+
+            triNewTriangle1.setNeighbourIndex(0, triCurrent.getNeighbourIndex(0));
+            triNewTriangle1.setNeighbourIndex(2, iTriangleIndex);
+
+
+            triCurrent.setPointIndex(1, iPointIndex);
+            triCurrent.setPoint(1, ptTargetPoint);
+
+            triCurrent.setNeighbourIndex(0, newIndex1);
+            triCurrent.setNeighbourIndex(1, -1);
+        }
+
+        else
+        {
+            triNewTriangle1.setPoint(0, triCurrent.getPoint(1));
+            triNewTriangle1.setPoint(1, triCurrent.getPoint(2));
+            triNewTriangle1.setPoint(2, ptTargetPoint);
+
+            triNewTriangle1.setPointIndex(0, triCurrent.getPointIndex(1));
+            triNewTriangle1.setPointIndex(1, triCurrent.getPointIndex(2));
+            triNewTriangle1.setPointIndex(2, iPointIndex);
+
+            triNewTriangle1.setNeighbourIndex(0, iTriangleIndex);
+            triNewTriangle1.setNeighbourIndex(1, triCurrent.getNeighbourIndex(1));
+
+
+            triCurrent.setPointIndex(2, iPointIndex);
+            triCurrent.setPoint(2, ptTargetPoint);
+
+            triCurrent.setNeighbourIndex(1, newIndex1);
+            triCurrent.setNeighbourIndex(2, -1);
+        }
+
+        // Set indices for the new triangle
+        vecTriangles.push_back(triNewTriangle1);
     }
 
-    if (triNeighbour1.isInCircumcircle(ptTargetPoint))
-    {
-        checkNeighboringCircumcircles(newIndex1,iPointIndex, 0);
-    }
-
-    if (triNeighbour2.isInCircumcircle(ptTargetPoint))
-        checkNeighboringCircumcircles(newIndex2, iPointIndex, 0);
-
-*/
 }
 
 // Finds the index of the triangle contaiCurrentNeighbourng the target point
@@ -251,7 +327,7 @@ int Mesh::findContainingTriangle(const Point& ptTargetPoint) const
         }
     }
 
-    // If no contaiCurrentNeighbourng triangle is found, return -1 or handle error appropriately
+    // If no contaiCurrentNeighbouring triangle is found, return -1 or handle error appropriately
     return -1;
 }
 
@@ -538,3 +614,26 @@ void Mesh::updateNeighbours(int oldNeighborIndex, int oldTriangleIndex, int newT
     }
 }
 
+
+
+void Mesh::findNeighbours
+    std::stack<int> stack;
+    stack.push(iTriangleIndex);
+    const Point& ptTargetPoint = vecPtShape[iPointIndex];
+
+    while (!stack.empty())
+    {
+        int iCurrentIndex = stack.top();
+
+        const Triangle& triCurrent = vecTriangles[iCurrentIndex];
+        int iResult = triCurrent.isInCircumcircle(ptTargetPoint);
+
+        if (iResult == 1) // -1 indicates that the currentTri contains ptTargetPoint
+        {
+            return triCurrent.getIndex();
+        }
+        else
+        {
+            stack.push(iResult);
+        }
+    }

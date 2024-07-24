@@ -20,6 +20,18 @@ public:
     // Constructor to initialize a triangle with three points
     Triangle(const Point& pt0, const Point& pt1, const Point& pt2);
 
+    // Getter and setter for neighboring triangle indices
+    int getNeighbourIndex(int iIndex) const;
+    void setNeighbourIndex(int iIndex, int iValue);
+
+    // Getter and setter for point indices
+    int getPointIndex(int iIndex) const;
+    int getPointIndex() const;
+    void setPointIndex(int iIndex, int iValue);
+
+    int getIndex() const;
+    void setIndex(int iValue);
+
     // Function to get the length of a specified side
     double getLength(int iSide) const;
 
@@ -53,17 +65,7 @@ public:
     // Function to check if a point is inside the circumcircle of the triangle
     bool isInCircumcircle(const Point& pt) const;
 
-    // Getter and setter for neighboring triangle indices
-    int getNeighbourIndex(int iIndex) const;
-    void setNeighbourIndex(int iIndex, int iValue);
-
-    // Getter and setter for point indices
-    int getPointIndex(int iIndex) const;
-    int getPointIndex() const;
-    void setPointIndex(int iIndex, int iValue);
-
-    int getIndex() const;
-    void setIndex(int iValue);
+    int onEdge(const Point& pt) const;
 
 };
 
