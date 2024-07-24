@@ -1,6 +1,9 @@
 # This file is used to ignore files which are generated
 # ----------------------------------------------------------------------------
 
+# Ignore build directories
+Build/
+
 *~
 *.autosave
 *.a
@@ -73,6 +76,7 @@ CMakeLists.txt.user*
 *.exe
 
 # Build directories
+/Build/
 /build/
 /.cmake/
 /.qtc/
