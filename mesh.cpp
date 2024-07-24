@@ -615,7 +615,7 @@ void Mesh::updateNeighbours(int oldNeighborIndex, int oldTriangleIndex, int newT
 }
 
 
-
+/*
 void Mesh::findNeighbours
     std::stack<int> stack;
     stack.push(iTriangleIndex);
@@ -637,3 +637,5 @@ void Mesh::findNeighbours
             stack.push(iResult);
         }
     }
+
+*/
