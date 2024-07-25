@@ -4,6 +4,7 @@
 #include "point.h"
 #include "triangle.h"
 #include <vector>
+#include <queue>
 
 // Class representing a 2D mesh composed of points and triangles
 class Mesh {
@@ -47,13 +48,16 @@ public:
     // Function to finds the index the triangle that contains a specific point
     int findContainingTriangle(const Point& ptTargetPoint) const;
 
-    // Function to check if a point is inside neighboring triangles' circumcircles
-    void checkNeighboringCircumcircles(int iTriangleIndex, int iPointIndex, int iSide);
-
-    // Function to update neighboring relationships between triangles
+    // Function to swap edge between neighbouring triangles
     void swapEdge(int iTri1, int iTri2);
 
+    void swapAll(std::queue<int>& neighbourQueue);
+
+    // Function to update neighboring relationships between triangles
     void updateNeighbours(int oldNeighborIndex, int oldTriangleIndex, int newTriangleIndex);
+
+    // Function to check if a point is inside neighboring triangles' circumcircles
+    std::queue<int> checkNeighboringCircumcircles(int iTriangleIndex, int iPointIndex, int iEdgeIndex);
 
     // Function to print the mesh for debugging purposes
     void printMesh() const;

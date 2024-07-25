@@ -3,6 +3,7 @@
 #include "mesh.h"
 #include <iostream>
 #include <vector>
+#include <queue>
 
 void printTriangleDetails(const Triangle& tri, int triIndex)
 {
@@ -26,7 +27,6 @@ int main()
     Triangle triTest = Triangle(Point(15, 2), Point(22.5, 7), Point(22.5, 12));
     Point p1 = Point(22.5, 10);
 
-    std::cout << triTest.onEdge(p1) << std::endl;
 
     // Mesh Class Testing
     std::vector<Point> vecPtRectangle =
@@ -51,22 +51,21 @@ int main()
 
     k.createTriangles(0, 3);
 
+
     k.createTriangles(2, 4);
-    //k.checkNeighboringCircumcircles(2, 4, 2);
+
 
     k.createTriangles(3, 5);
 
     k.createTriangles(5, 6);
-    //k.checkNeighboringCircumcircles(8, 6, 0);
 
     k.createTriangles(7, 7);
-    //k.checkNeighboringCircumcircles(10, 7, 0);
 
-    k.createTriangles(6, 8);
+    k.createTriangles(4, 8);
 
-    k.createTriangles(0, 9);
+    //k.createTriangles(0, 9);
 
-    k.createTriangles(4, 10);
+    //k.createTriangles(4, 10);
 
 
 

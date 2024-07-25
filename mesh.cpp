@@ -3,6 +3,7 @@
 #include <random>
 #include <algorithm>
 #include <stack>
+#include <queue>
 
 // Constructor: iCurrentNeighbourtializes the mesh with a given set of points
 Mesh::Mesh(const std::vector<Point>& vecPt)
@@ -133,7 +134,6 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
     if (triCurrent.onEdge(ptTargetPoint) < 0)
     {
 
-        triCurrent.printPoints();
         // Create two new triangles
         Triangle triNewTriangle1(triCurrent.getPoint(0), triCurrent.getPoint(1), ptTargetPoint); // 3
         Triangle triNewTriangle2(triCurrent.getPoint(1), triCurrent.getPoint(2), ptTargetPoint); // 4
@@ -165,16 +165,16 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
         triNewTriangle1.setNeighbourIndex(1, newIndex2);
         triNewTriangle2.setNeighbourIndex(2, newIndex1);
 
-        int oldNeighbourIndex = triCurrent.getNeighbourIndex(1);
+        int oldNeighbourIndex1 = triCurrent.getNeighbourIndex(0);
+        int oldNeighbourIndex2 = triCurrent.getNeighbourIndex(1);
 
         triCurrent.setNeighbourIndex(0, newIndex1);
         triCurrent.setNeighbourIndex(1, newIndex2);
 
-
         // Update the neighboring relationships with the old neighbor
-        if (oldNeighbourIndex != -1)
+        if (oldNeighbourIndex1 != -1)
         {
-            Triangle& oldNeighbour = vecTriangles[oldNeighbourIndex];
+            Triangle& oldNeighbour = vecTriangles[oldNeighbourIndex1];
 
             for (int i = 0; i < 3; ++i)
             {
@@ -185,8 +185,25 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
                 }
             }
 
-            triNewTriangle2.setNeighbourIndex(0, oldNeighbourIndex);
-            triNewTriangle2.setNeighbourIndex(1, iTriangleIndex);
+            triNewTriangle1.setNeighbourIndex(0, oldNeighbourIndex1);
+        }
+
+
+        // Update the neighboring relationships with the old neighbor
+        if (oldNeighbourIndex2 != -1)
+        {
+            Triangle& oldNeighbour = vecTriangles[oldNeighbourIndex2];
+
+            for (int i = 0; i < 3; ++i)
+            {
+                if (oldNeighbour.getNeighbourIndex(i) == iTriangleIndex)
+                {
+                    oldNeighbour.setNeighbourIndex(i, newIndex2);
+                    break;
+                }
+            }
+
+            triNewTriangle2.setNeighbourIndex(0, oldNeighbourIndex2);
         }
 
         // Add the new triangles to the vector
@@ -200,21 +217,27 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
         const Triangle& triNeighbour1 = vecTriangles[triNewTriangle1.getNeighbourIndex(0)];
         const Triangle& triNeighbour2 = vecTriangles[triNewTriangle2.getNeighbourIndex(0)];
 
-
         if (triNeighbour0.isInCircumcircle(ptTargetPoint))
         {
-            checkNeighboringCircumcircles(iTriangleIndex, iPointIndex, 2);
+            std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iTriangleIndex, iPointIndex, 2);
+
+            swapAll(neighbourQueue);
 
         }
 
         if (triNeighbour1.isInCircumcircle(ptTargetPoint))
         {
-            checkNeighboringCircumcircles(newIndex1,iPointIndex, 0);
+
+            std::queue<int> neighbourQueue = checkNeighboringCircumcircles(newIndex1,iPointIndex, 0);
+
+            swapAll(neighbourQueue);
         }
 
         if (triNeighbour2.isInCircumcircle(ptTargetPoint))
-            checkNeighboringCircumcircles(newIndex2, iPointIndex, 0);
-
+        {
+            std::queue<int> neighbourQueue = checkNeighboringCircumcircles(newIndex2, iPointIndex, 0);
+            swapAll(neighbourQueue);
+        }
     }
 
     else
@@ -332,38 +355,9 @@ int Mesh::findContainingTriangle(const Point& ptTargetPoint) const
 }
 
 
-void Mesh::checkNeighboringCircumcircles(int iTriangleIndex, int iPointIndex, int iSide)
-{
-    // Ensure indices are valid
-    if (iTriangleIndex < 0 || iTriangleIndex >= vecTriangles.size() || iPointIndex < 0 || iPointIndex >= vecPtShape.size()) {
-        std::cerr << "Invalid indices provided to checkNeighboringCircumcircles." << std::endl;
-        return;
-    }
-
-    // Get references to the target point and current triangle
-    const Point& ptTargetPoint = vecPtShape[iPointIndex];
-    Triangle& triCurrent = vecTriangles[iTriangleIndex];
-
-    int iNeighbourIndex = triCurrent.getNeighbourIndex(iSide);
-
-    // Ensure the neighbor index is valid
-    if (iNeighbourIndex < 0 || iNeighbourIndex >= vecTriangles.size())
-    {
-        std::cerr << "Invalid neighbor index." << std::endl;
-        return;
-    }
-
-    Triangle& triNeighbour = vecTriangles[iNeighbourIndex];
-
-    if (triNeighbour.isInCircumcircle(ptTargetPoint))
-    {
-        swapEdge(iTriangleIndex, iNeighbourIndex);
-    }
-}
-
-
 void Mesh::swapEdge(int iTri1, int iTri2)
 {
+
     Triangle& triCurrent = vecTriangles[iTri1];
     Triangle& triNeighbour = vecTriangles[iTri2];
 
@@ -569,6 +563,7 @@ void Mesh::swapEdge(int iTri1, int iTri2)
             break;
         }
     }
+    std::cout << "Triangles " << iTri1 << " and " << iTri2 << " have swapped edges" << std::endl;
 
 
     // Update old neighbors
@@ -615,27 +610,84 @@ void Mesh::updateNeighbours(int oldNeighborIndex, int oldTriangleIndex, int newT
 }
 
 
-/*
-void Mesh::findNeighbours
-    std::stack<int> stack;
-    stack.push(iTriangleIndex);
-    const Point& ptTargetPoint = vecPtShape[iPointIndex];
-
-    while (!stack.empty())
+void Mesh::swapAll(std::queue<int>& neighbourQueue)
+{
+    // Stack contains all triangles that have ptTargetPoint within their circumcircles
+    while (neighbourQueue.size() > 1)
     {
-        int iCurrentIndex = stack.top();
+        int iTriangleIndex = neighbourQueue.front();
+        neighbourQueue.pop();
+        int iNeighbourIndex = neighbourQueue.front();
 
-        const Triangle& triCurrent = vecTriangles[iCurrentIndex];
-        int iResult = triCurrent.isInCircumcircle(ptTargetPoint);
-
-        if (iResult == 1) // -1 indicates that the currentTri contains ptTargetPoint
+        if (iNeighbourIndex >= 0)
         {
-            return triCurrent.getIndex();
-        }
-        else
-        {
-            stack.push(iResult);
+            swapEdge(iTriangleIndex, iNeighbourIndex);
         }
     }
+}
 
-*/
+std::queue<int> Mesh::checkNeighboringCircumcircles(int iTriangleIndex, int iPointIndex, int iEdgeIndex)
+{
+    std::queue<int> neighbourQueue;
+    neighbourQueue.push(iTriangleIndex);
+
+
+    std::vector<bool> visited(vecTriangles.size(), false);
+
+    const Point& ptTargetPoint = vecPtShape[iPointIndex];
+    size_t iQueueIndex = 0;
+    bool firstIteration = true;
+
+    // Traverse the triangles
+    while (iQueueIndex < neighbourQueue.size())
+    {
+        // Get the index of the current triangle
+        int iCurrentIndex = neighbourQueue.back();
+
+        if (!visited[iCurrentIndex])
+        {
+            visited[iCurrentIndex] = true; // Mark as visited
+            Triangle& triCurrent = vecTriangles[iCurrentIndex];
+
+            if (firstIteration)
+            {
+                // For the very first triangle, check the specified edge
+                int iNeighbourIndex = triCurrent.getNeighbourIndex(iEdgeIndex);
+
+                // Ensure the neighbor index is valid
+                if (iNeighbourIndex >= 0 && !visited[iNeighbourIndex])
+                {
+                    Triangle& triNeighbour = vecTriangles[iNeighbourIndex];
+
+                    if (triNeighbour.isInCircumcircle(ptTargetPoint))
+                    {
+                        neighbourQueue.push(iNeighbourIndex);
+                    }
+                }
+                firstIteration = false;
+            }
+            else
+            {
+                // For subsequent triangles, check all three edges
+                for (int i = 0; i < 3; ++i)
+                {
+                    int iNeighbourIndex = triCurrent.getNeighbourIndex(i);
+
+                    // Ensure the neighbor index is valid
+                    if (iNeighbourIndex >= 0 && !visited[iNeighbourIndex])
+                    {
+                        Triangle& triNeighbour = vecTriangles[iNeighbourIndex];
+
+                        if (triNeighbour.isInCircumcircle(ptTargetPoint))
+                        {
+                            neighbourQueue.push(iNeighbourIndex);
+                        }
+                    }
+                }
+            }
+        }
+        iQueueIndex++;
+    }
+
+    return neighbourQueue; // Return the queue containing all neighbors to be processed
+}
