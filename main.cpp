@@ -61,7 +61,7 @@ int main()
 
     k.createTriangles(7, 7);
 
-    k.createTriangles(4, 8);
+    //k.createTriangles(4, 8);
 
     //k.createTriangles(0, 9);
 
