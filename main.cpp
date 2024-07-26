@@ -4,6 +4,10 @@
 #include <iostream>
 #include <vector>
 #include <queue>
+#include <QApplication>
+#include <QGraphicsScene>
+#include <QGraphicsView>
+#include "qtriangle.h"
 
 void printTriangleDetails(const Triangle& tri, int triIndex)
 {
@@ -21,57 +25,31 @@ void printTriangleDetails(const Triangle& tri, int triIndex)
     std::cout << "Circumcenter: (" << tri.getCircumcenter().getX() << ", " << tri.getCircumcenter().getY() << ")\n" << std::endl;
 }
 
-int main()
+
+
+
+int main(int argc, char *argv[])
 {
+    QApplication app(argc, argv);
 
-    Triangle triTest = Triangle(Point(15, 2), Point(22.5, 7), Point(22.5, 12));
-    Point p1 = Point(22.5, 10);
-    std::cout << triTest.contains(p1) << std::endl;
-
-
-    // Mesh Class Testing
+    // Create the points and mesh
     std::vector<Point> vecPtRectangle =
-    {
-        Point(7.5, 2.0),
-        Point(15.0, 2.0),
-        Point(22.5, 2.0),
-        Point(22.5, 7.0),
-        Point(22.5, 12.0),
-        Point(15.0, 12.0),
-        Point(7.5, 12.0),
-        Point(7.5, 7.0)
-    };
+        {
+            Point(7.5, 2.0),
+            Point(15.0, 2.0),
+            Point(22.5, 2.0),
+            Point(22.5, 7.0),
+            Point(22.5, 12.0),
+            Point(15.0, 12.0),
+            Point(7.5, 12.0),
+            Point(7.5, 7.0)
+        };
 
-    // Test createTriangles
     Mesh k(vecPtRectangle);
-
     k.setTriVector({ k.superTriangle() });
-
     k.buildMesh();
 
-/*
-    k.createTriangles(0, 3);
-
-
-    k.createTriangles(2, 4);
-
-
-    k.createTriangles(3, 5);
-
-    k.createTriangles(5, 6);
-
-    k.createTriangles(7, 7);
-
-    k.createTriangles(4, 8);
-
-    k.createTriangles(0, 9);
-
-    k.createTriangles(13, 10);
-
-*/
-
     std::vector<Triangle> meshTriangles = k.getTriVector();
-    std::cout << "\nThe size of the vector after the createTriangles operation: " << meshTriangles.size() << std::endl;
 
     for (int i = 0; i < meshTriangles.size(); ++i)
     {
@@ -83,5 +61,27 @@ int main()
 
     }
 
+    /*
+    // Create the graphics scene
+    QGraphicsScene scene;
+
+    // Add triangles to the scene
+    for (const auto& triangle : meshTriangles)
+    {
+        QPointF p1(triangle.getPoint(0).getX(), triangle.getPoint(0).getY());
+        QPointF p2(triangle.getPoint(1).getX(), triangle.getPoint(1).getY());
+        QPointF p3(triangle.getPoint(2).getX(), triangle.getPoint(2).getY());
+        scene.addItem(new QTriangle(p1, p2, p3));
+    }
+
+    // Create the graphics view
+    QGraphicsView view(&scene);
+    view.setRenderHint(QPainter::Antialiasing);
+    view.setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
+    view.setWindowTitle(QT_TRANSLATE_NOOP(QGraphicsView, "Triangulation Visualization"));
+    view.show();
+
+    return app.exec();
+*/
     return 0;
 }

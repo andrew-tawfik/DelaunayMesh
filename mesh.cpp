@@ -100,11 +100,6 @@ Triangle Mesh::superTriangle()
 // Builds mesh from points and triangles
 void Mesh::buildMesh()
 {
-    // Triangle triSuper = superTriangle();
-    // vecTriangles.push_back(triSuper);
-
-    std::cout << "Size of triVector: " << vecTriangles.size() <<  std::endl;
-    std::cout << "Size of ptVector : " << vecPtShape.size() <<  std::endl;
 
     int iPointIndex = 3;
     for (auto it = vecPtShape.begin() + 3; it != vecPtShape.end(); ++it)
@@ -114,7 +109,6 @@ void Mesh::buildMesh()
         createTriangles(iTriIndex, iPointIndex);
 
         iPointIndex += 1;
-        std::cout << "Size of triVector after loop: " << iPointIndex << ": " << vecTriangles.size() << std::endl;
     }
 }
 
@@ -459,8 +453,6 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
 
 void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int iNeighbourIndex0, int iNeighbourIndex1)
 {
-    std::cout << "Creating triangle inside the triangle of index: " << iTriangleIndex << std::endl;
-    std::cout << "These triangles will both be neighbour to one of the two triangles on the opposite side: " << iNeighbourIndex0 << " and " << iNeighbourIndex1 << std::endl;
 
     const Point& ptTargetPoint = vecPtShape[iPointIndex];
     Triangle& triCurrent = vecTriangles[iTriangleIndex];
@@ -932,7 +924,6 @@ void Mesh::swapEdge(int iTri1, int iTri2)
             break;
         }
     }
-    std::cout << "Triangles " << iTri1 << " and " << iTri2 << " have swapped edges" << std::endl;
 
 
     // Update old neighbors
