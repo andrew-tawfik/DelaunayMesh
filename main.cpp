@@ -47,9 +47,9 @@ int main()
 
     k.setTriVector({ k.superTriangle() });
 
-    //k.buildMesh();
+    k.buildMesh();
 
-
+/*
     k.createTriangles(0, 3);
 
 
@@ -64,11 +64,11 @@ int main()
 
     k.createTriangles(4, 8);
 
-    //k.createTriangles(0, 9);
+    k.createTriangles(0, 9);
 
-    //k.createTriangles(4, 10);
+    k.createTriangles(13, 10);
 
-
+*/
 
     std::vector<Triangle> meshTriangles = k.getTriVector();
     std::cout << "\nThe size of the vector after the createTriangles operation: " << meshTriangles.size() << std::endl;

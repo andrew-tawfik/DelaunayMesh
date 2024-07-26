@@ -61,5 +61,7 @@ public:
 
     // Function to print the mesh for debugging purposes
     void printMesh() const;
+
+    void createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int iNeighbourIndex0, int iNeighbourIndex1);
 };
 #endif // MESH_H
