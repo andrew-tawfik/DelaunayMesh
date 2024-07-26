@@ -5,7 +5,7 @@
 #include "triangle.h"
 #include "point.h"
 #include <cmath>
-#include <vector>
+
 
 // Default constructor: initializes the triangle with default points
 Triangle::Triangle()

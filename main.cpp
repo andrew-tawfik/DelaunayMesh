@@ -3,7 +3,6 @@
 #include "mesh.h"
 #include <iostream>
 #include <vector>
-#include <queue>
 #include <QApplication>
 #include <QGraphicsScene>
 #include <QGraphicsView>
@@ -33,8 +32,19 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
 
     // Create the points and mesh
-    std::vector<Point> vecPtRectangle =
+    std::vector<Point> testCaseHex =
         {
+            Point(22, 8.6),
+            Point(18.5, 14.7),
+            Point(11.5, 14.7),
+            Point(8, 8.6),
+            Point(11.5, 2.5),
+            Point(18.5, 2.5),
+        };
+
+    std::vector<Point> testCaseRect =
+        {
+
             Point(7.5, 2.0),
             Point(15.0, 2.0),
             Point(22.5, 2.0),
@@ -45,7 +55,9 @@ int main(int argc, char *argv[])
             Point(7.5, 7.0)
         };
 
-    Mesh k(vecPtRectangle);
+
+
+    Mesh k(testCaseRect);
     k.setTriVector({ k.superTriangle() });
     k.buildMesh();
 
@@ -61,11 +73,12 @@ int main(int argc, char *argv[])
 
     }
 
-    /*
-    // Create the graphics scene
+
     QGraphicsScene scene;
 
-    // Add triangles to the scene
+    scene.setSceneRect(-7.5, -10, 45, 45); // Adjust size as needed
+
+
     for (const auto& triangle : meshTriangles)
     {
         QPointF p1(triangle.getPoint(0).getX(), triangle.getPoint(0).getY());
@@ -74,14 +87,19 @@ int main(int argc, char *argv[])
         scene.addItem(new QTriangle(p1, p2, p3));
     }
 
+
     // Create the graphics view
     QGraphicsView view(&scene);
+    view.setTransform(QTransform().scale(1, -1)); // Flip vertically
     view.setRenderHint(QPainter::Antialiasing);
     view.setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
     view.setWindowTitle(QT_TRANSLATE_NOOP(QGraphicsView, "Triangulation Visualization"));
+
+    view.scale(25, 25);
     view.show();
 
+
     return app.exec();
-*/
-    return 0;
+
+    //return 0;
 }
