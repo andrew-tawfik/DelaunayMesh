@@ -51,7 +51,7 @@ public:
     // Function to swap edge between neighbouring triangles
     void swapEdge(int iTri1, int iTri2);
 
-    void swapAll(std::queue<int>& neighbourQueue);
+    void swapAll(std::queue<int>& neighbourQueue, int iPointIndex);
 
     // Function to update neighboring relationships between triangles
     void updateNeighbours(int oldNeighborIndex, int oldTriangleIndex, int newTriangleIndex);

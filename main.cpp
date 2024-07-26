@@ -26,6 +26,7 @@ int main()
 
     Triangle triTest = Triangle(Point(15, 2), Point(22.5, 7), Point(22.5, 12));
     Point p1 = Point(22.5, 10);
+    std::cout << triTest.contains(p1) << std::endl;
 
 
     // Mesh Class Testing
@@ -61,7 +62,7 @@ int main()
 
     k.createTriangles(7, 7);
 
-    //k.createTriangles(4, 8);
+    k.createTriangles(4, 8);
 
     //k.createTriangles(0, 9);
 

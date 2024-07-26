@@ -180,7 +180,7 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
             {
                 if (oldNeighbour.getNeighbourIndex(i) == iTriangleIndex)
                 {
-                    oldNeighbour.setNeighbourIndex(i, newIndex2);
+                    oldNeighbour.setNeighbourIndex(i, newIndex1);
                     break;
                 }
             }
@@ -221,7 +221,7 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
         {
             std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iTriangleIndex, iPointIndex, 2);
 
-            swapAll(neighbourQueue);
+            swapAll(neighbourQueue, iPointIndex);
 
         }
 
@@ -230,13 +230,13 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
 
             std::queue<int> neighbourQueue = checkNeighboringCircumcircles(newIndex1,iPointIndex, 0);
 
-            swapAll(neighbourQueue);
+            swapAll(neighbourQueue, iPointIndex);
         }
 
         if (triNeighbour2.isInCircumcircle(ptTargetPoint))
         {
             std::queue<int> neighbourQueue = checkNeighboringCircumcircles(newIndex2, iPointIndex, 0);
-            swapAll(neighbourQueue);
+            swapAll(neighbourQueue, iPointIndex);
         }
     }
 
@@ -610,14 +610,17 @@ void Mesh::updateNeighbours(int oldNeighborIndex, int oldTriangleIndex, int newT
 }
 
 
-void Mesh::swapAll(std::queue<int>& neighbourQueue)
+void Mesh::swapAll(std::queue<int>& neighbourQueue, int iPointIndex)
 {
+    Point& ptTargetPoint = vecPtShape[iPointIndex];
     // Stack contains all triangles that have ptTargetPoint within their circumcircles
     while (neighbourQueue.size() > 1)
     {
-        int iTriangleIndex = neighbourQueue.front();
         neighbourQueue.pop();
         int iNeighbourIndex = neighbourQueue.front();
+        Triangle& triNeighbour = vecTriangles[iNeighbourIndex];
+
+        int iTriangleIndex = triNeighbour.findPathToContainingTriangle(ptTargetPoint);
 
         if (iNeighbourIndex >= 0)
         {
