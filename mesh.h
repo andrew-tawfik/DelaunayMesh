@@ -45,11 +45,20 @@ public:
     // Function to create new triangles
     void createTriangles(int iTriangleIndex, int iPointIndex);
 
+    //Function to handle edge case
+    void handleEdgeCase(int iTriangleIndex, int iPointIndex);
+
     // Function to finds the index the triangle that contains a specific point
     int findContainingTriangle(const Point& ptTargetPoint) const;
 
     // Function to swap edge between neighbouring triangles
     void swapEdge(int iTri1, int iTri2);
+
+    int findSharedEdge(const Triangle& tri, int iDiff1, int iDiff2) const;
+
+    int findNewEdge(const Triangle& tri, int i, int iSharedEdge) const;
+
+    int findStolenEdge(const Triangle& tri, int iSharedPoint, int iDiff1) const;
 
     void swapAll(std::queue<int>& neighbourQueue, int iPointIndex);
 

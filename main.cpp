@@ -55,6 +55,24 @@ int main(int argc, char *argv[])
             Point(7.5, 7.0)
         };
 
+    std::vector<Point> testCaseInner =
+        {
+
+            Point(7.5, 2.0),
+            Point(15.0, 2.0),
+            Point(22.5, 2.0),
+            Point(22.5, 7.0),
+            Point(22.5, 12.0),
+            Point(15.0, 12.0),
+            Point(7.5, 12.0),
+            Point(7.5, 7.0),
+            //Point(15, 7),
+            //Point(11.25, 4.5),
+            //Point(18.75, 9.5),
+            //Point(11.25, 9.5),
+            //Point(18.75, 4.5)
+        };
+
 
 
     Mesh k(testCaseRect);
@@ -101,5 +119,4 @@ int main(int argc, char *argv[])
 
     return app.exec();
 
-    //return 0;
 }

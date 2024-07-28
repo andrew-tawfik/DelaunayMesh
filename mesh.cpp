@@ -123,20 +123,20 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
 
     // Get references to the target point and current triangle
     const Point& ptTargetPoint = vecPtShape[iPointIndex];
-    Triangle& triCurrent = vecTriangles[iTriangleIndex]; // 2
+    Triangle& triCurrent = vecTriangles[iTriangleIndex];
 
+    // Case when the point is inside the triangle but not on an edge
     if (triCurrent.onEdge(ptTargetPoint) < 0)
     {
-
-        // Create two new triangles
-        Triangle triNewTriangle1(triCurrent.getPoint(0), triCurrent.getPoint(1), ptTargetPoint); // 3
-        Triangle triNewTriangle2(triCurrent.getPoint(1), triCurrent.getPoint(2), ptTargetPoint); // 4
+        // Create two new triangles of different points from the current triangle and the target point
+        Triangle triNewTriangle1(triCurrent.getPoint(0), triCurrent.getPoint(1), ptTargetPoint);
+        Triangle triNewTriangle2(triCurrent.getPoint(1), triCurrent.getPoint(2), ptTargetPoint);
 
         // Set indices for the new triangles
-        int newIndex1 = vecTriangles.size();
-        int newIndex2 = newIndex1 + 1;
-        triNewTriangle1.setIndex(newIndex1);
-        triNewTriangle2.setIndex(newIndex2);
+        int iNewIndex1 = vecTriangles.size();
+        int iNewIndex2 = iNewIndex1 + 1;
+        triNewTriangle1.setIndex(iNewIndex1);
+        triNewTriangle2.setIndex(iNewIndex2);
 
         // Set point indices for the new triangles
         triNewTriangle1.setPointIndex(0, triCurrent.getPointIndex(0));
@@ -156,91 +156,92 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
         triNewTriangle2.setNeighbourIndex(1, iTriangleIndex);
 
         // Update neighbors for the current triangle
-        triNewTriangle1.setNeighbourIndex(1, newIndex2);
-        triNewTriangle2.setNeighbourIndex(2, newIndex1);
+        triNewTriangle1.setNeighbourIndex(1, iNewIndex2);
+        triNewTriangle2.setNeighbourIndex(2, iNewIndex1);
 
-        int oldNeighbourIndex1 = triCurrent.getNeighbourIndex(0);
-        int oldNeighbourIndex2 = triCurrent.getNeighbourIndex(1);
+        int iOldNeighbourIndex1 = triCurrent.getNeighbourIndex(0);
+        int iOldNeighbourIndex2 = triCurrent.getNeighbourIndex(1);
 
-        triCurrent.setNeighbourIndex(0, newIndex1);
-        triCurrent.setNeighbourIndex(1, newIndex2);
+        triCurrent.setNeighbourIndex(0, iNewIndex1);
+        triCurrent.setNeighbourIndex(1, iNewIndex2);
 
         // Update the neighboring relationships with the old neighbor
-        if (oldNeighbourIndex1 != -1)
+        if (iOldNeighbourIndex1 != -1)
         {
-            Triangle& oldNeighbour = vecTriangles[oldNeighbourIndex1];
+            Triangle& triOldNeighbour = vecTriangles[iOldNeighbourIndex1];
 
             for (int i = 0; i < 3; ++i)
             {
-                if (oldNeighbour.getNeighbourIndex(i) == iTriangleIndex)
+                if (triOldNeighbour.getNeighbourIndex(i) == iTriangleIndex)
                 {
-                    oldNeighbour.setNeighbourIndex(i, newIndex1);
+                    triOldNeighbour.setNeighbourIndex(i, iNewIndex1);
                     break;
                 }
             }
 
-            triNewTriangle1.setNeighbourIndex(0, oldNeighbourIndex1);
+            triNewTriangle1.setNeighbourIndex(0, iOldNeighbourIndex1);
         }
 
 
         // Update the neighboring relationships with the old neighbor
-        if (oldNeighbourIndex2 != -1)
+        if (iOldNeighbourIndex2 != -1)
         {
-            Triangle& oldNeighbour = vecTriangles[oldNeighbourIndex2];
+            Triangle& triOldNeighbour = vecTriangles[iOldNeighbourIndex2];
 
             for (int i = 0; i < 3; ++i)
             {
-                if (oldNeighbour.getNeighbourIndex(i) == iTriangleIndex)
+                if (triOldNeighbour.getNeighbourIndex(i) == iTriangleIndex)
                 {
-                    oldNeighbour.setNeighbourIndex(i, newIndex2);
+                    triOldNeighbour.setNeighbourIndex(i, iNewIndex2);
                     break;
                 }
             }
 
-            triNewTriangle2.setNeighbourIndex(0, oldNeighbourIndex2);
+            triNewTriangle2.setNeighbourIndex(0, iOldNeighbourIndex2);
         }
 
         // Add the new triangles to the vector
         vecTriangles.push_back(triNewTriangle1);
         vecTriangles.push_back(triNewTriangle2);
 
-        // Keep track of old neighbours checkNeighbourCircumcircles function
 
-        const Triangle& triFirst = vecTriangles[iTriangleIndex];
-        const Triangle& triNeighbour0 = vecTriangles[triFirst.getNeighbourIndex(2)];
-        const Triangle& triNeighbour1 = vecTriangles[triNewTriangle1.getNeighbourIndex(0)];
-        const Triangle& triNeighbour2 = vecTriangles[triNewTriangle2.getNeighbourIndex(0)];
-
-        if (triNeighbour0.isInCircumcircle(ptTargetPoint))
+        // Check circumcircles of the new triangles and swap edges if necessary
+        if (vecTriangles[iTriangleIndex].getNeighbourIndex(2) != -1 && vecTriangles[vecTriangles[iTriangleIndex].getNeighbourIndex(2)].isInCircumcircle(ptTargetPoint))
         {
             std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iTriangleIndex, iPointIndex, 2);
-
-            swapAll(neighbourQueue, iPointIndex);
-
-        }
-
-        if (triNeighbour1.isInCircumcircle(ptTargetPoint))
-        {
-
-            std::queue<int> neighbourQueue = checkNeighboringCircumcircles(newIndex1,iPointIndex, 0);
-
             swapAll(neighbourQueue, iPointIndex);
         }
 
-        if (triNeighbour2.isInCircumcircle(ptTargetPoint))
+        if (vecTriangles[iNewIndex1].getNeighbourIndex(0) != -1 && vecTriangles[vecTriangles[iNewIndex1].getNeighbourIndex(0)].isInCircumcircle(ptTargetPoint))
         {
-            std::queue<int> neighbourQueue = checkNeighboringCircumcircles(newIndex2, iPointIndex, 0);
+            std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iNewIndex1, iPointIndex, 0);
+            swapAll(neighbourQueue, iPointIndex);
+        }
+
+        if (vecTriangles[iNewIndex2].getNeighbourIndex(0) != -1 && vecTriangles[vecTriangles[iNewIndex2].getNeighbourIndex(0)].isInCircumcircle(ptTargetPoint))
+        {
+            std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iNewIndex2, iPointIndex, 0);
             swapAll(neighbourQueue, iPointIndex);
         }
     }
 
     else
     {
+        handleEdgeCase(iTriangleIndex, iPointIndex);
+    }
+}
+
+void Mesh::handleEdgeCase(int iTriangleIndex, int iPointIndex)
+{
+    {
+        const Point& ptTargetPoint = vecPtShape[iPointIndex];
+        Triangle& triCurrent = vecTriangles[iTriangleIndex];
         // Triangle gets split in half
         Triangle triNewTriangle1;
-        int newIndex1 = vecTriangles.size();
-        triNewTriangle1.setIndex(newIndex1);
+        int iNewIndex1 = vecTriangles.size();
+        triNewTriangle1.setIndex(iNewIndex1);
 
+        // Case where the point is on Edge 0 (pt0 to pt1)
         if(triCurrent.onEdge(ptTargetPoint) == 0)
         {
             triNewTriangle1.setPoint(0, triCurrent.getPoint(1));
@@ -255,17 +256,17 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
             triNewTriangle1.setNeighbourIndex(0, triCurrent.getNeighbourIndex(1));
 
 
-            int oldNeighbourIndex1 = triCurrent.getNeighbourIndex(1);
+            int iOldNeighbourIndex1 = triCurrent.getNeighbourIndex(1);
 
-            if (oldNeighbourIndex1 != -1)
+            if (iOldNeighbourIndex1 != -1)
             {
-                Triangle& triOldNeighbour = vecTriangles[oldNeighbourIndex1];
+                Triangle& triOldNeighbour = vecTriangles[iOldNeighbourIndex1];
 
                 for (int i = 0; i < 3; ++i)
                 {
                     if (triOldNeighbour.getNeighbourIndex(i) == iTriangleIndex)
                     {
-                        triOldNeighbour.setNeighbourIndex(i, newIndex1);
+                        triOldNeighbour.setNeighbourIndex(i, iNewIndex1);
                         break;
                     }
                 }
@@ -273,7 +274,7 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
 
             triCurrent.setPointIndex(1, iPointIndex);
             triCurrent.setPoint(1, ptTargetPoint);
-            triCurrent.setNeighbourIndex(1, newIndex1);
+            triCurrent.setNeighbourIndex(1, iNewIndex1);
 
             const int iOldNeighbour = triCurrent.getNeighbourIndex(0);
             triCurrent.setNeighbourIndex(0, -1);
@@ -282,7 +283,7 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
             vecTriangles.push_back(triNewTriangle1);
 
             triCurrent = vecTriangles[iTriangleIndex];
-            triNewTriangle1 = vecTriangles[newIndex1];
+            triNewTriangle1 = vecTriangles[iNewIndex1];
 
 
             const Triangle& triNeighbour0 = vecTriangles[triCurrent.getNeighbourIndex(2)];
@@ -299,17 +300,18 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
             if (triNeighbour1.isInCircumcircle(ptTargetPoint))
             {
 
-                std::queue<int> neighbourQueue = checkNeighboringCircumcircles(newIndex1,iPointIndex, 0);
+                std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iNewIndex1,iPointIndex, 0);
 
                 swapAll(neighbourQueue, iPointIndex);
             }
 
             if (iOldNeighbour > -1)
             {
-                createTrianglesOppositeSide(iOldNeighbour, iPointIndex, iTriangleIndex, newIndex1);
+                createTrianglesOppositeSide(iOldNeighbour, iPointIndex, iTriangleIndex, iNewIndex1);
             }
         }
 
+        // Case where the point is on Edge 1 (pt1 to pt2)
         else if (triCurrent.onEdge(ptTargetPoint) == 1)
         {
             triNewTriangle1.setPoint(0, triCurrent.getPoint(0));
@@ -323,17 +325,17 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
             triNewTriangle1.setNeighbourIndex(0, triCurrent.getNeighbourIndex(0));
             triNewTriangle1.setNeighbourIndex(2, iTriangleIndex);
 
-            int oldNeighbourIndex1 = triCurrent.getNeighbourIndex(0);
+            int iOldNeighbourIndex1 = triCurrent.getNeighbourIndex(0);
 
-            if (oldNeighbourIndex1 != -1)
+            if (iOldNeighbourIndex1 != -1)
             {
-                Triangle& triOldNeighbour = vecTriangles[oldNeighbourIndex1];
+                Triangle& triOldNeighbour = vecTriangles[iOldNeighbourIndex1];
 
                 for (int i = 0; i < 3; ++i)
                 {
                     if (triOldNeighbour.getNeighbourIndex(i) == iTriangleIndex)
                     {
-                        triOldNeighbour.setNeighbourIndex(i, newIndex1);
+                        triOldNeighbour.setNeighbourIndex(i, iNewIndex1);
                         break;
                     }
                 }
@@ -343,7 +345,7 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
             triCurrent.setPointIndex(1, iPointIndex);
             triCurrent.setPoint(1, ptTargetPoint);
 
-            triCurrent.setNeighbourIndex(0, newIndex1);
+            triCurrent.setNeighbourIndex(0, iNewIndex1);
 
             const int iOldNeighbour = triCurrent.getNeighbourIndex(1);
             triCurrent.setNeighbourIndex(1, -1);
@@ -353,11 +355,11 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
 
             if (iOldNeighbour > -1)
             {
-                createTrianglesOppositeSide(iOldNeighbour, iPointIndex, iTriangleIndex, newIndex1);
+                createTrianglesOppositeSide(iOldNeighbour, iPointIndex, iTriangleIndex, iNewIndex1);
             }
 
             triCurrent = vecTriangles[iTriangleIndex];
-            triNewTriangle1 = vecTriangles[newIndex1];
+            triNewTriangle1 = vecTriangles[iNewIndex1];
 
             const Triangle& triNeighbour0 = vecTriangles[triCurrent.getNeighbourIndex(2)];
             const Triangle& triNeighbour1 = vecTriangles[triNewTriangle1.getNeighbourIndex(0)];
@@ -373,13 +375,14 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
             if (triNeighbour1.isInCircumcircle(ptTargetPoint))
             {
 
-                std::queue<int> neighbourQueue = checkNeighboringCircumcircles(newIndex1,iPointIndex, 0);
+                std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iNewIndex1,iPointIndex, 0);
 
                 swapAll(neighbourQueue, iPointIndex);
             }
 
         }
 
+        // Case where the point is on Edge 2 (pt2 to pt0)
         else
         {
             triNewTriangle1.setPoint(0, triCurrent.getPoint(1));
@@ -393,17 +396,17 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
             triNewTriangle1.setNeighbourIndex(0, iTriangleIndex);
             triNewTriangle1.setNeighbourIndex(1, triCurrent.getNeighbourIndex(1));
 
-            int oldNeighbourIndex1 = triCurrent.getNeighbourIndex(1);
+            int iOldNeighbourIndex1 = triCurrent.getNeighbourIndex(1);
 
-            if (oldNeighbourIndex1 != -1)
+            if (iOldNeighbourIndex1 != -1)
             {
-                Triangle& triOldNeighbour = vecTriangles[oldNeighbourIndex1];
+                Triangle& triOldNeighbour = vecTriangles[iOldNeighbourIndex1];
 
                 for (int i = 0; i < 3; ++i)
                 {
                     if (triOldNeighbour.getNeighbourIndex(i) == iTriangleIndex)
                     {
-                        triOldNeighbour.setNeighbourIndex(i, newIndex1);
+                        triOldNeighbour.setNeighbourIndex(i, iNewIndex1);
                         break;
                     }
                 }
@@ -412,7 +415,7 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
             triCurrent.setPointIndex(2, iPointIndex);
             triCurrent.setPoint(2, ptTargetPoint);
 
-            triCurrent.setNeighbourIndex(1, newIndex1);
+            triCurrent.setNeighbourIndex(1, iNewIndex1);
 
             const int iOldNeighbour = triCurrent.getNeighbourIndex(2);
             triCurrent.setNeighbourIndex(2, -1);
@@ -422,11 +425,11 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
 
             if (iOldNeighbour > -1)
             {
-                createTrianglesOppositeSide(iOldNeighbour, iPointIndex, iTriangleIndex, newIndex1);
+                createTrianglesOppositeSide(iOldNeighbour, iPointIndex, iTriangleIndex, iNewIndex1);
             }
 
             triCurrent = vecTriangles[iTriangleIndex];
-            triNewTriangle1 = vecTriangles[newIndex1];
+            triNewTriangle1 = vecTriangles[iNewIndex1];
 
             const Triangle& triNeighbour0 = vecTriangles[triCurrent.getNeighbourIndex(0)];
             const Triangle& triNeighbour1 = vecTriangles[triNewTriangle1.getNeighbourIndex(1)];
@@ -442,7 +445,7 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
             if (triNeighbour1.isInCircumcircle(ptTargetPoint))
             {
 
-                std::queue<int> neighbourQueue = checkNeighboringCircumcircles(newIndex1,iPointIndex, 1);
+                std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iNewIndex1,iPointIndex, 1);
 
                 swapAll(neighbourQueue, iPointIndex);
             }
@@ -458,8 +461,8 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
     Triangle& triCurrent = vecTriangles[iTriangleIndex];
 
     Triangle triNewTriangle1;
-    int newIndex1 = vecTriangles.size();
-    triNewTriangle1.setIndex(newIndex1);
+    int iNewIndex1 = vecTriangles.size();
+    triNewTriangle1.setIndex(iNewIndex1);
 
     if(triCurrent.onEdge(ptTargetPoint) == 0)
     {
@@ -475,17 +478,17 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
         triNewTriangle1.setNeighbourIndex(0, triCurrent.getNeighbourIndex(1));
         triNewTriangle1.setNeighbourIndex(2, iNeighbourIndex1);
 
-        int oldNeighbourIndex1 = triCurrent.getNeighbourIndex(1);
+        int iOldNeighbourIndex1 = triCurrent.getNeighbourIndex(1);
 
-        if (oldNeighbourIndex1 != -1)
+        if (iOldNeighbourIndex1 != -1)
         {
-            Triangle& triOldNeighbour = vecTriangles[oldNeighbourIndex1];
+            Triangle& triOldNeighbour = vecTriangles[iOldNeighbourIndex1];
 
             for (int i = 0; i < 3; ++i)
             {
                 if (triOldNeighbour.getNeighbourIndex(i) == iTriangleIndex)
                 {
-                    triOldNeighbour.setNeighbourIndex(i, newIndex1);
+                    triOldNeighbour.setNeighbourIndex(i, iNewIndex1);
                     break;
                 }
             }
@@ -493,7 +496,7 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
 
         triCurrent.setPointIndex(1, iPointIndex);
         triCurrent.setPoint(1, ptTargetPoint);
-        triCurrent.setNeighbourIndex(1, newIndex1);
+        triCurrent.setNeighbourIndex(1, iNewIndex1);
 
         const int iOldNeighbour = triCurrent.getNeighbourIndex(0);
         triCurrent.setNeighbourIndex(0, -1);
@@ -504,7 +507,7 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
         for (int i = 0; i < 3; ++i)
         {
             if (triOldNeighbour0.getNeighbourIndex(i) == -1)
-                triOldNeighbour0.setNeighbourIndex(i, newIndex1);
+                triOldNeighbour0.setNeighbourIndex(i, iNewIndex1);
 
             if (triOldNeighbour1.getNeighbourIndex(i) == -1)
                 triOldNeighbour1.setNeighbourIndex(i, iTriangleIndex);
@@ -524,7 +527,7 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
         if (triNeighbour1.isInCircumcircle(ptTargetPoint))
         {
 
-            std::queue<int> neighbourQueue = checkNeighboringCircumcircles(newIndex1,iPointIndex, 0);
+            std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iNewIndex1,iPointIndex, 0);
 
             swapAll(neighbourQueue, iPointIndex);
         }
@@ -545,17 +548,17 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
         triNewTriangle1.setNeighbourIndex(1, iNeighbourIndex0);
         triNewTriangle1.setNeighbourIndex(2, iTriangleIndex);
 
-        int oldNeighbourIndex1 = triCurrent.getNeighbourIndex(0);
+        int iOldNeighbourIndex1 = triCurrent.getNeighbourIndex(0);
 
-        if (oldNeighbourIndex1 != -1)
+        if (iOldNeighbourIndex1 != -1)
         {
-            Triangle& triOldNeighbour = vecTriangles[oldNeighbourIndex1];
+            Triangle& triOldNeighbour = vecTriangles[iOldNeighbourIndex1];
 
             for (int i = 0; i < 3; ++i)
             {
                 if (triOldNeighbour.getNeighbourIndex(i) == iTriangleIndex)
                 {
-                    triOldNeighbour.setNeighbourIndex(i, newIndex1);
+                    triOldNeighbour.setNeighbourIndex(i, iNewIndex1);
                     break;
                 }
             }
@@ -564,7 +567,7 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
         triCurrent.setPointIndex(1, iPointIndex);
         triCurrent.setPoint(1, ptTargetPoint);
 
-        triCurrent.setNeighbourIndex(0, newIndex1);
+        triCurrent.setNeighbourIndex(0, iNewIndex1);
 
         triCurrent.setNeighbourIndex(1, iNeighbourIndex1);
 
@@ -575,7 +578,7 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
         for (int i = 0; i < 3; ++i)
         {
             if (triOldNeighbour0.getNeighbourIndex(i) == -1)
-                triOldNeighbour0.setNeighbourIndex(i, newIndex1);
+                triOldNeighbour0.setNeighbourIndex(i, iNewIndex1);
 
             if (triOldNeighbour1.getNeighbourIndex(i) == -1)
                 triOldNeighbour1.setNeighbourIndex(i, iTriangleIndex);
@@ -596,7 +599,7 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
         if (triNeighbour1.isInCircumcircle(ptTargetPoint))
         {
 
-            std::queue<int> neighbourQueue = checkNeighboringCircumcircles(newIndex1,iPointIndex, 0);
+            std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iNewIndex1,iPointIndex, 0);
 
             swapAll(neighbourQueue, iPointIndex);
         }
@@ -616,17 +619,17 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
         triNewTriangle1.setNeighbourIndex(1, triCurrent.getNeighbourIndex(1));
         triNewTriangle1.setNeighbourIndex(2, iNeighbourIndex1);
 
-        int oldNeighbourIndex1 = triCurrent.getNeighbourIndex(1);
+        int iOldNeighbourIndex1 = triCurrent.getNeighbourIndex(1);
 
-        if (oldNeighbourIndex1 != -1)
+        if (iOldNeighbourIndex1 != -1)
         {
-            Triangle& triOldNeighbour = vecTriangles[oldNeighbourIndex1];
+            Triangle& triOldNeighbour = vecTriangles[iOldNeighbourIndex1];
 
             for (int i = 0; i < 3; ++i)
             {
                 if (triOldNeighbour.getNeighbourIndex(i) == iTriangleIndex)
                 {
-                    triOldNeighbour.setNeighbourIndex(i, newIndex1);
+                    triOldNeighbour.setNeighbourIndex(i, iNewIndex1);
                     break;
                 }
             }
@@ -635,7 +638,7 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
         triCurrent.setPointIndex(2, iPointIndex);
         triCurrent.setPoint(2, ptTargetPoint);
 
-        triCurrent.setNeighbourIndex(1, newIndex1);
+        triCurrent.setNeighbourIndex(1, iNewIndex1);
         triCurrent.setNeighbourIndex(2, iNeighbourIndex0);
 
 
@@ -645,7 +648,7 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
         for (int i = 0; i < 3; ++i)
         {
             if (triOldNeighbour0.getNeighbourIndex(i) == -1)
-                triOldNeighbour0.setNeighbourIndex(i, newIndex1);
+                triOldNeighbour0.setNeighbourIndex(i, iNewIndex1);
 
             if (triOldNeighbour1.getNeighbourIndex(i) == -1)
                 triOldNeighbour1.setNeighbourIndex(i, iTriangleIndex);
@@ -665,7 +668,7 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
         if (triNeighbour1.isInCircumcircle(ptTargetPoint))
         {
 
-            std::queue<int> neighbourQueue = checkNeighboringCircumcircles(newIndex1,iPointIndex, 1);
+            std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iNewIndex1,iPointIndex, 1);
 
             swapAll(neighbourQueue, iPointIndex);
         }
@@ -689,14 +692,14 @@ int Mesh::findContainingTriangle(const Point& ptTargetPoint) const
     // Get a randomized triangle from vecTriangles
     int iRandomIndex = dis(gen);
 
-    // iCurrentNeighbourtialize stack for dfs
-    std::stack<int> stack;
-    stack.push(iRandomIndex);
+    // Initialize stack for DFS
+    std::stack<int> stackTriangles;
+    stackTriangles.push(iRandomIndex);
 
-    while (!stack.empty())
+    while (!stackTriangles.empty())
     {
-        int iCurrentIndex = stack.top();
-        stack.pop();
+        int iCurrentIndex = stackTriangles.top();
+        stackTriangles.pop();
 
         const Triangle& triCurrent = vecTriangles[iCurrentIndex];
         int iResult = triCurrent.findPathToContainingTriangle(ptTargetPoint);
@@ -707,7 +710,7 @@ int Mesh::findContainingTriangle(const Point& ptTargetPoint) const
         }
         else
         {
-            stack.push(iResult);
+            stackTriangles.push(iResult);
         }
     }
 
@@ -769,6 +772,7 @@ void Mesh::swapEdge(int iTri1, int iTri2)
     const int iCurrentPt1 = triCurrent.getPointIndex(1);
     const int iCurrentPt2 = triCurrent.getPointIndex(2);
 
+
     // Replace one of the shared points in triCurrent with diff2
     for (int i = 0; i < 3; ++i)
     {
@@ -778,69 +782,27 @@ void Mesh::swapEdge(int iTri1, int iTri2)
             triCurrent.setPoint(i, vecPtShape[diff2]);
 
             // Determine the shared edge and new edge after swap
-            int sharedEdge = -1, newEdge = -1;
-            for (int j = 0; j < 3; ++j)
-            {
-                if (((triCurrent.getPointIndex(j) == diff1 && triCurrent.getPointIndex((j + 1) % 3) == diff2)) || ((triCurrent.getPointIndex(j) == diff2 && triCurrent.getPointIndex((j + 1) % 3) == diff1)))
-                {
-                    sharedEdge = j;
-                }
-            }
+            int iSharedEdge = findSharedEdge(triCurrent, diff1, diff2);
+            int iNewEdge = findNewEdge(triCurrent, i, iSharedEdge);
 
-            if (i == 0)
-            {
-                if (sharedEdge == 0)
-                {
-                    newEdge = 2;
-                }
-                else if (sharedEdge == 2)
-                {
-                    newEdge = 0;
-                }
-            }
-
-            else if (i == 1)
-            {
-                if (sharedEdge == 0)
-                {
-                    newEdge = 1;
-                }
-                else if (sharedEdge == 1)
-                {
-                    newEdge = 0;
-                }
-            }
-
-            else if (i == 2)
-            {
-                if (sharedEdge == 1)
-                {
-                    newEdge = 2;
-                }
-                else if (sharedEdge == 2)
-                {
-                    newEdge = 1;
-                }
-            }
-
-            // Find which neighbor from triNeighbour was stolen
-            int stolenEdge = -1;
+            int iStolenEdge = -1;
             if ((triNeighbour.getPointIndex(0) == shared[1] && triNeighbour.getPointIndex(1) == diff2) || (triNeighbour.getPointIndex(1) == shared[1] && triNeighbour.getPointIndex(0) == diff2))
             {
-                stolenEdge = iNeighbourN0;
+                iStolenEdge = iNeighbourN0;
             }
             else if ((triNeighbour.getPointIndex(1) == shared[1] && triNeighbour.getPointIndex(2) == diff2) || (triNeighbour.getPointIndex(2) == shared[1] && triNeighbour.getPointIndex(1) == diff2))
             {
-                stolenEdge = iNeighbourN1;
+                iStolenEdge = iNeighbourN1;
             }
             else if ((triNeighbour.getPointIndex(2) == shared[1] && triNeighbour.getPointIndex(0) == diff2) || (triNeighbour.getPointIndex(0) == shared[1] && triNeighbour.getPointIndex(2) == diff2) )
             {
-                stolenEdge = iNeighbourN2;
+                iStolenEdge = iNeighbourN2;
             }
 
+
             // Update the neighbor indices
-            triCurrent.setNeighbourIndex(sharedEdge, iTri2);
-            triCurrent.setNeighbourIndex(newEdge, stolenEdge);
+            triCurrent.setNeighbourIndex(iSharedEdge, iTri2);
+            triCurrent.setNeighbourIndex(iNewEdge, iStolenEdge);
             break;
 
             \
@@ -856,71 +818,26 @@ void Mesh::swapEdge(int iTri1, int iTri2)
             triNeighbour.setPoint(i, vecPtShape[diff1]);
 
             // Determine the shared edge and new edge after swap
-            int sharedEdge = -1, newEdge = -1;
-            for (int j = 0; j < 3; ++j)
-            {
-                if ((triNeighbour.getPointIndex(j) == diff1 && triNeighbour.getPointIndex((j + 1) % 3) == diff2) || (triNeighbour.getPointIndex(j) == diff2 && triNeighbour.getPointIndex((j + 1) % 3) == diff1))
-                {
-                    sharedEdge = j;
-                }
-            }
+            int iSharedEdge = findSharedEdge(triNeighbour, diff1, diff2);
+            int iNewEdge = findNewEdge(triNeighbour, i, iSharedEdge);
 
-
-
-            if (i == 0)
-            {
-                if (sharedEdge == 0)
-                {
-                    newEdge = 2;
-                }
-                else if (sharedEdge == 2)
-                {
-                    newEdge = 0;
-                }
-            }
-
-            else if (i == 1)
-            {
-                if (sharedEdge == 0)
-                {
-                    newEdge = 1;
-                }
-                else if (sharedEdge == 1)
-                {
-                    newEdge = 0;
-                }
-            }
-
-            else if (i == 2)
-            {
-                if (sharedEdge == 1)
-                {
-                    newEdge = 2;
-                }
-                else if (sharedEdge == 2)
-                {
-                    newEdge = 1;
-                }
-            }
-
-            // Find which neighbor from triCurrent was stolen
-            int stolenEdge = -1;
+            int iStolenEdge = -1;
             if ((iCurrentPt0 == diff1 && iCurrentPt1 == shared[0]) || (iCurrentPt1 == diff1 && iCurrentPt0 == shared[0]))
             {
-                stolenEdge = iCurrentN0;
+                iStolenEdge = iCurrentN0;
             }
             else if ((iCurrentPt1 == diff1 && iCurrentPt2 == shared[0]) || (iCurrentPt2 == diff1 && iCurrentPt1 == shared[0]))
             {
-                stolenEdge = iCurrentN1;
+                iStolenEdge = iCurrentN1;
             }
             else if ((iCurrentPt2 == diff1 && iCurrentPt0 == shared[0]) || (iCurrentPt0 == diff1 && iCurrentPt2 == shared[0]))
             {
-                stolenEdge = iCurrentN2;
+                iStolenEdge = iCurrentN2;
             }
 
             // Update the neighbor indices
-            triNeighbour.setNeighbourIndex(sharedEdge, iTri1);
-            triNeighbour.setNeighbourIndex(newEdge, stolenEdge);
+            triNeighbour.setNeighbourIndex(iSharedEdge, iTri1);
+            triNeighbour.setNeighbourIndex(iNewEdge, iStolenEdge);
             break;
         }
     }
@@ -934,6 +851,55 @@ void Mesh::swapEdge(int iTri1, int iTri2)
     updateNeighbours(iNeighbourN1, iTri2, iTri1);
     updateNeighbours(iNeighbourN2, iTri2, iTri1);
 }
+
+int Mesh::findSharedEdge(const Triangle& tri, int iDiff1, int iDiff2) const
+{
+    for (int i = 0; i < 3; ++i)
+    {
+        if (((tri.getPointIndex(i) == iDiff1 && tri.getPointIndex((i + 1) % 3) == iDiff2)) || ((tri.getPointIndex(i) == iDiff2 && tri.getPointIndex((i + 1) % 3) == iDiff1)))
+        { return i; }
+    }
+    return -1;
+}
+int Mesh::findNewEdge(const Triangle& tri, int i, int iSharedEdge) const
+{
+    if (i == 0)
+    {
+        if (iSharedEdge == 0)
+        {
+            return 2;
+        }
+        else if (iSharedEdge == 2)
+        {
+            return 0;
+        }
+    }
+
+    else if (i == 1)
+    {
+        if (iSharedEdge == 0)
+        {
+            return 1;
+        }
+        else if (iSharedEdge == 1)
+        {
+            return 0;
+        }
+    }
+
+    else if (i == 2)
+    {
+        if (iSharedEdge == 1)
+        {
+            return 2;
+        }
+        else if (iSharedEdge == 2)
+        {
+            return 1;
+        }
+    }
+}
+
 
 
 void Mesh::updateNeighbours(int oldNeighborIndex, int oldTriangleIndex, int newTriangleIndex)
