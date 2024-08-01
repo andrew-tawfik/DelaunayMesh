@@ -80,29 +80,26 @@ Triangle Mesh::superTriangle()
     Point p2(15, 25.981);
 
     Triangle triSuper = Triangle(p0, p1, p2);
-    triSuper.setPointIndex(0, 0);
-    triSuper.setPointIndex(1, 1);
-    triSuper.setPointIndex(2, 2);
+    triSuper.setPointIndex(0, vecPtShape.size());
+    triSuper.setPointIndex(1, vecPtShape.size() + 1);
+    triSuper.setPointIndex(2, vecPtShape.size() + 2);
 
-    for (int i = 0; i < 3; ++i)
-    {
-        viPointIndices[i] = i;
-    }
-
-    // Insert points at the beginning of vecPtShape
-    vecPtShape.insert(vecPtShape.begin(), {p0, p1, p2});
+    // Append points to the end of vecPtShape
+    vecPtShape.push_back(p0);
+    vecPtShape.push_back(p1);
+    vecPtShape.push_back(p2);
 
     triSuper.setIndex(0);
 
     return triSuper;
 }
 
+
 // Builds mesh from points and triangles
 void Mesh::buildMesh()
 {
-
-    int iPointIndex = 3;
-    for (auto it = vecPtShape.begin() + 3; it != vecPtShape.end(); ++it)
+    int iPointIndex = 0;
+    for (auto it = vecPtShape.begin(); it != vecPtShape.end() - 3; ++it)
     {
         const auto& p = *it;
         int iTriIndex = findContainingTriangle(p);
