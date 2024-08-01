@@ -7,7 +7,8 @@
 class QTriangle : public QGraphicsItem
 {
 public:
-    QTriangle(const QPointF& p0, const QPointF& p1, const QPointF& p2, QGraphicsItem *parent = nullptr);
+    QTriangle(const QPointF& p0, const QPointF& p1, const QPointF& p2, int iIndex, QGraphicsItem *parent = nullptr);
+    void setShowIndex(bool show);
 
 protected:
     void paint(QPainter *painter,  const QStyleOptionGraphicsItem *option, QWidget *widget = nullptr) override;
@@ -15,6 +16,8 @@ protected:
 
 private:
     QPointF p0, p1, p2;
+    int iIndex;
+    bool bShowIndex;
 
 };
 

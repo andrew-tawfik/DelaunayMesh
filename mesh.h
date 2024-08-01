@@ -48,6 +48,8 @@ public:
     //Function to handle edge case
     void handleEdgeCase(int iTriangleIndex, int iPointIndex);
 
+    void updateEdgeNeighbours(int iTriangleIndex, int iNewTriangleIndex, int iNeighbourIndex0, int iNeighbourIndex1);
+
     // Function to finds the index the triangle that contains a specific point
     int findContainingTriangle(const Point& ptTargetPoint) const;
 

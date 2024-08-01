@@ -57,7 +57,6 @@ int main(int argc, char *argv[])
 
     std::vector<Point> testCaseInner =
         {
-
             Point(7.5, 2.0),
             Point(15.0, 2.0),
             Point(22.5, 2.0),
@@ -66,16 +65,18 @@ int main(int argc, char *argv[])
             Point(15.0, 12.0),
             Point(7.5, 12.0),
             Point(7.5, 7.0),
-            //Point(15, 7),
-            //Point(11.25, 4.5),
-            //Point(18.75, 9.5),
-            //Point(11.25, 9.5),
-            //Point(18.75, 4.5)
+            Point(15, 7),
+            Point(11.25, 4.5),
+            Point(18.75, 9.5),
+            Point(11.25, 9.5),
+            Point(18.75, 4.5)
         };
 
 
+    // Problem when the neighbour of 12 is 17 instead of 18 why?
 
-    Mesh k(testCaseRect);
+
+    Mesh k(testCaseInner);
     k.setTriVector({ k.superTriangle() });
     k.buildMesh();
 
@@ -88,7 +89,6 @@ int main(int argc, char *argv[])
         std::cout << "\ta) Neighbour at index:  " << meshTriangles[i].getNeighbourIndex(0) << std::endl;
         std::cout << "\tb) Neighbour at index:  " << meshTriangles[i].getNeighbourIndex(1) << std::endl;
         std::cout << "\tc) Neighbour at index:  " << meshTriangles[i].getNeighbourIndex(2) << std::endl;
-
     }
 
 
@@ -97,12 +97,19 @@ int main(int argc, char *argv[])
     scene.setSceneRect(-7.5, -10, 45, 45); // Adjust size as needed
 
 
-    for (const auto& triangle : meshTriangles)
+    for (int i = 0; i < meshTriangles.size(); ++i)
     {
+        const auto& triangle = meshTriangles[i];
         QPointF p1(triangle.getPoint(0).getX(), triangle.getPoint(0).getY());
         QPointF p2(triangle.getPoint(1).getX(), triangle.getPoint(1).getY());
         QPointF p3(triangle.getPoint(2).getX(), triangle.getPoint(2).getY());
-        scene.addItem(new QTriangle(p1, p2, p3));
+        QTriangle* qTriangle = new QTriangle(p1, p2, p3, i);
+
+
+        // Set whether to show the triangle index on display
+        qTriangle->setShowIndex(true); // Change to false to hide the index
+
+        scene.addItem(qTriangle);
     }
 
 
