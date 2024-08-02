@@ -42,6 +42,8 @@ public:
     // Function to build the mesh from points and triangles
     void buildMesh();
 
+    void removeHelperTriangles();
+
     // Function to create new triangles
     void createTriangles(int iTriangleIndex, int iPointIndex);
 

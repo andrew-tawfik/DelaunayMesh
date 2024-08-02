@@ -40,6 +40,7 @@ int main(int argc, char *argv[])
             Point(8, 8.6),
             Point(11.5, 2.5),
             Point(18.5, 2.5),
+            Point(14, 8.6)
         };
 
     std::vector<Point> testCaseRect =
@@ -69,7 +70,7 @@ int main(int argc, char *argv[])
             Point(11.25, 4.5),
             Point(18.75, 9.5),
             Point(11.25, 9.5),
-            Point(18.75, 4.5)
+            Point(18.75, 4.5),
         };
 
 
@@ -79,6 +80,7 @@ int main(int argc, char *argv[])
     Mesh k(testCaseInner);
     k.setTriVector({ k.superTriangle() });
     k.buildMesh();
+    k.removeHelperTriangles();
 
     std::vector<Triangle> meshTriangles = k.getTriVector();
 
@@ -107,7 +109,7 @@ int main(int argc, char *argv[])
 
 
         // Set whether to show the triangle index on display
-        qTriangle->setShowIndex(true); // Change to false to hide the index
+        qTriangle->setShowIndex(false); // Change to false to hide the index
 
         scene.addItem(qTriangle);
     }

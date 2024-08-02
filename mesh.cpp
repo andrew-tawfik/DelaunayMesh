@@ -81,13 +81,13 @@ Triangle Mesh::superTriangle()
 
     Triangle triSuper = Triangle(p0, p1, p2);
     triSuper.setPointIndex(0, vecPtShape.size());
-    triSuper.setPointIndex(1, vecPtShape.size() + 1);
-    triSuper.setPointIndex(2, vecPtShape.size() + 2);
+    vecPtShape.push_back(p0);
+    triSuper.setPointIndex(1, vecPtShape.size());
+    vecPtShape.push_back(p1);
+    triSuper.setPointIndex(2, vecPtShape.size());
+    vecPtShape.push_back(p2);
 
     // Append points to the end of vecPtShape
-    vecPtShape.push_back(p0);
-    vecPtShape.push_back(p1);
-    vecPtShape.push_back(p2);
 
     triSuper.setIndex(0);
 
@@ -108,6 +108,40 @@ void Mesh::buildMesh()
         iPointIndex += 1;
     }
 }
+
+void Mesh::removeHelperTriangles()
+{
+    // Iterate through the triangles using a for loop with an index
+    for (auto it = vecTriangles.begin(); it != vecTriangles.end(); )
+    {
+        bool containsHelperPoint = false;
+        for (int i = 0; i < 3; ++i)
+        {
+            // Check if any of the triangle's points are helper points
+            if (it->getPointIndex(i) >= vecPtShape.size() - 3)
+            {
+                containsHelperPoint = true;
+                break;
+            }
+        }
+
+        if (containsHelperPoint)
+        {
+            // Erase the triangle and update the iterator
+            it = vecTriangles.erase(it);
+        }
+        else
+        {
+            // Move to the next triangle
+            ++it;
+        }
+    }
+
+    // Remove the last three points added for the super triangle
+    vecPtShape.resize(vecPtShape.size() - 3);
+
+}
+
 
 
 void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
