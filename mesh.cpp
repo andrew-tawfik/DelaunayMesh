@@ -8,10 +8,7 @@
 // Constructor: iCurrentNeighbourtializes the mesh with a given set of points
 Mesh::Mesh(const std::vector<Point>& vecPt)
 {
-    setTriVector({});
     setShape(vecPt);
-    setPointIndices(vecPt.size());
-    setTriangleIndices(vecPt.size());
 }
 
 // Sets the shape of the mesh with a given vector of points
@@ -38,39 +35,6 @@ std::vector<Triangle> Mesh::getTriVector() const
     return vecTriangles;
 }
 
-// Returns the indices of points in the mesh
-std::vector<int> Mesh::getPointIndices() const
-{
-    return viPointIndices;
-}
-
-// Sets the indices of points in the mesh, adding 3 for the super triangle
-void Mesh::setPointIndices(int iNumPoints)
-{
-    iNumPoints += 3;
-    viPointIndices.resize(iNumPoints);
-    for (int i = 0; i < iNumPoints; ++i)
-    {
-        viPointIndices[i] = i;
-    }
-}
-
-// Returns the indices of triangles in the mesh
-std::vector<int> Mesh::getTriangleIndices() const
-{
-    return viTriangleIndices;
-}
-
-// Sets the indices of triangles in the mesh, calculating the number based on points
-void Mesh::setTriangleIndices(int numPoints)
-{
-    int iNumTriangles = 2 * numPoints + 1;
-    viTriangleIndices.resize(iNumTriangles);
-    for (int i = 0; i < iNumTriangles; ++i)
-    {
-        viTriangleIndices[i] = i;
-    }
-}
 
 // Creates a super triangle that encloses all points in the mesh
 Triangle Mesh::superTriangle()

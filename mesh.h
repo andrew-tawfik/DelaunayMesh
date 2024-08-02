@@ -13,8 +13,8 @@ private:
     std::vector<Point> vecPtShape;  // Vector of points defining the shape
     std::vector<Triangle> vecTriangles;  // Vector of triangles defining the shape
 
-    std::vector<int> viTriangleIndices;  // Indices of triangles in the mesh
-    std::vector<int> viPointIndices;  // Indices of points in the mesh
+    // Vector of points that will aid maintain the triangles to adhere to the Delaunay Criterion
+    std::vector<Point> vecPtInternal;
 
 public:
     // Constructor to initialize mesh with a set of points
