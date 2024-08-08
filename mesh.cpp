@@ -349,7 +349,6 @@ void Mesh::handleEdgeCase(int iTriangleIndex, int iPointIndex)
             // Set indices for the new triangle
             vecTriangles.push_back(triNewTriangle1);
 
-
             triCurrent = vecTriangles[iTriangleIndex];
             triNewTriangle1 = vecTriangles[iNewIndex1];
 
@@ -479,7 +478,6 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
 
         triNewTriangle1.setNeighbourIndex(1, iTriangleIndex);
         triNewTriangle1.setNeighbourIndex(0, triCurrent.getNeighbourIndex(1));
-        triNewTriangle1.setNeighbourIndex(2, iNeighbourIndex1);
 
         int iOldNeighbourIndex1 = triCurrent.getNeighbourIndex(1);
 
@@ -501,8 +499,22 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
         triCurrent.setPoint(1, ptTargetPoint);
         triCurrent.setNeighbourIndex(1, iNewIndex1);
 
+        if (bAreNeighbours(iTriangleIndex, iNeighbourIndex0))
+        {
+            triNewTriangle1.setNeighbourIndex(2, iNeighbourIndex1);
+            triCurrent.setNeighbourIndex(0, iNeighbourIndex0);
+        }
+        else
+        {
+            triNewTriangle1.setNeighbourIndex(2, iNeighbourIndex0);
+            triCurrent.setNeighbourIndex(0, iNeighbourIndex1);
+        }
+
+
         //Add new triangle to vecTriangles
         vecTriangles.push_back(triNewTriangle1);
+
+        triCurrent = vecTriangles[iTriangleIndex];
 
         updateEdgeNeighbours(iTriangleIndex, iNewIndex1, iNeighbourIndex0, iNeighbourIndex1);
 
@@ -538,7 +550,6 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
         triNewTriangle1.setPointIndex(2, iPointIndex);
 
         triNewTriangle1.setNeighbourIndex(0, triCurrent.getNeighbourIndex(0));
-        triNewTriangle1.setNeighbourIndex(1, iNeighbourIndex0);
         triNewTriangle1.setNeighbourIndex(2, iTriangleIndex);
 
         int iOldNeighbourIndex1 = triCurrent.getNeighbourIndex(0);
@@ -562,10 +573,21 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
 
         triCurrent.setNeighbourIndex(0, iNewIndex1);
 
-        triCurrent.setNeighbourIndex(1, iNeighbourIndex1);
+        if (bAreNeighbours(iTriangleIndex, iNeighbourIndex1))
+        {
+            triNewTriangle1.setNeighbourIndex(1, iNeighbourIndex0);
+            triCurrent.setNeighbourIndex(1, iNeighbourIndex1);
+        }
+        else
+        {
+            triNewTriangle1.setNeighbourIndex(1, iNeighbourIndex1);
+            triCurrent.setNeighbourIndex(1, iNeighbourIndex0);
+        }
 
         //Add new triangle to vecTriangles
         vecTriangles.push_back(triNewTriangle1);
+
+        triCurrent = vecTriangles[iTriangleIndex];
 
         updateEdgeNeighbours(iTriangleIndex, iNewIndex1, iNeighbourIndex0, iNeighbourIndex1);
 
@@ -601,7 +623,6 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
         triNewTriangle1.setPointIndex(2, iPointIndex);
 
         triNewTriangle1.setNeighbourIndex(0, triCurrent.getNeighbourIndex(1));
-        triNewTriangle1.setNeighbourIndex(1, iNeighbourIndex1);
         triNewTriangle1.setNeighbourIndex(2, iTriangleIndex);
 
         int iOldNeighbourIndex1 = triCurrent.getNeighbourIndex(1);
@@ -620,14 +641,38 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
             }
         }
 
+
         triCurrent.setPointIndex(2, iPointIndex);
         triCurrent.setPoint(2, ptTargetPoint);
 
         triCurrent.setNeighbourIndex(1, iNewIndex1);
-        triCurrent.setNeighbourIndex(2, iNeighbourIndex0);
+
+        // Must determine which triangles are neighbours
+        if (bAreNeighbours(iTriangleIndex, iNeighbourIndex0))
+        {
+            triNewTriangle1.setNeighbourIndex(1, iNeighbourIndex1);
+            triCurrent.setNeighbourIndex(2, iNeighbourIndex0);
+        }
+        else
+        {
+            triNewTriangle1.setNeighbourIndex(1, iNeighbourIndex0);
+            triCurrent.setNeighbourIndex(2, iNeighbourIndex1);
+        }
+
+        if (triCurrent.getIndex() == 13)
+        {
+            triCurrent.printPoints();
+        }
 
         //Add new triangle to vecTriangles
         vecTriangles.push_back(triNewTriangle1);
+
+        if (triCurrent.getIndex() == 13)
+        {
+            triCurrent.printPoints();
+        }
+
+        triCurrent = vecTriangles[iTriangleIndex];
 
         updateEdgeNeighbours(iTriangleIndex, iNewIndex1, iNeighbourIndex0, iNeighbourIndex1);
 
@@ -651,6 +696,40 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
             swapAll(neighbourQueue, iPointIndex);
         }
     }
+}
+
+
+bool Mesh::bAreNeighbours(int iTri1, int iTri2)
+{
+    const Triangle& tri1 = vecTriangles[iTri1];
+    const Triangle& tri2 = vecTriangles[iTri2];
+
+    int iSharedCount = 0;
+    // Identify shared points
+    for (int i = 0; i < 3; ++i)
+    {
+        for (int j = 0; j < 3; ++j)
+        {
+            int pointCurrent = tri1.getPointIndex(i);
+            int pointNeighbour = tri2.getPointIndex(j);
+
+            if (pointCurrent == pointNeighbour)
+            {
+                ++iSharedCount;
+            }
+        }
+    }
+
+    if (iSharedCount == 2)
+    {
+        return true;
+    }
+
+    else
+    {
+        return false;
+    }
+
 }
 
 void Mesh::updateEdgeNeighbours(int iTriangleIndex, int iNewTriangleIndex, int iNeighbourIndex0, int iNeighbourIndex1)

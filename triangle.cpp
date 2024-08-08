@@ -48,6 +48,7 @@ Triangle::Triangle(const Point& pt0, const Point& pt1, const Point& pt2)
     aiPointIndices[2] = -1;
 }
 
+
 // Get the length of a specified side
 double Triangle::getLength(int iSide) const
 {

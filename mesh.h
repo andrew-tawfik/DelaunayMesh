@@ -58,6 +58,8 @@ public:
     // Function to swap edge between neighbouring triangles
     void swapEdge(int iTri1, int iTri2);
 
+    bool bAreNeighbours(int iTri1, int iTri2);
+
     int findSharedEdge(const Triangle& tri, int iDiff1, int iDiff2) const;
 
     int findNewEdge(const Triangle& tri, int i, int iSharedEdge) const;
