@@ -8,24 +8,6 @@
 #include <QGraphicsView>
 #include "qtriangle.h"
 
-void printTriangleDetails(const Triangle& tri, int triIndex)
-{
-    std::cout << "Triangle " << triIndex << ": ";
-    tri.printPoints();
-    std::cout << "Perimeter: " << tri.getPerimeter() << std::endl;
-    std::cout << "Area: " << tri.getArea() << std::endl;
-    std::cout << "Angles: ";
-    for (int i = 0; i < 3; ++i)
-    {
-        std::cout << tri.getAng(i) << " ";
-    }
-
-    std::cout << std::endl;
-    std::cout << "Circumcenter: (" << tri.getCircumcenter().getX() << ", " << tri.getCircumcenter().getY() << ")\n" << std::endl;
-}
-
-
-
 
 int main(int argc, char *argv[])
 {
@@ -35,7 +17,7 @@ int main(int argc, char *argv[])
     std::vector<Point> testCaseHex =
     {
         Point(22, 8.6), Point(18.5, 14.7), Point(11.5, 14.7), Point(8, 8.6),
-        Point(11.5, 2.5), Point(18.5, 2.5), Point(14, 8.6),
+        Point(11.5, 2.5), Point(18.5, 2.5), Point(14, 8.6), Point(18.5, 8.6)
     };
 
     std::vector<Point> testCaseRect =
@@ -55,7 +37,6 @@ int main(int argc, char *argv[])
         Point(15.0, 12.0), Point(7.5, 12.0), Point(7.5, 7.0), Point(15, 7), Point(11.25, 4.5),
         Point(18.75, 9.5), Point(18.75, 4.5), Point(11.25, 9.5), Point(11.25, 7),
         Point(18.75, 7),
-        Point(13.125, 10.75)
     };
 
     std::vector<Point> testCasePicture =
@@ -75,16 +56,16 @@ int main(int argc, char *argv[])
     };
 
 
-    Mesh k(testCasePicture);
+    Mesh k(testCaseInner);
     k.setTriVector({ k.superTriangle() });
     k.buildMesh();
-    //k.removeHelperTriangles();
+    k.removeHelperTriangles();
 
     std::vector<Triangle> meshTriangles = k.getTriVector();
 
     for (int i = 0; i < meshTriangles.size(); ++i)
     {
-        std::cout << "Triangle " << i << ": ";
+        std::cout << "Triangle " << meshTriangles[i].getIndex() << ": ";
         meshTriangles[i].printPoints();
         std::cout << "\ta) Neighbour at index:  " << meshTriangles[i].getNeighbourIndex(0) << std::endl;
         std::cout << "\tb) Neighbour at index:  " << meshTriangles[i].getNeighbourIndex(1) << std::endl;
@@ -108,9 +89,8 @@ int main(int argc, char *argv[])
         QPointF p3(triangle.getPoint(2).getX(), triangle.getPoint(2).getY());
         QTriangle* qTriangle = new QTriangle(p1, p2, p3, i);
 
-
         // Set whether to show the triangle index on display
-        qTriangle->setShowIndex(false); // Change to false to hide the index
+        qTriangle->setShowIndex(true); // Change to false to hide the index
 
         scene.addItem(qTriangle);
     }

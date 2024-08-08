@@ -63,49 +63,60 @@ Triangle Mesh::superTriangle()
 void Mesh::buildMesh()
 {
     int iPointIndex = 0;
-    for (auto it = vecPtShape.begin(); it != vecPtShape.end() - 3; ++it)
+    for (auto point: vecPtShape)
     {
-        const auto& p = *it;
-        int iTriIndex = findContainingTriangle(p);
+        int iTriIndex = findContainingTriangle(point);
         createTriangles(iTriIndex, iPointIndex);
 
         iPointIndex += 1;
+
+        if ((vecPtShape.size() - 3) == iPointIndex){ break;}
     }
 }
 
 void Mesh::removeHelperTriangles()
 {
-    // Iterate through the triangles using a for loop with an index
-    for (auto it = vecTriangles.begin(); it != vecTriangles.end(); )
-    {
-        bool containsHelperPoint = false;
-        for (int i = 0; i < 3; ++i)
-        {
-            // Check if any of the triangle's points are helper points
-            if (it->getPointIndex(i) >= vecPtShape.size() - 3)
+    // Remove triangles that contain helper points
+    vecTriangles.erase(
+        std::remove_if(vecTriangles.begin(), vecTriangles.end(),[this](const Triangle& triangle) {
+            for (int i = 0; i < 3; ++i)
             {
-                containsHelperPoint = true;
-                break;
+                if (triangle.getPointIndex(i) >= vecPtShape.size() - 3)
+                {
+                    updateRemovedNeighbours(triangle.getIndex());
+                    return true;
+                }
             }
-        }
-
-        if (containsHelperPoint)
-        {
-            // Erase the triangle and update the iterator
-            it = vecTriangles.erase(it);
-        }
-        else
-        {
-            // Move to the next triangle
-            ++it;
-        }
-    }
+           return false;
+       }
+       ),
+vecTriangles.end()
+);
 
     // Remove the last three points added for the super triangle
     vecPtShape.resize(vecPtShape.size() - 3);
-
 }
 
+
+void Mesh::updateRemovedNeighbours(int iRemovedTriangleIndex)
+{
+    const Triangle& triRemoved = vecTriangles[iRemovedTriangleIndex];
+
+    for (int i = 0; i < 3; ++i)
+    {
+        int removedNeighborIndex = triRemoved.getNeighbourIndex(i);
+        if (removedNeighborIndex == -1) continue; // Skip if no neighbor
+
+        Triangle& triNeighbour = vecTriangles[removedNeighborIndex];
+        for (int j = 0; j < 3; ++j)
+        {
+            if (triNeighbour.getNeighbourIndex(j) == iRemovedTriangleIndex)
+            {
+                triNeighbour.setNeighbourIndex(j, -1);
+            }
+        }
+    }
+}
 
 
 void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
@@ -298,7 +309,7 @@ void Mesh::handleEdgeCase(int iTriangleIndex, int iPointIndex)
 
                 std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iNewIndex1, iPointIndex, 0);
                 swapAll(neighbourQueue, iPointIndex);
-                iTriangleIndex = triNeighbour1.getIndex();
+                iNewIndex1 = triNeighbour1.getIndex();
 
             }
 
@@ -370,7 +381,7 @@ void Mesh::handleEdgeCase(int iTriangleIndex, int iPointIndex)
 
                 std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iNewIndex1, iPointIndex, 0);
                 swapAll(neighbourQueue, iPointIndex);
-                iTriangleIndex = triNeighbour1.getIndex();
+                iNewIndex1 = triNeighbour1.getIndex();
 
             }
 
@@ -444,7 +455,7 @@ void Mesh::handleEdgeCase(int iTriangleIndex, int iPointIndex)
 
                 std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iNewIndex1, iPointIndex, 1);
                 swapAll(neighbourQueue, iPointIndex);
-                iTriangleIndex = triNeighbour1.getIndex();
+                iNewIndex1 = triNeighbour1.getIndex();
 
             }
 
@@ -691,7 +702,7 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
         if (triNeighbour1.isInCircumcircle(ptTargetPoint))
         {
 
-            std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iNewIndex1,iPointIndex, 1);
+            std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iNewIndex1,iPointIndex, 0);
 
             swapAll(neighbourQueue, iPointIndex);
         }

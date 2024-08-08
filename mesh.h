@@ -44,6 +44,8 @@ public:
 
     void removeHelperTriangles();
 
+    void updateRemovedNeighbours(int iRemovedTriangleIndex);
+
     // Function to create new triangles
     void createTriangles(int iTriangleIndex, int iPointIndex);
 
