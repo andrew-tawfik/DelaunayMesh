@@ -44,6 +44,8 @@ public:
 
     void removeHelperTriangles();
 
+    void updateTriangleIndicesAfterRemoval();
+
     void updateRemovedNeighbours(int iRemovedTriangleIndex);
 
     // Function to create new triangles
@@ -80,5 +82,12 @@ public:
     void printMesh() const;
 
     void createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int iNeighbourIndex0, int iNeighbourIndex1);
+
+    bool isNearEquilateral(int iTriangleIndex);
+
+    void equilateralizeTriangles();
+
+    int locateSmallestAngle();
+
 };
 #endif // MESH_H

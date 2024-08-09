@@ -17,18 +17,13 @@ int main(int argc, char *argv[])
     std::vector<Point> testCaseHex =
     {
         Point(22, 8.6), Point(18.5, 14.7), Point(11.5, 14.7), Point(8, 8.6),
-        Point(11.5, 2.5), Point(18.5, 2.5), Point(14, 8.6), Point(18.5, 8.6)
+        Point(11.5, 2.5), Point(18.5, 2.5)
     };
 
     std::vector<Point> testCaseRect =
     {
-        Point(7.5, 2.0), Point(10.0, 2.0), Point(12.5, 2.0), Point(15.0, 2.0),
-        Point(17.5, 2.0), Point(20.0, 2.0), Point(22.5, 2.0), Point(22.5, 4.0),
-        Point(22.5, 5.0), Point(22.5, 6.0), Point(22.5, 7.0), Point(22.5, 8.5),
-        Point(22.5, 10.0), Point(22.5, 12.0), Point(20.0, 12.0), Point(17.5, 12.0),
-        Point(15.0, 12.0), Point(12.5, 12.0), Point(10.0, 12.0), Point(7.5, 12.0),
-        Point(7.5, 10.0), Point(7.5, 8.5), Point(7.5, 7.0), Point(7.5, 5.0),
-        Point(7.5, 4.0), Point(7.5, 2.0)
+        Point(7.5, 2.0), Point(15.0, 2.0), Point(22.5, 2.0), Point(22.5, 7.0),
+        Point(22.5, 12.0),Point(15.0, 12.0), Point(7.5, 12.0),Point(7.5, 7.0),
     };
 
     std::vector<Point> testCaseInner =
@@ -56,10 +51,11 @@ int main(int argc, char *argv[])
     };
 
 
-    Mesh k(testCaseInner);
+    Mesh k(testCaseHex);
     k.setTriVector({ k.superTriangle() });
     k.buildMesh();
     k.removeHelperTriangles();
+    k.equilateralizeTriangles();
 
     std::vector<Triangle> meshTriangles = k.getTriVector();
 
@@ -77,17 +73,12 @@ int main(int argc, char *argv[])
 
     scene.setSceneRect(-7.5, -10, 45, 45); // Adjust size as needed
 
-    Triangle t = Triangle(Point(7.5, 2), Point(15, 2), Point(15, 12));
-    Point ptT = Point(7.5, 7);
-    std::cout << t.isInCircumcircle(ptT) << std::endl;
-
-    for (int i = 0; i < meshTriangles.size(); ++i)
+    for (const auto& triangle: meshTriangles)
     {
-        const auto& triangle = meshTriangles[i];
         QPointF p1(triangle.getPoint(0).getX(), triangle.getPoint(0).getY());
         QPointF p2(triangle.getPoint(1).getX(), triangle.getPoint(1).getY());
         QPointF p3(triangle.getPoint(2).getX(), triangle.getPoint(2).getY());
-        QTriangle* qTriangle = new QTriangle(p1, p2, p3, i);
+        QTriangle* qTriangle = new QTriangle(p1, p2, p3, triangle.getIndex());
 
         // Set whether to show the triangle index on display
         qTriangle->setShowIndex(true); // Change to false to hide the index

@@ -84,3 +84,4 @@ bool Point::equals(const Point& pOther) const
 {
     return fx == pOther.getX() && fy == pOther.getY();
 }
+

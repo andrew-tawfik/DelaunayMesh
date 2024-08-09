@@ -351,3 +351,8 @@ int Triangle::onEdge(const Point& pt) const
 
     return -1;
 }
+
+Point Triangle::getCentroid() const
+{
+    return Point((pt0.getX() + pt1.getX() + pt2.getX()) / 3, (pt0.getY() + pt1.getY() + pt2.getY()) / 3);
+}

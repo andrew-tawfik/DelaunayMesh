@@ -58,7 +58,6 @@ Triangle Mesh::superTriangle()
     return triSuper;
 }
 
-
 // Builds mesh from points and triangles
 void Mesh::buildMesh()
 {
@@ -76,27 +75,76 @@ void Mesh::buildMesh()
 
 void Mesh::removeHelperTriangles()
 {
-    // Remove triangles that contain helper points
-    vecTriangles.erase(
-        std::remove_if(vecTriangles.begin(), vecTriangles.end(),[this](const Triangle& triangle) {
-            for (int i = 0; i < 3; ++i)
+    // Vector to hold indices of triangles to be removed
+    std::vector<int> trianglesToRemove;
+
+    // Iterate through all triangles
+    for (int i = 0; i < vecTriangles.size(); ++i)
+    {
+        const Triangle& triangle = vecTriangles[i];
+
+        // Check each point in the triangle
+        for (int j = 0; j < 3; ++j)
+        {
+            // If the point index is within the range of helper points
+            if (triangle.getPointIndex(j) >= vecPtShape.size() - 3)
             {
-                if (triangle.getPointIndex(i) >= vecPtShape.size() - 3)
-                {
-                    updateRemovedNeighbours(triangle.getIndex());
-                    return true;
-                }
+                // Record the triangle's index for removal
+                trianglesToRemove.push_back(i);
+                updateRemovedNeighbours(triangle.getIndex());
+                break;  // Exit loop early since this triangle will be removed
             }
-           return false;
-       }
-       ),
-vecTriangles.end()
-);
+        }
+    }
+
+    // Remove the triangles in reverse order to avoid invalidating indices
+    for (int i = trianglesToRemove.size() - 1; i >= 0; --i)
+    {
+        vecTriangles.erase(vecTriangles.begin() + trianglesToRemove[i]);
+    }
 
     // Remove the last three points added for the super triangle
     vecPtShape.resize(vecPtShape.size() - 3);
+    updateTriangleIndicesAfterRemoval();
 }
 
+void Mesh::updateTriangleIndicesAfterRemoval()
+{
+    for (int iTriangleIndex = 0; iTriangleIndex < vecTriangles.size(); ++iTriangleIndex)
+    {
+        Triangle& currentTriangle = vecTriangles[iTriangleIndex];
+        int iOldIndex = currentTriangle.getIndex();
+
+        // Only update if the index has actually changed
+        if (iOldIndex != iTriangleIndex)
+        {
+            currentTriangle.setIndex(iTriangleIndex);
+
+            // Update the neighbors of the current triangle
+            for (int i = 0; i < 3; ++i)
+            {
+                int iTriangleNeighbourIndex = currentTriangle.getNeighbourIndex(i);
+                if (iTriangleNeighbourIndex == -1) continue; // Skip if no neighbor
+
+                for (Triangle& triNeighbour : vecTriangles) // Iterate by reference
+                {
+                    if (triNeighbour.getIndex() == iTriangleNeighbourIndex)
+                    {
+                        // Update the neighbor's reference to the old index
+                        for (int j = 0; j < 3; ++j)
+                        {
+                            if (triNeighbour.getNeighbourIndex(j) == iOldIndex)
+                            {
+                                triNeighbour.setNeighbourIndex(j, iTriangleIndex);
+                                break; // No need to check other neighbors once updated
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 void Mesh::updateRemovedNeighbours(int iRemovedTriangleIndex)
 {
@@ -117,7 +165,6 @@ void Mesh::updateRemovedNeighbours(int iRemovedTriangleIndex)
         }
     }
 }
-
 
 void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
 {
@@ -709,7 +756,6 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
     }
 }
 
-
 bool Mesh::bAreNeighbours(int iTri1, int iTri2)
 {
     const Triangle& tri1 = vecTriangles[iTri1];
@@ -824,7 +870,6 @@ int Mesh::findContainingTriangle(const Point& ptTargetPoint) const
     // If no contaiCurrentNeighbouring triangle is found, return -1 or handle error appropriately
     return -1;
 }
-
 
 void Mesh::swapEdge(int iTri1, int iTri2)
 {
@@ -968,6 +1013,7 @@ int Mesh::findSharedEdge(const Triangle& tri, int iDiff1, int iDiff2) const
     }
     return -1;
 }
+
 int Mesh::findNewEdge(const Triangle& tri, int i, int iSharedEdge) const
 {
     if (i == 0)
@@ -1007,8 +1053,6 @@ int Mesh::findNewEdge(const Triangle& tri, int i, int iSharedEdge) const
     }
 }
 
-
-
 void Mesh::updateNeighbours(int oldNeighborIndex, int oldTriangleIndex, int newTriangleIndex)
 {
     if (oldNeighborIndex != -1 && oldNeighborIndex != oldTriangleIndex && oldNeighborIndex != newTriangleIndex)
@@ -1041,7 +1085,6 @@ void Mesh::updateNeighbours(int oldNeighborIndex, int oldTriangleIndex, int newT
         }
     }
 }
-
 
 void Mesh::swapAll(std::queue<int>& neighbourQueue, int iPointIndex)
 {
@@ -1126,4 +1169,71 @@ std::queue<int> Mesh::checkNeighboringCircumcircles(int iTriangleIndex, int iPoi
     }
 
     return neighbourQueue; // Return the queue containing all neighbors to be processed
+}
+
+bool Mesh::isNearEquilateral(int iTriangleIndex)
+{
+    const Triangle& currentTriangle = vecTriangles[iTriangleIndex];
+
+    for (int i = 0; i < 3; ++i)
+    {
+        if (currentTriangle.getAng(i) < 40) { return false; }
+    }
+
+    return true;
+}
+
+void Mesh::equilateralizeTriangles()
+{
+    int iMinimimumAngleTriangleIndex;
+    int count = 0; // for testing purposes
+    // Continuously process triangles until locateSmallestAngle returns -1
+    while ((iMinimimumAngleTriangleIndex = locateSmallestAngle()) >= 0)
+    {
+        auto& triangle = vecTriangles[iMinimimumAngleTriangleIndex];
+        Point centroid = triangle.getCentroid();
+        vecPtShape.push_back(centroid);
+        int iPointIndex = vecPtShape.size() - 1;
+        std::cout << "Creating triangles with index: " << iPointIndex << std::endl;
+        createTriangles(iMinimimumAngleTriangleIndex, iPointIndex);
+        if (count == 2){break;}
+        ++count;
+    }
+
+    std::cout << "All Triangles are near equilateral" << std::endl;
+}
+
+int Mesh::locateSmallestAngle()
+{
+    double dMinAngle = 180;
+    int iMinAngleTriangleIndex = -1;
+
+    for (int i = 0; i < vecTriangles.size(); ++i)
+    {
+        const Triangle& triangle = vecTriangles[i];
+
+        for (int j = 0; j < 3; ++j)
+        {
+            if (triangle.getAng(j) < dMinAngle)
+            {
+                dMinAngle = triangle.getAng(j);
+                iMinAngleTriangleIndex = triangle.getIndex();
+            }
+        }
+    }
+
+
+
+    if (dMinAngle < 40)
+    {
+        std::cout << "The smallest angle in the mesh of triangles is: " << dMinAngle << std::endl;
+        std::cout << "The index of that triangle is: " << iMinAngleTriangleIndex << std::endl;
+        std::cout << std::endl;
+        return iMinAngleTriangleIndex;
+    }
+    else
+    {
+        std::cout << "Delauny Triangulation satisfied"<< std::endl;
+        return -1;
+    }
 }

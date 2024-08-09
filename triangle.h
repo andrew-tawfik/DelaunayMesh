@@ -67,6 +67,8 @@ public:
 
     int onEdge(const Point& pt) const;
 
+    Point getCentroid() const;
+
 };
 
 #endif // TRIANGLE_H
