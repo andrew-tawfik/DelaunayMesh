@@ -35,7 +35,6 @@ std::vector<Triangle> Mesh::getTriVector() const
     return vecTriangles;
 }
 
-
 // Creates a super triangle that encloses all points in the mesh
 Triangle Mesh::superTriangle()
 {
@@ -717,18 +716,8 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
             triCurrent.setNeighbourIndex(2, iNeighbourIndex1);
         }
 
-        if (triCurrent.getIndex() == 13)
-        {
-            triCurrent.printPoints();
-        }
-
         //Add new triangle to vecTriangles
         vecTriangles.push_back(triNewTriangle1);
-
-        if (triCurrent.getIndex() == 13)
-        {
-            triCurrent.printPoints();
-        }
 
         triCurrent = vecTriangles[iTriangleIndex];
 
@@ -1185,55 +1174,74 @@ bool Mesh::isNearEquilateral(int iTriangleIndex)
 
 void Mesh::equilateralizeTriangles()
 {
-    int iMinimimumAngleTriangleIndex;
-    int count = 0; // for testing purposes
-    // Continuously process triangles until locateSmallestAngle returns -1
-    while ((iMinimimumAngleTriangleIndex = locateSmallestAngle()) >= 0)
+    int smallestAngleTriangleIndex;
+    int iterationCount = 0;
+
+    // Process triangles until no more small angles are found
+    while ((smallestAngleTriangleIndex = locateSmallestAngle()) >= 0)
     {
-        auto& triangle = vecTriangles[iMinimimumAngleTriangleIndex];
-        Point centroid = triangle.getCentroid();
+        auto& triangle = vecTriangles[smallestAngleTriangleIndex];
+        Point centroid = triangle.getCircumcenter();
+
         vecPtShape.push_back(centroid);
-        int iPointIndex = vecPtShape.size() - 1;
-        std::cout << "Creating triangles with index: " << iPointIndex << std::endl;
-        createTriangles(iMinimimumAngleTriangleIndex, iPointIndex);
-        if (count == 2){break;}
-        ++count;
+
+        int containingTriangleIndex = findContainingTriangle(centroid);
+        int newPointIndex = vecPtShape.size() - 1;
+
+        createTriangles(containingTriangleIndex, newPointIndex);
+
+        // Optional: Remove this test code or replace with a configuration
+        if (++iterationCount == 4)
+        {
+            break;
+        }
     }
 
-    std::cout << "All Triangles are near equilateral" << std::endl;
+    std::cout << "All triangles are nearly equilateral." << std::endl;
 }
+
 
 int Mesh::locateSmallestAngle()
 {
-    double dMinAngle = 180;
-    int iMinAngleTriangleIndex = -1;
+    double minAngle = 180.0;
+    int minAngleTriangleIndex = -1;
 
-    for (int i = 0; i < vecTriangles.size(); ++i)
+    auto updateMinAngle = [&](double angle, int triangleIndex) {
+        if (angle < minAngle)
+        {
+            minAngle = angle;
+            minAngleTriangleIndex = triangleIndex;
+        }
+    };
+
+    for (const auto& triangle : vecTriangles)
     {
-        const Triangle& triangle = vecTriangles[i];
-
         for (int j = 0; j < 3; ++j)
         {
-            if (triangle.getAng(j) < dMinAngle)
+            int neighborIndex = triangle.getNeighbourIndex(j);
+            if (neighborIndex == -1)  // Border Case
             {
-                dMinAngle = triangle.getAng(j);
-                iMinAngleTriangleIndex = triangle.getIndex();
+                double innerAngle = triangle.getAng(j);
+                updateMinAngle(innerAngle, triangle.getIndex());
+                break;  // No need to check further if it's a border case
+            }
+            else
+            {
+                updateMinAngle(triangle.getAng(j), triangle.getIndex());
             }
         }
     }
 
-
-
-    if (dMinAngle < 40)
+    if (minAngle < 40.0)
     {
-        std::cout << "The smallest angle in the mesh of triangles is: " << dMinAngle << std::endl;
-        std::cout << "The index of that triangle is: " << iMinAngleTriangleIndex << std::endl;
-        std::cout << std::endl;
-        return iMinAngleTriangleIndex;
+        std::cout << "The smallest angle in the mesh is: " << minAngle << std::endl;
+        std::cout << "The index of that triangle is: " << minAngleTriangleIndex << std::endl;
+        return minAngleTriangleIndex;
     }
     else
     {
-        std::cout << "Delauny Triangulation satisfied"<< std::endl;
+        std::cout << "Delaunay Triangulation satisfied." << std::endl;
         return -1;
     }
 }
+
