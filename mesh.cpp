@@ -556,7 +556,7 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
         triCurrent.setPoint(1, ptTargetPoint);
         triCurrent.setNeighbourIndex(1, iNewIndex1);
 
-        if (bAreNeighbours(iTriangleIndex, iNeighbourIndex0))
+        if (areNeighbours(iTriangleIndex, iNeighbourIndex0))
         {
             triNewTriangle1.setNeighbourIndex(2, iNeighbourIndex1);
             triCurrent.setNeighbourIndex(0, iNeighbourIndex0);
@@ -630,7 +630,7 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
 
         triCurrent.setNeighbourIndex(0, iNewIndex1);
 
-        if (bAreNeighbours(iTriangleIndex, iNeighbourIndex1))
+        if (areNeighbours(iTriangleIndex, iNeighbourIndex1))
         {
             triNewTriangle1.setNeighbourIndex(1, iNeighbourIndex0);
             triCurrent.setNeighbourIndex(1, iNeighbourIndex1);
@@ -705,7 +705,7 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
         triCurrent.setNeighbourIndex(1, iNewIndex1);
 
         // Must determine which triangles are neighbours
-        if (bAreNeighbours(iTriangleIndex, iNeighbourIndex0))
+        if (areNeighbours(iTriangleIndex, iNeighbourIndex0))
         {
             triNewTriangle1.setNeighbourIndex(1, iNeighbourIndex1);
             triCurrent.setNeighbourIndex(2, iNeighbourIndex0);
@@ -745,7 +745,7 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
     }
 }
 
-bool Mesh::bAreNeighbours(int iTri1, int iTri2)
+bool Mesh::areNeighbours(int iTri1, int iTri2)
 {
     const Triangle& tri1 = vecTriangles[iTri1];
     const Triangle& tri2 = vecTriangles[iTri2];
@@ -780,44 +780,42 @@ bool Mesh::bAreNeighbours(int iTri1, int iTri2)
 
 void Mesh::updateEdgeNeighbours(int iTriangleIndex, int iNewTriangleIndex, int iNeighbourIndex0, int iNeighbourIndex1)
 {
+
+    if (areNeighbours(iTriangleIndex, iNeighbourIndex0))
+    {
+       std::swap(iNeighbourIndex0, iNeighbourIndex1);
+    }
+
     Triangle& triCurrent = vecTriangles[iTriangleIndex];
-    Triangle& triNewTriangle1 = vecTriangles[iNewTriangleIndex];
+    Triangle& triNewTriangle = vecTriangles[iNewTriangleIndex];
 
     Triangle& triOldNeighbour0 = vecTriangles[iNeighbourIndex0];
     Triangle& triOldNeighbour1 = vecTriangles[iNeighbourIndex1];
 
+    int iEdgeIndex0, iEdgeIndex1;
+
     for (int i = 0; i < 3; ++i)
     {
-        if (triOldNeighbour0.getNeighbourIndex(i) == -1)
+        if (triNewTriangle.getNeighbourIndex(i) == iNeighbourIndex0)
         {
-            for (int j = 0; j < 3; ++j)
-            {
-                if (triCurrent.getNeighbourIndex(j) == triOldNeighbour0.getIndex())
-                {
-                    triOldNeighbour0.setNeighbourIndex(i, iTriangleIndex);
-                }
-                else if (triNewTriangle1.getNeighbourIndex(j) == triOldNeighbour0.getIndex())
-                {
-                    triOldNeighbour0.setNeighbourIndex(i, iNewTriangleIndex);
-                }
-            }
+            iEdgeIndex0 = i;
         }
 
-        if (triOldNeighbour1.getNeighbourIndex(i) == -1)
+        if (triCurrent.getNeighbourIndex(i) == iNeighbourIndex1)
         {
-            for (int j = 0; j < 3; ++j)
-            {
-                if (triCurrent.getNeighbourIndex(j) == triOldNeighbour1.getIndex())
-                {
-                    triOldNeighbour1.setNeighbourIndex(i, iTriangleIndex);
-                }
-                else if (triNewTriangle1.getNeighbourIndex(j) == triOldNeighbour1.getIndex())
-                {
-                    triOldNeighbour1.setNeighbourIndex(i, iNewTriangleIndex);
-                }
-            }
+            iEdgeIndex1 = i;
         }
     }
+
+
+    Point ptMid0 = triNewTriangle.getEdgeMidpoint(iEdgeIndex0);
+    Point ptMid1 = triCurrent.getEdgeMidpoint(iEdgeIndex1);
+
+    int iTargetEdgeIndex0 = triOldNeighbour0.onEdge(ptMid0);
+    int iTargetEdgeIndex1 = triOldNeighbour1.onEdge(ptMid1);
+
+    triOldNeighbour0.setNeighbourIndex(iTargetEdgeIndex0, iNewTriangleIndex);
+    triOldNeighbour1.setNeighbourIndex(iTargetEdgeIndex1, iTriangleIndex);
 }
 
 // Finds the index of the triangle contaiCurrentNeighbourng the target point

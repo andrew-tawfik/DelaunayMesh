@@ -69,6 +69,8 @@ public:
 
     Point getCentroid() const;
 
+    Point getEdgeMidpoint(int iSide) const;
+
 };
 
 #endif // TRIANGLE_H

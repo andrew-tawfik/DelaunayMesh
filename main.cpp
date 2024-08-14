@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
     };
 
 
-    Mesh k(testCaseHex);
+    Mesh k(testCaseRect);
     k.setTriVector({ k.superTriangle() });
     k.buildMesh();
     k.removeHelperTriangles();
@@ -86,7 +86,6 @@ int main(int argc, char *argv[])
         scene.addItem(qTriangle);
     }
 
-
     // Create the graphics view
     QGraphicsView view(&scene);
     view.setTransform(QTransform().scale(1, -1)); // Flip vertically
@@ -94,10 +93,13 @@ int main(int argc, char *argv[])
     view.setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
     view.setWindowTitle(QT_TRANSLATE_NOOP(QGraphicsView, "Triangulation Visualization"));
 
+    Triangle t;
+    t.printPoints();
+    Point midEdgePoint = t.getEdgeMidpoint(0);
+    midEdgePoint.printCoordinates();
+
     view.scale(25, 25);
     view.show();
 
-
     return app.exec();
-
 }

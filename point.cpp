@@ -85,3 +85,8 @@ bool Point::equals(const Point& pOther) const
     return fx == pOther.getX() && fy == pOther.getY();
 }
 
+void Point::printCoordinates() const
+{
+    std::cout << "Point(" << fx << ", " << fy << ") " << std::endl;
+}
+

@@ -356,3 +356,33 @@ Point Triangle::getCentroid() const
 {
     return Point((pt0.getX() + pt1.getX() + pt2.getX()) / 3, (pt0.getY() + pt1.getY() + pt2.getY()) / 3);
 }
+
+
+Point Triangle::getEdgeMidpoint(int iSide) const
+{
+    Point ptStart, ptEnd;
+
+    // Determine which points make up the edge
+    if (iSide == 0)
+    {
+        ptStart = pt0;
+        ptEnd = pt1;
+    }
+    else if (iSide == 1)
+    {
+        ptStart = pt1;
+        ptEnd = pt2;
+    }
+    else
+    {
+        ptStart = pt2;
+        ptEnd = pt0;
+    }
+
+    // Calculation of the midpoint
+    double dXMid = (ptStart.getX() + ptEnd.getX()) / 2.0;
+    double dYMid = (ptStart.getY() + ptEnd.getY()) / 2.0;
+
+    // Return the midpoint
+    return Point(dXMid, dYMid);
+}

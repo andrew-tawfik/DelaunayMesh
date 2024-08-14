@@ -36,6 +36,9 @@ public:
 
     // Function to check if the current point is equal to another point
     bool equals(const Point& pOther) const;
+
+    //Function to print point coordinates
+    void printCoordinates() const;
 };
 
 #endif // POINT_H
