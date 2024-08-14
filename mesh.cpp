@@ -346,7 +346,11 @@ void Mesh::handleEdgeCase(int iTriangleIndex, int iPointIndex)
 
                 std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iTriangleIndex, iPointIndex, 2);
                 swapAll(neighbourQueue, iPointIndex);
-                iTriangleIndex = triNeighbour0.getIndex();
+
+                if (areNeighbours(iTriangleIndex, iNewIndex1))
+                {
+                    iTriangleIndex = triNeighbour0.getIndex();
+                }
 
             }
 
@@ -355,7 +359,11 @@ void Mesh::handleEdgeCase(int iTriangleIndex, int iPointIndex)
 
                 std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iNewIndex1, iPointIndex, 0);
                 swapAll(neighbourQueue, iPointIndex);
-                iNewIndex1 = triNeighbour1.getIndex();
+
+                if (areNeighbours(iTriangleIndex, iNewIndex1))
+                {
+                    iNewIndex1 = triNeighbour1.getIndex();
+                }
 
             }
 
@@ -418,7 +426,11 @@ void Mesh::handleEdgeCase(int iTriangleIndex, int iPointIndex)
 
                 std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iTriangleIndex, iPointIndex, 2);
                 swapAll(neighbourQueue, iPointIndex);
-                iTriangleIndex = triNeighbour0.getIndex();
+
+                if (areNeighbours(iTriangleIndex, iNewIndex1))
+                {
+                    iTriangleIndex = triNeighbour0.getIndex();
+                }
 
             }
 
@@ -427,7 +439,11 @@ void Mesh::handleEdgeCase(int iTriangleIndex, int iPointIndex)
 
                 std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iNewIndex1, iPointIndex, 0);
                 swapAll(neighbourQueue, iPointIndex);
-                iNewIndex1 = triNeighbour1.getIndex();
+
+                if (areNeighbours(iTriangleIndex, iNewIndex1))
+                {
+                    iNewIndex1 = triNeighbour1.getIndex();
+                }
 
             }
 
@@ -485,23 +501,31 @@ void Mesh::handleEdgeCase(int iTriangleIndex, int iPointIndex)
             triNewTriangle1 = vecTriangles[iNewIndex1];
 
             const Triangle& triNeighbour0 = vecTriangles[triCurrent.getNeighbourIndex(0)];
-            const Triangle& triNeighbour1 = vecTriangles[triNewTriangle1.getNeighbourIndex(1)];
+            const Triangle& triNeighbour1 = vecTriangles[triNewTriangle1.getNeighbourIndex(0)];
 
             if (triNeighbour0.isInCircumcircle(ptTargetPoint))
             {
 
                 std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iTriangleIndex, iPointIndex, 0);
                 swapAll(neighbourQueue, iPointIndex);
-                iTriangleIndex = triNeighbour0.getIndex();
+
+                if (areNeighbours(iTriangleIndex, iNewIndex1))
+                {
+                    iTriangleIndex = triNeighbour0.getIndex();
+                }
 
             }
 
             if (triNeighbour1.isInCircumcircle(ptTargetPoint))
             {
 
-                std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iNewIndex1, iPointIndex, 1);
+                std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iNewIndex1, iPointIndex, 0);
                 swapAll(neighbourQueue, iPointIndex);
-                iNewIndex1 = triNeighbour1.getIndex();
+
+                if (areNeighbours(iTriangleIndex, iNewIndex1))
+                {
+                    iNewIndex1 = triNeighbour1.getIndex();
+                }
 
             }
 
@@ -1189,10 +1213,7 @@ void Mesh::equilateralizeTriangles()
         createTriangles(containingTriangleIndex, newPointIndex);
 
         // Optional: Remove this test code or replace with a configuration
-        if (++iterationCount == 4)
-        {
-            break;
-        }
+        if (++iterationCount == 3){break;}
     }
 
     std::cout << "All triangles are nearly equilateral." << std::endl;
@@ -1242,4 +1263,3 @@ int Mesh::locateSmallestAngle()
         return -1;
     }
 }
-

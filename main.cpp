@@ -35,23 +35,29 @@ int main(int argc, char *argv[])
     };
 
     std::vector<Point> testCasePicture =
-    {
-        Point(7.5, 2.0), Point(15.0, 2.0), Point(22.5, 2.0), Point(22.5, 7.0),
-        Point(22.5, 12.0),Point(15.0, 12.0), Point(7.5, 12.0),Point(7.5, 7.0),
+        {
 
-        Point(10.0, 3.0), Point(20.0, 3.0), Point(10.0, 5.0), Point(20.0, 5.0), Point(10.0, 7.0),
-        Point(20.0, 7.0), Point(10.0, 9.0), Point(20.0, 9.0), Point(10.0, 11.0), Point(20.0, 11.0),
-        Point(12.5, 4.0), Point(17.5, 4.0), Point(12.5, 6.0), Point(17.5, 6.0), Point(12.5, 8.0),
-        Point(17.5, 8.0), Point(12.5, 10.0), Point(17.5, 10.0), Point(15.0, 8.5), Point(15.0, 5.5),
-        Point(13.0, 8.0), Point(18.0, 8.0), Point(13.0, 5.0), Point(18.0, 5.0), Point(11.0, 10.0),
-        Point(19.0, 10.0), Point(11.0, 4.0), Point(19.0, 4.0), Point(16.5, 7.0), Point(16.5, 9.0),
-        Point(13.5, 7.0), Point(13.5, 9.0), Point(14.0, 4.5), Point(16.0, 4.5), Point(14.0, 10.5),
-        Point(16.0, 10.5), Point(12.0, 6.5), Point(18.0, 6.5), Point(12.0, 9.5), Point(18.0, 9.5),
-        Point(14.0, 6.5), Point(16.0, 6.5), Point(14.0, 9.5), Point(16.0, 9.5)
-    };
+            // 0 y = 13
+            Point(13.0, 13.0), Point(11.0, 13.0), Point(17.0, 13.0), Point(19.0, 13.0),
+
+            // 1 y = 9
+            Point(9.0, 11.0), Point(15.0, 11.0), Point(21.0, 11.0),
+
+            // 2 y = 7
+            Point(21.0, 9.0), Point(9.0, 9.0),
+
+            // 3 y = 5
+            Point(11.0, 7.0), Point(19.0, 7.0),
+
+            //4 y = 3
+            Point(15.0, 3.0),
+
+        };
 
 
-    Mesh k(testCaseRect);
+
+
+    Mesh k(testCasePicture);
     k.setTriVector({ k.superTriangle() });
     k.buildMesh();
     k.removeHelperTriangles();
