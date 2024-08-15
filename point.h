@@ -3,6 +3,7 @@
 
 // Class representing a 2D point
 class Point {
+
 private:
     float fx{0.0}, fy{0.0};  // x and y coordinates of the point
 
@@ -25,20 +26,12 @@ public:
     // Setter for y coordinate
     void setY(float fy);
 
-    // Function to find the distance to another point
+    // Function to find the distance between another point
     double findDistance(const Point& p2) const;
 
     // Function to find the slope to another point
     double findSlope(const Point& p2) const;
 
-    // Function to check if a target point is between the current point and another point
-    bool betweenPoints(const Point& p2, const Point& pTargetPoint) const;
-
-    // Function to check if the current point is equal to another point
-    bool equals(const Point& pOther) const;
-
-    //Function to print point coordinates
-    void printCoordinates() const;
 };
 
 #endif // POINT_H

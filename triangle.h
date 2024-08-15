@@ -3,7 +3,6 @@
 
 #include "point.h"
 #include <vector>
-#include <map>
 
 // Class representing a triangle defined by three points
 class Triangle {
@@ -65,10 +64,10 @@ public:
     // Function to check if a point is inside the circumcircle of the triangle
     bool isInCircumcircle(const Point& pt) const;
 
+    // Function to determine whether a point is on the perimeter of the triangle, and on which edge is it located on
     int onEdge(const Point& pt) const;
 
-    Point getCentroid() const;
-
+    // Function to get the point of the center of the edge
     Point getEdgeMidpoint(int iSide) const;
 
 };

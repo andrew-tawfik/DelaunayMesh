@@ -31,7 +31,7 @@ void Point::setY(float fy) {
     this->fy = fy;
 }
 
-// Function to find the distance to another point
+// Function to find the distance between another point
 double Point::findDistance(const Point& p2) const
 {
     double dx1 = fx;
@@ -61,32 +61,3 @@ double Point::findSlope(const Point& p2) const
 
     return dSlope;
 }
-
-// Function to check if a target point is between the current point and another point
-bool Point::betweenPoints(const Point& p2, const Point& pTargetPoint) const
-{
-    double db = p2.getY() - (p2.getX() * findSlope(p2));
-    double dtpx = pTargetPoint.getX();
-    double dtpy = pTargetPoint.getY();
-
-    if (dtpy == findSlope(p2) * dtpx + db) {
-        if ((dtpx >= (std::fmin(getX(), p2.getX()))) && (dtpx <= (std::fmax(getX(), p2.getX())))) {
-            if ((dtpy >= (std::fmin(getY(), p2.getY()))) && (dtpy <= (std::fmax(getY(), p2.getY())))) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-// Function to check if the current point is equal to another point
-bool Point::equals(const Point& pOther) const
-{
-    return fx == pOther.getX() && fy == pOther.getY();
-}
-
-void Point::printCoordinates() const
-{
-    std::cout << "Point(" << fx << ", " << fy << ") " << std::endl;
-}
-

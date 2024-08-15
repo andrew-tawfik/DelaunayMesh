@@ -126,12 +126,12 @@ int Triangle::findPathToContainingTriangle(const Point& ptTargetPoint) const
         if (dL2 > 0) return getNeighbourIndex(1);
         if (dL3 > 0) return getNeighbourIndex(2);
 
-        std::cout << "Could not find containing triangle." << std::endl;
     }
 
     return -1; // Return -1 if no positive determinant is found
 }
 
+// Set a specific point of the triangle
 void Triangle::setPoint(int iPoint, const Point& newPoint)
 {
     if (iPoint == 0) this->pt0 = newPoint;
@@ -300,7 +300,7 @@ void Triangle::setIndex(int iValue)
     this->iIndex = iValue;
 }
 
-// Determines whether a point is on the perimeter of the triangle
+// Determines whether a point is on the perimeter of the triangle, and on which edge is it located on
 int Triangle::onEdge(const Point& pt) const
 {
 
@@ -352,12 +352,7 @@ int Triangle::onEdge(const Point& pt) const
     return -1;
 }
 
-Point Triangle::getCentroid() const
-{
-    return Point((pt0.getX() + pt1.getX() + pt2.getX()) / 3, (pt0.getY() + pt1.getY() + pt2.getY()) / 3);
-}
-
-
+// Gets the point of the center of the edge
 Point Triangle::getEdgeMidpoint(int iSide) const
 {
     Point ptStart, ptEnd;

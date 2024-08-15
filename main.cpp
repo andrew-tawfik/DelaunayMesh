@@ -13,32 +13,18 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
-    // Create the points and mesh
-    std::vector<Point> testCaseHex =
-    {
-        Point(22, 8.6), Point(18.5, 14.7), Point(11.5, 14.7), Point(8, 8.6),
-        Point(11.5, 2.5), Point(18.5, 2.5)
-    };
+    // The following vectors are test cases showcasing different test cases
+    std::vector<Point> testCaseHex = { Point(22, 8.6), Point(18.5, 14.7), Point(11.5, 14.7), Point(8, 8.6), Point(11.5, 2.5), Point(18.5, 2.5) };
 
-    std::vector<Point> testCaseRect =
-    {
-        Point(7.5, 2.0), Point(15.0, 2.0), Point(22.5, 2.0), Point(22.5, 7.0),
-        Point(22.5, 12.0),Point(15.0, 12.0), Point(7.5, 12.0),Point(7.5, 7.0),
-    };
+    std::vector<Point> testCaseRect = { Point(7.5, 2.0), Point(15.0, 2.0), Point(22.5, 2.0), Point(22.5, 7.0), Point(22.5, 12.0),Point(15.0, 12.0), Point(7.5, 12.0),Point(7.5, 7.0) };
 
-    std::vector<Point> testCaseInner =
-    {
-        Point(7.5, 2.0), Point(15.0, 2.0), Point(22.5, 2.0), Point(22.5, 7.0), Point(22.5, 12.0),
-        Point(15.0, 12.0), Point(7.5, 12.0), Point(7.5, 7.0), Point(15, 7), Point(11.25, 4.5),
-        Point(18.75, 9.5), Point(18.75, 4.5), Point(11.25, 9.5), Point(11.25, 7),
-        Point(18.75, 7),
-    };
+    std::vector<Point> testCaseInner = { Point(7.5, 2.0), Point(15.0, 2.0), Point(22.5, 2.0), Point(22.5, 7.0), Point(22.5, 12.0), Point(15.0, 12.0), Point(7.5, 12.0), Point(7.5, 7.0), Point(15, 7), Point(11.25, 4.5), Point(18.75, 9.5), Point(18.75, 4.5), Point(11.25, 9.5), Point(11.25, 7), Point(18.75, 7) };
 
     std::vector<Point> testCasePicture =
         {
 
             // 0 y = 13
-            Point(13.0, 13.0), Point(11.0, 13.0), Point(17.0, 13.0), Point(19.0, 13.0),
+            Point(11.0, 13.0), Point(13.0, 13.0), Point(17.0, 13.0), Point(19.0, 13.0),
 
             // 1 y = 9
             Point(9.0, 11.0), Point(15.0, 11.0), Point(21.0, 11.0),
@@ -54,10 +40,8 @@ int main(int argc, char *argv[])
 
         };
 
-
-
-
-    Mesh k(testCasePicture);
+    // Mesh Workflow
+    Mesh k(testCaseHex);
     k.setTriVector({ k.superTriangle() });
     k.buildMesh();
     k.removeHelperTriangles();
@@ -65,6 +49,7 @@ int main(int argc, char *argv[])
 
     std::vector<Triangle> meshTriangles = k.getTriVector();
 
+    // Prints the mesh and each triangles' neighbours
     for (int i = 0; i < meshTriangles.size(); ++i)
     {
         std::cout << "Triangle " << meshTriangles[i].getIndex() << ": ";
@@ -74,10 +59,9 @@ int main(int argc, char *argv[])
         std::cout << "\tc) Neighbour at index:  " << meshTriangles[i].getNeighbourIndex(2) << std::endl;
     }
 
-
     QGraphicsScene scene;
 
-    scene.setSceneRect(-7.5, -10, 45, 45); // Adjust size as needed
+    scene.setSceneRect(-7.5, -10, 45, 45);
 
     for (const auto& triangle: meshTriangles)
     {
@@ -87,22 +71,17 @@ int main(int argc, char *argv[])
         QTriangle* qTriangle = new QTriangle(p1, p2, p3, triangle.getIndex());
 
         // Set whether to show the triangle index on display
-        qTriangle->setShowIndex(true); // Change to false to hide the index
+        qTriangle->setShowIndex(false);
 
         scene.addItem(qTriangle);
     }
 
     // Create the graphics view
     QGraphicsView view(&scene);
-    view.setTransform(QTransform().scale(1, -1)); // Flip vertically
+    view.setTransform(QTransform().scale(1, -1));
     view.setRenderHint(QPainter::Antialiasing);
     view.setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
     view.setWindowTitle(QT_TRANSLATE_NOOP(QGraphicsView, "Triangulation Visualization"));
-
-    Triangle t;
-    t.printPoints();
-    Point midEdgePoint = t.getEdgeMidpoint(0);
-    midEdgePoint.printCoordinates();
 
     view.scale(25, 25);
     view.show();
