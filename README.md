@@ -6,6 +6,7 @@
 2. [Algorithm](#algorithm)
 3. [Class Structure](#class-structure)
 4. [Future Modifications](#future-modifications)
+5. [Demo](#demo)
 
 
 ## Overview
@@ -60,3 +61,17 @@ The Delaunay triangulation algorithm follows these steps:
 ### Performance Improvements
 
 - **Algorithm Optimization**: Explore ways to optimize the Delaunay triangulation algorithm for higher performance.
+
+## Demo 
+
+### Step 1. Build Mesh
+
+![Build Mesh Demo](buildMesh-Demo.png)
+
+### Step 2. Remove Helper Triangles
+
+![Remove Helper Triangles Demo](removeHelperTriangles-Demo.png)
+
+### Step 3. Equalaterize All Triangles
+
+![Equalaterize Triangles Final Demo](equalateralizeTriangles-FinalDemo.png)
