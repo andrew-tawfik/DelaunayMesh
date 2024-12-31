@@ -1,6 +1,6 @@
-#include "include/point.h"
-#include "include/triangle.h"
-#include "include/mesh.h"
+#include "point.h"
+#include "triangle.h"
+#include "mesh.h"
 #include <iostream>
 #include <vector>
 
@@ -17,14 +17,9 @@ int main(int argc, char *argv[])
 
     // Mesh Workflow
     Mesh m;
-
-    for (Point p : testCaseInner) {
+    for (Point p : testCaseRect) {
         m.triangulatePoint(p.getX(), p.getY());
-        std::cout << "Number of triangles after operation: " << m.getTriVector().size() << "\n\n";
     }
-
-    m.removeHelperTriangles();
-    //m.equilateralizeTriangles();
 
     std::vector<Triangle> meshTriangles = m.getTriVector();
 

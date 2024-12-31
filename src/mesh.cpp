@@ -1,10 +1,11 @@
-#include "include/mesh.h"
+#include "mesh.h"
 #include <iostream>
 #include <random>
 #include <stack>
 #include <vector>
 #include <queue>
 
+// Constructor: Creates empty mesh object
 Mesh::Mesh() {
     setShape({});
     setTriVector({ superTriangle() });
@@ -14,7 +15,7 @@ Mesh::Mesh() {
 Mesh::Mesh(const std::vector<Point>& vecPt)
 {
     setShape(vecPt);
-   // setTriVector({ superTriangle()});
+    setTriVector({ superTriangle()});
 }
 
 // Returns the shape of the mesh as a vector of points
@@ -70,21 +71,18 @@ void Mesh::buildMesh()
         createTriangles(iTriIndex, iPointIndex);
 
         iPointIndex += 1;  // Move to the next point
-
-        // Stop processing when the last three points (super triangle points) are reached
-        //if ((vecPtShape.size() - 3) == iPointIndex) { break; }
     }
 }
 
 // Finds the index of the triangle contaiCurrentNeighbourng the target point
 int Mesh::findContainingTriangle(const Point& ptTargetPoint) const
 {
-    // iCurrentNeighbourtialize random number generator
+    // random number generator
     static std::random_device rd;  // Seed
     static std::mt19937 gen(rd()); // Mersenne Twister RNG
 
 
-    // Size of vecTriangles should change everytime method is called
+    // Should adapt to size of updated vecTriangles
     std::uniform_int_distribution<> dis(0, vecTriangles.size() - 1);
 
     // Get a randomized triangle from vecTriangles
@@ -102,8 +100,8 @@ int Mesh::findContainingTriangle(const Point& ptTargetPoint) const
         const Triangle& triCurrent = vecTriangles[iCurrentIndex];
         int iResult = triCurrent.findPathToContainingTriangle(ptTargetPoint);
 
-        if (iResult == -1) break;
-        if (iResult == -2) // -1 indicates that the currentTri contains ptTargetPoint
+        if (iResult == -1) break; // indicates triangle not found
+        if (iResult == -2) // -2 indicates that the currentTri contains ptTargetPoint
         {
             return triCurrent.getIndex();
         }
@@ -113,31 +111,20 @@ int Mesh::findContainingTriangle(const Point& ptTargetPoint) const
         }
     }
 
-    // If no contaiCurrentNeighbouring triangle is found, return -1 or handle error appropriately
     return -1;
 }
 
 // Creates a super triangle that encloses all points in the mesh
 Triangle Mesh::superTriangle()
 {
-    /**
-     * There is a bug i need to address, I think its related to the cooridantes
-     * I think the fix could be just to check if hasPos and hasNeg infindTriangle
-     *
-     */
-    Point p0 {-800, -500}; // want to change to (-800, -500)
-    Point p1 {2200, -500}; // // want to change to (2200, -500)
-    Point p2 {700, 2098.076}; // want to change to (700, 2098.076)
+    Point p0 {-800, -500};
+    Point p1 {2200, -500};
+    Point p2 {700, 2098.076};
 
     Triangle triSuper {p0, p1, p2};
     triSuper.setPointIndex(0, -10);
-    //vecPtShape.push_back(p0);
     triSuper.setPointIndex(1, -11);
-    //vecPtShape.push_back(p1);
     triSuper.setPointIndex(2, -12);
-    //vecPtShape.push_back(p2);
-
-    // Append points to the end of vecPtShape
 
     triSuper.setIndex(0);
 
@@ -149,7 +136,6 @@ void Mesh::removeHelperTriangles()
 {
     std::vector<int> trianglesToRemove;  // Vector to store indices of triangles to be removed
 
-    // Iterate over all triangles in the mesh
     for (int i = 0; i < vecTriangles.size(); ++i)
     {
         const Triangle& triangle = vecTriangles[i];
@@ -170,14 +156,11 @@ void Mesh::removeHelperTriangles()
         }
     }
 
-    // Remove the triangles marked for deletion, starting from the end to avoid index issues
+    // Remove the triangles marked for deletion, starting from the end to start
     for (int i = trianglesToRemove.size() - 1; i >= 0; --i)
     {
         vecTriangles.erase(vecTriangles.begin() + trianglesToRemove[i]);
     }
-
-    // Remove the last three points corresponding to the super triangle
-    // vecPtShape.resize(vecPtShape.size() - 3);
 
     // Update triangle indices to reflect the removal
     updateTriangleIndicesAfterRemoval();
@@ -1287,9 +1270,6 @@ void Mesh::equilateralizeTriangles()
 
         // Create new triangles by connecting the new point with the containing triangle
         createTriangles(containingTriangleIndex, newPointIndex);
-
-        // For debugging purposes,
-        if (++iterationCount == 2){break;}
     }
 }
 

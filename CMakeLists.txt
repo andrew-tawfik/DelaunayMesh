@@ -5,21 +5,23 @@ project(ShapeTriangulation LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_executable(ShapeTriangulation main.cpp
-        include/point.h point.cpp
-        include/triangle.h triangle.cpp
-        include/mesh.h mesh.cpp
-        include/json.hpp
+include_directories(include)
+
+add_executable(ShapeTriangulation src/main.cpp
+        src/point.cpp
+        src/triangle.cpp
+        src/mesh.cpp
 )
 
 # Add test executable
 add_executable(mesh_test
         test/mesh_test.cpp
-        include/point.h point.cpp
-        include/triangle.h triangle.cpp
-        include/mesh.h mesh.cpp
+        src/point.cpp
+        src/triangle.cpp
+        src/mesh.cpp
 )
 
+include_directories(/opt/restbed/source)
 # Explicitly add GTest include directory and link library
 target_include_directories(mesh_test PRIVATE /usr/local/Cellar/googletest/1.15.2/include)
 target_link_directories(mesh_test PRIVATE /usr/local/Cellar/googletest/1.15.2/lib)

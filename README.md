@@ -11,7 +11,7 @@
 
 ## Overview
 
-This project implements a Delaunay triangulation algorithm using C++. The program efficiently generates a mesh of triangles from a given set of points, ensuring that no point lies inside the circumcircle of any triangle in the mesh. Delauny triangulation for mesh generation results in well-shaped triangles that are useful in various applications, including computational geometry, finite element analysis, and computer graphics.
+This project implements a Delaunay triangulation algorithm using C++. The program efficiently generates a mesh of triangles from a given set of points, ensuring that no point lies inside the circumcircle of any triangle in the mesh. Delaunay triangulation for mesh generation results in well-shaped triangles that are useful in various applications, including finite element analysis and computer graphics.
 
 
 ## Algorithm 
@@ -22,12 +22,12 @@ The Delaunay triangulation algorithm follows these steps:
 
 2. **Adding Points**: 
    - Iterate over each input point and find the triangle that contains it. 
-   - If the point lies inside a triangle, split the triangle into three new triangles. 
-   - If the point lies on an edge, split the triangle into two new triangles and handle neighboring triangles accordingly. 
+   - If the point lies inside a triangle, split the triangle into three triangles. 
+   - If the point lies on an edge, split the triangle into two triangles and handle neighboring triangles accordingly. 
 
 3. **Edge Flipping**: 
    - After adding each point, check the circumcircles of the neighboring triangles. 
-   - If a point lies inside the circumcircle of a triangle, swap the edge between the triangles to maintain the Delaunay property. 
+   - If a point lies inside the circumcircle of a neighbour, swap the edge between the current triangle and that neighbour to maintain the Delaunay property. 
 
 4. **Maintaining Neighbors**: 
    - Update neighbor relationships for all affected triangles after adding points and swapping edges. 
@@ -39,8 +39,6 @@ The Delaunay triangulation algorithm follows these steps:
 6. **Triangle Equilateralization**
    - If any triangle has an angle under 40 degrees, add a point in that triangle's circumcenter. 
 
-7. **Visualization**: 
-   - Use Qt's `QGraphicsScene` and `QGraphicsView` to visualize the resulting triangulation.
 
 
 ## Class Structure
@@ -48,7 +46,6 @@ The Delaunay triangulation algorithm follows these steps:
 - **Point Class**: Represents a point in 2D space.
 - **Triangle Class**: Represents a triangle formed by three points.
 - **Mesh Class**: Manages a collection of points and triangles to build and maintain the Delaunay triangulation mesh, including adding points and handling neighbor relationships.
-- **QTriangle Class**: Integrates with Qt to visualize the triangulation using `QGraphicsScene` and `QGraphicsView`.
 
 
 ## Future Modifications

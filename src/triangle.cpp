@@ -2,8 +2,8 @@
 
 #include <sstream>
 #include <iostream>
-#include "include/triangle.h"
-#include "include/point.h"
+#include "triangle.h"
+#include "point.h"
 #include <cmath>
 
 

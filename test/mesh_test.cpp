@@ -35,6 +35,7 @@ TEST(MeshTest, BuildMesh_EmptyPoints)
     std::vector<Point> points;
     Mesh mesh(points);
     mesh.buildMesh();
+    mesh.removeHelperTriangles();
     EXPECT_TRUE(mesh.getTriVector().empty());
 }
 
@@ -87,7 +88,7 @@ TEST(MeshTest, FindContainingTriangle_PointInsideTriangle) {
 }
 
 TEST(MeshTest, FindContainingTriangle_PointOutsideTriangles) {
-    Point targetPoint = Point(25, 26);
+    Point targetPoint = Point(700, 2099);
     std::vector <Point> points;
     Mesh mesh(points);
     mesh.setTriVector({ mesh.superTriangle()});
