@@ -1,6 +1,7 @@
 # This file is used to ignore files which are generated
 # ----------------------------------------------------------------------------
 
+.idea
 # Ignore build directories
 triangulation-backend/build
 triangulation-backend/cmake-build-debug
@@ -10,7 +11,7 @@ cmake-build-debug
 
 triangulation-frontend/node_modules
 triangulation-frontend/.idea
-
+triangulation-frontend/package-lock.json
 
 *~
 *.autosave
