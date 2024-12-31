@@ -2,8 +2,12 @@
 # ----------------------------------------------------------------------------
 
 # Ignore build directories
-build
+triangulation-backend/build
+triangulation-backend/cmake-build-debug
+triangulation-backend/CMakeLists.txt.user
+triangulation-backend/.idea
 cmake-build-debug
+
 
 *~
 *.autosave
@@ -41,7 +45,7 @@ Thumbs.db
 
 # qtcreator generated files
 *.pro.user*
-CMakeLists.txt.user*
+triangulation-backend/CMakeLists.txt.user
 
 # xemacs temporary files
 *.flc
@@ -78,7 +82,7 @@ CMakeLists.txt.user*
 
 # Build directories
 /Build/
-/build/
+/triangulation-backend/build/
 /.cmake/
 /.qtc/
 /CMakeCache.txt
