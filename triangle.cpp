@@ -2,8 +2,8 @@
 
 #include <sstream>
 #include <iostream>
-#include "triangle.h"
-#include "point.h"
+#include "include/triangle.h"
+#include "include/point.h"
 #include <cmath>
 
 
@@ -104,9 +104,9 @@ bool Triangle::contains(const Point& ptTargetPoint) const
     double dL3 = (dTpx - pt2.getX()) * (pt0.getY() - pt2.getY()) - (pt0.getX() - pt2.getX()) * (dTpy - pt2.getY());
 
     // All the signs must be the same (all positive or all negative)
-    bool bHasPos = (dL1 > 0) || (dL2 > 0) || (dL3 > 0);
+    bool bAllNeg = (dL1 <= 0) && (dL2 <= 0) && (dL3 <= 0);
 
-    return !(bHasPos);  // Either all positive or all negative
+    return bAllNeg;  // Either all positive or all negative
 }
 
 // Find the path to the triangle containing a given point
@@ -128,7 +128,7 @@ int Triangle::findPathToContainingTriangle(const Point& ptTargetPoint) const
 
     }
 
-    return -1; // Return -1 if no positive determinant is found
+    return -2; // Return -2 if no positive determinant is found
 }
 
 // Set a specific point of the triangle

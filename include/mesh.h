@@ -9,7 +9,7 @@
 #include <queue>
 
 // Class representing a 2D mesh composed of points and triangles
-class Mesh {
+class Mesh{
 
 private:
 
@@ -18,6 +18,7 @@ private:
 
 public:
 
+    Mesh();
     // Constructor to initialize mesh with a set of points
     Mesh(const std::vector<Point>& vecPt);
 
@@ -29,6 +30,9 @@ public:
     void setTriVector(const std::vector<Triangle>& vecTri);
     std::vector<Triangle> getTriVector() const;
 
+    void addPoint(const Point& pt) ;
+    void triangulatePoint(float fx, float fy);
+
     // Function to build the mesh from points and triangles
     void buildMesh();
 
@@ -37,6 +41,8 @@ public:
 
     // Function to create a super triangle that encloses all points
     Triangle superTriangle();
+
+    bool isHelperTriangle(const Triangle& tri) const;
 
     // Removes helper triangles used for intermediate computations
     void removeHelperTriangles();
@@ -53,7 +59,7 @@ public:
     //Function to handle edge case
     void handleEdgeCase(int iTriangleIndex, int iPointIndex);
 
-    // Creates new triangles on the opposite side of a specified triangle and point
+    // Creates new triangles on the opposite side of an edge
     void createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int iNeighbourIndex0, int iNeighbourIndex1);
 
     // Updates the neighboring triangles' edge references after swapping edges
@@ -75,7 +81,7 @@ public:
     int findSharedEdge(const Triangle& tri, int iDiff1, int iDiff2) const;
 
     // Finds the new edge index after swapping edges
-    int findNewEdge(const Triangle& tri, int i, int iSharedEdge) const;
+    int findNewEdge(int i, int iSharedEdge) const;
 
     // Updates neighboring relationships between triangles
     void updateNeighboursAfterSwap(int oldNeighborIndex, int oldTriangleIndex, int newTriangleIndex);

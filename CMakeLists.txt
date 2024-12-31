@@ -2,29 +2,28 @@ cmake_minimum_required(VERSION 3.5)
 
 project(ShapeTriangulation LANGUAGES CXX)
 
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
-
 add_executable(ShapeTriangulation main.cpp
-    point.h point.cpp
-    triangle.h triangle.cpp
-    mesh.h mesh.cpp
-    README.md
-    qtriangle.h qtriangle.cpp)
+        include/point.h point.cpp
+        include/triangle.h triangle.cpp
+        include/mesh.h mesh.cpp
+        include/json.hpp
+)
 
+# Add test executable
+add_executable(mesh_test
+        test/mesh_test.cpp
+        include/point.h point.cpp
+        include/triangle.h triangle.cpp
+        include/mesh.h mesh.cpp
+)
 
-target_link_libraries(ShapeTriangulation PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
-
-if(${QT_VERSION} VERSION_LESS 6.1.0)
-  set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.ShapeTriangulation)
-endif()
+# Explicitly add GTest include directory and link library
+target_include_directories(mesh_test PRIVATE /usr/local/Cellar/googletest/1.15.2/include)
+target_link_directories(mesh_test PRIVATE /usr/local/Cellar/googletest/1.15.2/lib)
+target_link_libraries(mesh_test PRIVATE gtest gtest_main pthread)
 
 
 include(GNUInstallDirs)
@@ -33,7 +32,3 @@ install(TARGETS ShapeTriangulation
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
-
-if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(ShapeTriangulation)
-endif()

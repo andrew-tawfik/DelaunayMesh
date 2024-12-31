@@ -66,12 +66,12 @@ The Delaunay triangulation algorithm follows these steps:
 
 ### Step 1. Build Mesh
 
-![Build Mesh Demo](buildMesh-Demo.png)
+![Build Mesh Demo](demo/buildMesh-Demo.png)
 
 ### Step 2. Remove Helper Triangles
 
-![Remove Helper Triangles Demo](removeHelperTriangles-Demo.png)
+![Remove Helper Triangles Demo](demo/removeHelperTriangles-Demo.png)
 
 ### Step 3. Equalaterize All Triangles
 
-![Equalaterize Triangles Final Demo](equalateralizeTriangles-FinalDemo.png)
+![Equalaterize Triangles Final Demo](demo/equalateralizeTriangles-FinalDemo.png)

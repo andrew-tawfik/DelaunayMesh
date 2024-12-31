@@ -32,6 +32,8 @@ public:
     // Function to find the slope to another point
     double findSlope(const Point& p2) const;
 
+    bool operator==(const Point& other) const;
+
 };
 
 #endif // POINT_H

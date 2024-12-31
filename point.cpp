@@ -1,4 +1,4 @@
-#include "point.h"
+#include "include/point.h"
 #include <cmath>
 #include <iostream>
 
@@ -61,3 +61,5 @@ double Point::findSlope(const Point& p2) const
 
     return dSlope;
 }
+
+bool Point::operator==(const Point& other) const { return fx == other.fx && fy == other.fy; }

@@ -1,14 +1,20 @@
-#include "mesh.h"
+#include "include/mesh.h"
 #include <iostream>
 #include <random>
-#include <algorithm>
 #include <stack>
+#include <vector>
 #include <queue>
+
+Mesh::Mesh() {
+    setShape({});
+    setTriVector({ superTriangle() });
+}
 
 // Constructor: Creates the mesh with a given set of points
 Mesh::Mesh(const std::vector<Point>& vecPt)
 {
     setShape(vecPt);
+   // setTriVector({ superTriangle()});
 }
 
 // Returns the shape of the mesh as a vector of points
@@ -23,6 +29,12 @@ void Mesh::setShape(const std::vector<Point>& vecPt)
     vecPtShape = vecPt;
 }
 
+void Mesh::addPoint(const Point &pt)
+{
+    vecPtShape.push_back(pt);
+}
+
+
 // Returns the triangle vector
 std::vector<Triangle> Mesh::getTriVector() const
 {
@@ -33,6 +45,15 @@ std::vector<Triangle> Mesh::getTriVector() const
 void Mesh::setTriVector(const std::vector<Triangle>& vecTri)
 {
     vecTriangles = vecTri;
+}
+
+void Mesh::triangulatePoint(float fx, float fy)
+{
+    int iPointIndex = vecPtShape.size();
+    Point target_point = {fx, fy};
+    addPoint(target_point);
+    int iTriIndex = findContainingTriangle(target_point);
+    createTriangles(iTriIndex, iPointIndex);
 }
 
 // Builds the mesh by iterating through all points in vecPtShape.
@@ -51,7 +72,7 @@ void Mesh::buildMesh()
         iPointIndex += 1;  // Move to the next point
 
         // Stop processing when the last three points (super triangle points) are reached
-        if ((vecPtShape.size() - 3) == iPointIndex) { break; }
+        //if ((vecPtShape.size() - 3) == iPointIndex) { break; }
     }
 }
 
@@ -81,7 +102,8 @@ int Mesh::findContainingTriangle(const Point& ptTargetPoint) const
         const Triangle& triCurrent = vecTriangles[iCurrentIndex];
         int iResult = triCurrent.findPathToContainingTriangle(ptTargetPoint);
 
-        if (iResult == -1) // -1 indicates that the currentTri contains ptTargetPoint
+        if (iResult == -1) break;
+        if (iResult == -2) // -1 indicates that the currentTri contains ptTargetPoint
         {
             return triCurrent.getIndex();
         }
@@ -98,17 +120,22 @@ int Mesh::findContainingTriangle(const Point& ptTargetPoint) const
 // Creates a super triangle that encloses all points in the mesh
 Triangle Mesh::superTriangle()
 {
-    Point p0(0, 0);
-    Point p1(30, 0);
-    Point p2(15, 25.981);
+    /**
+     * There is a bug i need to address, I think its related to the cooridantes
+     * I think the fix could be just to check if hasPos and hasNeg infindTriangle
+     *
+     */
+    Point p0 {-800, -500}; // want to change to (-800, -500)
+    Point p1 {2200, -500}; // // want to change to (2200, -500)
+    Point p2 {700, 2098.076}; // want to change to (700, 2098.076)
 
-    Triangle triSuper = Triangle(p0, p1, p2);
-    triSuper.setPointIndex(0, vecPtShape.size());
-    vecPtShape.push_back(p0);
-    triSuper.setPointIndex(1, vecPtShape.size());
-    vecPtShape.push_back(p1);
-    triSuper.setPointIndex(2, vecPtShape.size());
-    vecPtShape.push_back(p2);
+    Triangle triSuper {p0, p1, p2};
+    triSuper.setPointIndex(0, -10);
+    //vecPtShape.push_back(p0);
+    triSuper.setPointIndex(1, -11);
+    //vecPtShape.push_back(p1);
+    triSuper.setPointIndex(2, -12);
+    //vecPtShape.push_back(p2);
 
     // Append points to the end of vecPtShape
 
@@ -131,7 +158,7 @@ void Mesh::removeHelperTriangles()
         for (int j = 0; j < 3; ++j)
         {
             // If a point in the triangle belongs to the super triangle (helper points)
-            if (triangle.getPointIndex(j) >= vecPtShape.size() - 3)
+            if (triangle.getPointIndex(j) <= -10)
             {
                 // Mark this triangle for removal
                 trianglesToRemove.push_back(i);
@@ -150,7 +177,7 @@ void Mesh::removeHelperTriangles()
     }
 
     // Remove the last three points corresponding to the super triangle
-    vecPtShape.resize(vecPtShape.size() - 3);
+    // vecPtShape.resize(vecPtShape.size() - 3);
 
     // Update triangle indices to reflect the removal
     updateTriangleIndicesAfterRemoval();
@@ -235,6 +262,10 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
     // Reference to the triangle being split
     Triangle& triCurrent = vecTriangles[iTriangleIndex];
 
+    if(!triCurrent.contains(ptTargetPoint)) {
+        std::cerr << "Target point provided is outside the bounds of the triangle. " << std::endl;
+        return;
+    }
     // Check if the target point lies inside the triangle but not on any edge
     if (triCurrent.onEdge(ptTargetPoint) < 0)
     {
@@ -337,7 +368,7 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
     }
 }
 
-// Handles special edge cases when a triangle's edge is processed or modified.
+// Handle cases where the target point lies on an edge of the current triangle
 void Mesh::handleEdgeCase(int iTriangleIndex, int iPointIndex)
 {
     {
@@ -851,6 +882,10 @@ void Mesh::updateEdgeNeighbours(int iTriangleIndex, int iNewTriangleIndex, int i
         {
             iEdgeIndex1 = i;
         }
+        else
+        {
+            continue;
+        }
     }
 
     // Calculate the midpoints of the edges that connect the new triangle and current triangle
@@ -900,6 +935,7 @@ bool Mesh::areNeighbours(int iTri1, int iTri2)
         return false;
     }
 }
+
 
 // Checks neighboring triangles' circumcircles to find those containing the target point.
 std::queue<int> Mesh::checkNeighboringCircumcircles(int iTriangleIndex, int iPointIndex, int iEdgeIndex)
@@ -972,6 +1008,7 @@ std::queue<int> Mesh::checkNeighboringCircumcircles(int iTriangleIndex, int iPoi
 // Swaps the edge between two triangles and updates their neighboring relationships.
 void Mesh::swapEdge(int iTri1, int iTri2)
 {
+    Triangle super = superTriangle();
     // Retrieve the triangles based on their indices
     Triangle& triCurrent = vecTriangles[iTri1];
     Triangle& triNeighbour = vecTriangles[iTri2];
@@ -1030,11 +1067,16 @@ void Mesh::swapEdge(int iTri1, int iTri2)
         if (triCurrent.getPointIndex(i) == shared[0])
         {
             triCurrent.setPointIndex(i, diff2);
-            triCurrent.setPoint(i, vecPtShape[diff2]);
+
+            if(diff2 > -1) {
+                triCurrent.setPoint(i, vecPtShape[diff2]);
+            } else {
+                triCurrent.setPoint(i, super.getPoint(abs(diff2) - 10));
+            }
 
             // Determine the shared edge and new edge after swap
             int iSharedEdge = findSharedEdge(triCurrent, diff1, diff2);
-            int iNewEdge = findNewEdge(triCurrent, i, iSharedEdge);
+            int iNewEdge = findNewEdge(i, iSharedEdge);
 
             int iStolenEdge = -1;
             if ((triNeighbour.getPointIndex(0) == shared[1] && triNeighbour.getPointIndex(1) == diff2) ||
@@ -1066,11 +1108,15 @@ void Mesh::swapEdge(int iTri1, int iTri2)
         if (triNeighbour.getPointIndex(i) == shared[1])
         {
             triNeighbour.setPointIndex(i, diff1);
-            triNeighbour.setPoint(i, vecPtShape[diff1]);
+            if(diff1 > -1)
+                triNeighbour.setPoint(i, vecPtShape[diff1]);
+            else {
+                triNeighbour.setPoint(i, super.getPoint(abs(diff1) - 10));
+            }
 
             // Determine the shared edge and new edge after swap
             int iSharedEdge = findSharedEdge(triNeighbour, diff1, diff2);
-            int iNewEdge = findNewEdge(triNeighbour, i, iSharedEdge);
+            int iNewEdge = findNewEdge(i, iSharedEdge);
 
             int iStolenEdge = -1;
             if ((iCurrentPt0 == diff1 && iCurrentPt1 == shared[0]) ||
@@ -1145,7 +1191,7 @@ int Mesh::findSharedEdge(const Triangle& tri, int iDiff1, int iDiff2) const
 }
 
 // Determines the new edge index for a triangle after an edge swap.
-int Mesh::findNewEdge(const Triangle& tri, int i, int iSharedEdge) const
+int Mesh::findNewEdge(int i, int iSharedEdge) const
 {
     if (i == 0)
     {
@@ -1243,7 +1289,7 @@ void Mesh::equilateralizeTriangles()
         createTriangles(containingTriangleIndex, newPointIndex);
 
         // For debugging purposes,
-        //if (++iterationCount == 3){break;}
+        if (++iterationCount == 2){break;}
     }
 }
 
