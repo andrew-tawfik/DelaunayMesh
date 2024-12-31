@@ -8,6 +8,9 @@ triangulation-backend/CMakeLists.txt.user
 triangulation-backend/.idea
 cmake-build-debug
 
+triangulation-frontend/node_modules
+triangulation-frontend/.idea
+
 
 *~
 *.autosave

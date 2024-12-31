@@ -30,7 +30,7 @@ target_link_libraries(mesh_test PRIVATE gtest gtest_main pthread)
 
 include(GNUInstallDirs)
 install(TARGETS ShapeTriangulation
-    BUNDLE DESTINATION .
+    BUNDLE DESTINATION ..
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
