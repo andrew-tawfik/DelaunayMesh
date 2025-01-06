@@ -4,7 +4,6 @@
 
 #include "point.h"
 #include "triangle.h"
-
 #include <vector>
 #include <queue>
 
@@ -13,8 +12,8 @@ class Mesh{
 
 private:
 
-    std::vector<Point> vecPtShape;  // Vector of points defining the shape
-    std::vector<Triangle> vecTriangles;  // Vector of triangles defining the shape
+    std::vector<Point> m_vecPoints;  // Vector of points defining the shape
+    std::vector<Triangle> m_vecTriangles;  // Vector of triangles defining the shape
 
 public:
 
@@ -23,8 +22,8 @@ public:
     Mesh(const std::vector<Point>& vecPt);
 
     // Getters and setters for the shape
-    std::vector<Point> getShape() const;
-    void setShape(const std::vector<Point>& vecPt);
+    std::vector<Point> getPtVector() const;
+    void setPtVector(const std::vector<Point>& vecPt);
 
     // Getters and setters for the vector of Triangles (for testing purposes only)
     void setTriVector(const std::vector<Triangle>& vecTri);
@@ -91,7 +90,9 @@ public:
 
     // Locates the triangle with the smallest angle
     int locateSmallestAngle();
-
 };
+
+// Serialization function
+void to_json(nlohmann::json& j, const Mesh& m);
 
 #endif // MESH_H

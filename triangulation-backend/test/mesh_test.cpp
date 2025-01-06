@@ -10,14 +10,14 @@ TEST(MeshTest, Constructor_ValidPoints)
 {
     std::vector<Point> points = { Point(0, 0), Point(1, 0), Point(0, 1)};
     Mesh mesh(points);
-    EXPECT_EQ(mesh.getShape(), points);
+    EXPECT_EQ(mesh.getPtVector(), points);
 }
 
 TEST(MeshTest, Constructor_EmptyPoints)
 {
     std::vector<Point> points;
     Mesh mesh(points);
-    EXPECT_TRUE(mesh.getShape().empty());
+    EXPECT_TRUE(mesh.getPtVector().empty());
 }
 
 // 2. Core Mesh Methods
@@ -199,7 +199,7 @@ TEST(MeshTest, MeshTest_CreateTriangles_Adjacency) {
 
     int iPointIndex = 0;
 
-    for (auto point : mesh.getShape())
+    for (auto point : mesh.getPtVector())
     {
         // Find the triangle that contains the current point
         int iTriIndex = mesh.findContainingTriangle(point);
@@ -210,7 +210,7 @@ TEST(MeshTest, MeshTest_CreateTriangles_Adjacency) {
         iPointIndex += 1;  // Move to the next point
 
         // Stop processing when the last three points (super triangle points) are reached
-        if ((mesh.getShape().size() - 3) == iPointIndex) { break; }
+        if ((mesh.getPtVector().size() - 3) == iPointIndex) { break; }
     }
     for(auto triangle : mesh.getTriVector()) {
         for(int i = 0; i < 3; i++) {

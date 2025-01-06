@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/ShapeTriangulation.iml" filepath="$PROJECT_DIR$/.idea/ShapeTriangulation.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/DelaunayMesh.iml" filepath="$PROJECT_DIR$/.idea/DelaunayMesh.iml" />
     </modules>
   </component>
 </project>

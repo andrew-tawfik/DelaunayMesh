@@ -1,7 +1,8 @@
 # This file is used to ignore files which are generated
 # ----------------------------------------------------------------------------
-
-.idea
+CMakeLists.txt.user
+build/
+.idea/
 # Ignore build directories
 triangulation-backend/build
 triangulation-backend/cmake-build-debug

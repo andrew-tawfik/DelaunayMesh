@@ -6,36 +6,36 @@
 Point::Point() {}
 
 // Parameterized constructor: initializes the point at (fx, fy)
-Point::Point(float fx, float fy) : fx(fx), fy(fy) {}
+Point::Point(float fx, float fy) : m_fx(fx), m_fy(fy) {}
 
 // Getter for x coordinate
 float Point::getX() const
 {
-    return fx;
+    return m_fx;
 }
 
 // Setter for x coordinate
 void Point::setX(float fx)
 {
-    this->fx = fx;
+    this->m_fx = fx;
 }
 
 // Getter for y coordinate
 float Point::getY() const
 {
-    return fy;
+    return m_fy;
 }
 
 // Setter for y coordinate
 void Point::setY(float fy) {
-    this->fy = fy;
+    this->m_fy = fy;
 }
 
 // Function to find the distance between another point
 double Point::findDistance(const Point& p2) const
 {
-    double dx1 = fx;
-    double dy1 = fy;
+    double dx1 = m_fx;
+    double dy1 = m_fy;
 
     double dx2 = p2.getX();
     double dy2 = p2.getY();
@@ -51,8 +51,8 @@ double Point::findDistance(const Point& p2) const
 // Function to find the slope to another point
 double Point::findSlope(const Point& p2) const
 {
-    double dx1 = fx;
-    double dy1 = fy;
+    double dx1 = m_fx;
+    double dy1 = m_fy;
 
     double dx2 = p2.getX();
     double dy2 = p2.getY();
@@ -62,4 +62,9 @@ double Point::findSlope(const Point& p2) const
     return dSlope;
 }
 
-bool Point::operator==(const Point& other) const { return fx == other.fx && fy == other.fy; }
+bool Point::operator==(const Point& other) const { return m_fx == other.m_fx && m_fy == other.m_fy; }
+
+void to_json(nlohmann::json &j, const Point &p)
+{
+    j = nlohmann::json{{"x", p.getX()},{"y", p.getY()}};
+}

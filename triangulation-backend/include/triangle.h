@@ -7,10 +7,10 @@
 // Class representing a triangle defined by three points
 class Triangle {
 private:
-    Point pt0, pt1, pt2;  // Points defining the triangle
-    int iIndex; // Index of the triangle
-    int aiNeighbourIndices[3];  // Indices of neighboring triangles
-    int aiPointIndices[3];  // Indices of points in the triangle
+    Point m_pt0, m_pt1, m_pt2;  // Points defining the triangle
+    int m_iIndex; // Index of the triangle
+    int m_aiNeighbourIndices[3];  // Indices of neighboring triangles
+    int m_aiPointIndices[3];  // Indices of points in the triangle
 
 public:
     // Default constructor
@@ -71,5 +71,8 @@ public:
     Point getEdgeMidpoint(int iSide) const;
 
 };
+
+// Serialization function
+void to_json(nlohmann::json& j, const Triangle& t);
 
 #endif // TRIANGLE_H

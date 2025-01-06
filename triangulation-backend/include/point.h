@@ -1,3 +1,5 @@
+#include "json.hpp"
+
 #ifndef POINT_H
 #define POINT_H
 
@@ -5,7 +7,7 @@
 class Point {
 
 private:
-    float fx{0.0}, fy{0.0};  // x and y coordinates of the point
+    float m_fx{0.0}, m_fy{0.0};  // x and y coordinates of the point
 
 public:
     // Default constructor
@@ -34,6 +36,10 @@ public:
 
     bool operator==(const Point& other) const;
 
+
 };
+
+// Serialization functions
+void to_json(nlohmann::json& j, const Point& p);
 
 #endif // POINT_H
