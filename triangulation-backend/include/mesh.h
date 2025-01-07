@@ -41,17 +41,6 @@ public:
     // Function to create a super triangle that encloses all points
     Triangle superTriangle();
 
-    bool isHelperTriangle(const Triangle& tri) const;
-
-    // Removes helper triangles used for intermediate computations
-    void removeHelperTriangles();
-
-    // Updates triangle indices after removing triangles
-    void updateTriangleIndicesAfterRemoval();
-
-    // Updates neighboring triangles when a triangle is removed
-    void updateRemovedNeighbours(int iRemovedTriangleIndex);
-
     // Function to create new triangles
     void createTriangles(int iTriangleIndex, int iPointIndex);
 
@@ -84,12 +73,6 @@ public:
 
     // Updates neighboring relationships between triangles
     void updateNeighboursAfterSwap(int oldNeighborIndex, int oldTriangleIndex, int newTriangleIndex);
-
-    // Equilateralizes triangles by adding new points to improve the mesh quality
-    void equilateralizeTriangles();
-
-    // Locates the triangle with the smallest angle
-    int locateSmallestAngle();
 };
 
 // Serialization function

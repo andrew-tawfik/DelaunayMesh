@@ -384,8 +384,15 @@ Point Triangle::getEdgeMidpoint(int iSide) const
 
 void to_json(nlohmann::json &j, const Triangle &t)
 {
+    bool helper_triangle = false;
+    for (int i = 0; i < 3; ++i) {
+        if (t.getPointIndex(i) <= -10) {
+            helper_triangle = true;
+            break; // Exit early if the condition is not met
+        }
+    }
     j = nlohmann::json {
-        {"modified", 0}, // modified flag: 0 : 1
+        {"helper", helper_triangle}, // helper flag: 0 : 1
         {"index", t.getIndex()}, // triangle index
         {"pt0", t.getPoint(0)}, // Point 0
         {"pt1", t.getPoint(1)}, // Point 1

@@ -7,7 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include_directories(include)
 
-add_executable(ShapeTriangulation src/main.cpp
+add_executable(ShapeTriangulation
+        src/main.cpp
         src/point.cpp
         src/triangle.cpp
         src/mesh.cpp
@@ -21,7 +22,6 @@ add_executable(mesh_test
         src/mesh.cpp
 )
 
-include_directories(/opt/restbed/source)
 # Explicitly add GTest include directory and link library
 target_include_directories(mesh_test PRIVATE /usr/local/Cellar/googletest/1.15.2/include)
 target_link_directories(mesh_test PRIVATE /usr/local/Cellar/googletest/1.15.2/lib)

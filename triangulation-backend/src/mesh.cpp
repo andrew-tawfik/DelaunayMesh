@@ -36,7 +36,6 @@ void Mesh::addPoint(const Point &pt)
     m_vecPoints.push_back(pt);
 }
 
-
 // Returns the triangle vector
 std::vector<Triangle> Mesh::getTriVector() const
 {
@@ -75,7 +74,7 @@ void Mesh::buildMesh()
     }
 }
 
-// Finds the index of the triangle contaiCurrentNeighbourng the target point
+// Finds the index of the triangle containing the target point
 int Mesh::findContainingTriangle(const Point& ptTargetPoint) const
 {
     // random number generator
@@ -130,106 +129,6 @@ Triangle Mesh::superTriangle()
     triSuper.setIndex(0);
 
     return triSuper;
-}
-
-// Removes the helper triangles that include points of the super triangle.
-void Mesh::removeHelperTriangles()
-{
-    std::vector<int> trianglesToRemove;  // Vector to store indices of triangles to be removed
-
-    for (int i = 0; i < m_vecTriangles.size(); ++i)
-    {
-        const Triangle& triangle = m_vecTriangles[i];
-
-        // Check each point in the current triangle
-        for (int j = 0; j < 3; ++j)
-        {
-            // If a point in the triangle belongs to the super triangle (helper points)
-            if (triangle.getPointIndex(j) <= -10)
-            {
-                // Mark this triangle for removal
-                trianglesToRemove.push_back(i);
-
-                // Update the neighbors of the triangle being removed
-                updateRemovedNeighbours(triangle.getIndex());
-                break;  // Exit the loop as this triangle will be removed
-            }
-        }
-    }
-
-    // Remove the triangles marked for deletion, starting from the end to start
-    for (int i = trianglesToRemove.size() - 1; i >= 0; --i)
-    {
-        m_vecTriangles.erase(m_vecTriangles.begin() + trianglesToRemove[i]);
-    }
-
-    // Update triangle indices to reflect the removal
-    updateTriangleIndicesAfterRemoval();
-}
-
-// Updates triangle indices after some triangles have been removed.
-void Mesh::updateTriangleIndicesAfterRemoval()
-{
-    // Iterate through all remaining triangles
-    for (int iTriangleIndex = 0; iTriangleIndex < m_vecTriangles.size(); ++iTriangleIndex)
-    {
-        Triangle& currentTriangle = m_vecTriangles[iTriangleIndex];
-        int iOldIndex = currentTriangle.getIndex();  // Get the current triangle index
-
-        // Update the triangle's index if it has changed
-        if (iOldIndex != iTriangleIndex)
-        {
-            currentTriangle.setIndex(iTriangleIndex);
-
-            // Update the neighbors of the current triangle to reference the new index
-            for (int i = 0; i < 3; ++i)
-            {
-                int iTriangleNeighbourIndex = currentTriangle.getNeighbourIndex(i);
-                if (iTriangleNeighbourIndex == -1) continue;  // Skip if no neighbor
-
-                // Iterate through all triangles to find and update the neighbor's references
-                for (Triangle& triNeighbour : m_vecTriangles)
-                {
-                    if (triNeighbour.getIndex() == iTriangleNeighbourIndex)
-                    {
-                        // Update the specific neighbor reference to the new index
-                        for (int j = 0; j < 3; ++j)
-                        {
-                            if (triNeighbour.getNeighbourIndex(j) == iOldIndex)
-                            {
-                                triNeighbour.setNeighbourIndex(j, iTriangleIndex);
-                                break;  // Exit loop once the neighbor is updated
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-// Updates the neighbors of a triangle that has been removed.
-void Mesh::updateRemovedNeighbours(int iRemovedTriangleIndex)
-{
-    const Triangle& triRemoved = m_vecTriangles[iRemovedTriangleIndex];  // Get the removed triangle
-
-    // Iterate through each edge of the removed triangle
-    for (int i = 0; i < 3; ++i)
-    {
-        int removedNeighborIndex = triRemoved.getNeighbourIndex(i);
-        if (removedNeighborIndex == -1) continue;  // Skip if no neighbor
-
-        Triangle& triNeighbour = m_vecTriangles[removedNeighborIndex];
-
-        // Update the neighbor reference to indicate it no longer has a neighbor on this edge
-        for (int j = 0; j < 3; ++j)
-        {
-            if (triNeighbour.getNeighbourIndex(j) == iRemovedTriangleIndex)
-            {
-                triNeighbour.setNeighbourIndex(j, -1);  // Mark as no neighbor
-            }
-        }
-    }
 }
 
 // Creates new triangles by splitting an existing triangle based on the provided point index.
@@ -1248,84 +1147,9 @@ void Mesh::updateNeighboursAfterSwap(int oldNeighborIndex, int oldTriangleIndex,
     }
 }
 
-// Adjusts triangles to make them more equilateral by adding new points and creating new triangles.
-void Mesh::equilateralizeTriangles()
-{
-    int smallestAngleTriangleIndex;
-    int iterationCount = 0;
-
-    // Continuously process triangles until no triangles with small angles are found
-    while ((smallestAngleTriangleIndex = locateSmallestAngle()) >= 0)
-    {
-        // Retrieve the triangle with the smallest angle
-        auto& triangle = m_vecTriangles[smallestAngleTriangleIndex];
-
-        Point circumcenter = triangle.getCircumcenter();
-
-        m_vecPoints.push_back(circumcenter);
-
-        // Find the triangle that contains the circumcenter
-        int containingTriangleIndex = findContainingTriangle(circumcenter);
-
-        int newPointIndex = m_vecPoints.size() - 1;
-
-        // Create new triangles by connecting the new point with the containing triangle
-        createTriangles(containingTriangleIndex, newPointIndex);
-    }
-}
-
-// Finds the index of the triangle with the smallest angle to be processed for equilateralization.
-int Mesh::locateSmallestAngle()
-{
-    double minAngle = 180.0; // Initialize with the largest possible angle
-    int minAngleTriangleIndex = -1; // Index of the triangle with the smallest angle
-
-    // Update the minimum angle and corresponding triangle index
-    auto updateMinAngle = [&](double angle, int triangleIndex) {
-        if (angle < minAngle)
-        {
-            minAngle = angle;
-            minAngleTriangleIndex = triangleIndex;
-        }
-    };
-
-    // Iterate over all triangles in the mesh
-    for (const auto& triangle : m_vecTriangles)
-    {
-        // Check each angle of the triangle
-        for (int j = 0; j < 3; ++j)
-        {
-            int neighborIndex = triangle.getNeighbourIndex(j);
-
-            // Check if the edge is a border case (i.e., has no neighbor)
-            if (neighborIndex == -1)
-            {
-                double innerAngle = triangle.getAng(j);
-                updateMinAngle(innerAngle, triangle.getIndex());
-                break;  // No need to check further angles for this triangle
-            }
-            else
-            {
-                updateMinAngle(triangle.getAng(j), triangle.getIndex());
-            }
-        }
-    }
-
-    // Return the index of the triangle with the smallest angle if it's below threshold, else return -1
-    if (minAngle < 40.0)
-    {
-        return minAngleTriangleIndex;
-    }
-    else
-    {
-        return -1;
-    }
-}
-
 void to_json(nlohmann::json &j, const Mesh &m)
 {
     j = nlohmann::json {
-
         {"triangles", m.getTriVector()},
         {"points", m.getPtVector()}
     };
