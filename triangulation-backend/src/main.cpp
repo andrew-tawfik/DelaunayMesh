@@ -2,7 +2,7 @@
 #include <iostream>
 #include <websocketpp/config/asio_no_tls.hpp>
 #include <websocketpp/server.hpp>
-#include <memory>
+#include <websocketpp/client.hpp>
 #include <map>
 
 typedef websocketpp::server<websocketpp::config::asio> server;
