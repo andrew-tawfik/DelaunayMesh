@@ -1,4 +1,4 @@
-# Delaunay Triangulation Project
+# Full-Stack Mesh Generation Project
 
 ## Table of Contents
 
@@ -62,8 +62,6 @@ The Delaunay triangulation algorithm consists of the following steps:
 4. **Maintaining Neighbors**:
    - Update the relationships between triangles to ensure consistency in the mesh structure.
 
-6. **Equilateralization**:
-   - Add points to the circumcenters of triangles with angles under 40 degrees to improve mesh quality.
 
 ---
 
