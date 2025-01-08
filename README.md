@@ -67,6 +67,6 @@ The Delaunay triangulation algorithm consists of the following steps:
 
 ## Demo
 
-![Demo of Real-Time Mesh Update](./demo.gif)
+![Demo of Real-Time Mesh Update](./DEMO.gif)
 
 The above animation shows real-time triangulation and mesh updates as the user places points on the canvas.
