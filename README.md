@@ -61,6 +61,7 @@ The Delaunay triangulation algorithm follows these steps:
 
 ## Demo 
 
+![Video](./demo.gif)
 ### Step 1. Build Mesh
 
 ![Build Mesh Demo](triangulation-backend/demo/buildMesh-Demo.png)
