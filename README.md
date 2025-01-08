@@ -3,73 +3,72 @@
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Algorithm](#algorithm)
-3. [Class Structure](#class-structure)
-4. [Future Modifications](#future-modifications)
-5. [Demo](#demo)
+2. [Features](#features)
+3. [Technical Highlights](#technical-highlights)
+4. [Algorithm](#algorithm)
+6. [Demo](#demo)
 
+---
 
 ## Overview
 
-This project implements a Delaunay triangulation algorithm using C++. The program efficiently generates a mesh of triangles from a given set of points, ensuring that no point lies inside the circumcircle of any triangle in the mesh. Delaunay triangulation for mesh generation results in well-shaped triangles that are useful in various applications, including finite element analysis and computer graphics.
+This project is a real-time triangulation engine that dynamically generates and updates meshes based on user-defined points. Using the **Delaunay triangulation algorithm**, the application ensures that the resulting meshes maintain desirable properties like well-shaped triangles and adherence to the Delaunay condition.
 
+The project is ideal for applications in computer graphics, simulations, and finite element analysis, leveraging its high interactivity and reliable triangulation techniques.
 
-## Algorithm 
-The Delaunay triangulation algorithm follows these steps: 
-1. **Initialization**: 
-   - Create a super triangle that encompasses all input points. This triangle is large enough to contain all the given points within it. 
-   - Add this super triangle to the mesh. 
+---
 
-2. **Adding Points**: 
-   - Iterate over each input point and find the triangle that contains it. 
-   - If the point lies inside a triangle, split the triangle into three triangles. 
-   - If the point lies on an edge, split the triangle into two triangles and handle neighboring triangles accordingly. 
+## Features
 
-3. **Edge Flipping**: 
-   - After adding each point, check the circumcircles of the neighboring triangles. 
-   - If a point lies inside the circumcircle of a neighbour, swap the edge between the current triangle and that neighbour to maintain the Delaunay property. 
+- **Dynamic Mesh Updates**: The triangulation engine updates meshes in real time as users add points.
+- **Industry-Standard Algorithm**: Implements the highly regarded **Delaunay triangulation algorithm**, a staple in the graphics industry.
+- **User-Interactive Interface**: Seamless user interaction with immediate visualization of updated meshes.
+- **Optimized for Performance**: High-performance backend ensures efficient handling of large datasets.
+- **Real-Time Communication**: WebSocket-based API enables low-latency communication between the backend and frontend.
 
-4. **Maintaining Neighbors**: 
-   - Update neighbor relationships for all affected triangles after adding points and swapping edges. 
-   - Ensure the mesh remains consistent and maintains the Delaunay triangulation properties. 
+---
 
-5. **Triangle Removal** 
-   - When the points are all processed, remove all triangles connected to points of the super triangle. 
+## Technical Highlights
 
-6. **Triangle Equilateralization**
-   - If any triangle has an angle under 40 degrees, add a point in that triangle's circumcenter. 
+1. **C++ Triangulation Engine**:
+   - Designed for high performance, it calculates and updates meshes efficiently.
+   - Implements edge-flipping and circumcircle calculations to maintain the Delaunay condition.
 
+2. **React Frontend**:
+   - Provides an intuitive interface for users to add points and see immediate results.
+   - Features real-time rendering of mesh updates.
 
+3. **WebSocket Integration**:
+   - Enables continuous, low-latency communication between the frontend and backend for seamless updates.
 
-## Class Structure
+---
 
-- **Point Class**: Represents a point in 2D space.
-- **Triangle Class**: Represents a triangle formed by three points.
-- **Mesh Class**: Manages a collection of points and triangles to build and maintain the Delaunay triangulation mesh, including adding points and handling neighbor relationships.
+## Algorithm
 
+The Delaunay triangulation algorithm consists of the following steps:
 
-## Future Modifications
+1. **Initialization**:
+   - A large super triangle is created to encompass all input points.
+   - This super triangle serves as the starting mesh structure.
 
-### Interactive GUI
+2. **Adding Points**:
+   - For each input point, locate the triangle containing it.
+   - Split the triangle into smaller triangles, ensuring the mesh maintains Delaunay properties.
 
-- **Add Point Placement**: Implement functionality to allow users to click on the canvas to place points for triangulation.
-- **Real-Time Visualization**: Enable real-time updates to the mesh as points are added or moved, observing the effects on the triangulation.
+3. **Edge Flipping**:
+   - Check the circumcircles of adjacent triangles after adding points.
+   - Flip edges where necessary to maintain the Delaunay condition (no point lies inside another triangle's circumcircle).
 
-### Performance Improvements
+4. **Maintaining Neighbors**:
+   - Update the relationships between triangles to ensure consistency in the mesh structure.
 
-- **Algorithm Optimization**: Explore ways to optimize the Delaunay triangulation algorithm for higher performance.
+6. **Equilateralization**:
+   - Add points to the circumcenters of triangles with angles under 40 degrees to improve mesh quality.
 
-## Demo 
+---
 
-![Video](./demo.gif)
-### Step 1. Build Mesh
+## Demo
 
-![Build Mesh Demo](triangulation-backend/demo/buildMesh-Demo.png)
+![Demo of Real-Time Mesh Update](./demo.gif)
 
-### Step 2. Remove Helper Triangles
-
-![Remove Helper Triangles Demo](triangulation-backend/demo/removeHelperTriangles-Demo.png)
-
-### Step 3. Equalaterize All Triangles
-
-![Equalaterize Triangles Final Demo](triangulation-backend/demo/equalateralizeTriangles-FinalDemo.png)
+The above animation shows real-time triangulation and mesh updates as the user places points on the canvas.
