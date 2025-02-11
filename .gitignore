@@ -3,6 +3,7 @@
 CMakeLists.txt.user
 build/
 .idea/
+.vscode/
 # Ignore build directories
 triangulation-backend/build
 triangulation-backend/cmake-build-debug

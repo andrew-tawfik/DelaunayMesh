@@ -39,21 +39,6 @@ add_executable(ShapeTriangulation
 
 target_link_libraries(ShapeTriangulation Boost::boost Boost::system Boost::thread)
 
-
-# Add test executable
-add_executable(mesh_test
-        test/mesh_test.cpp
-        src/point.cpp
-        src/triangle.cpp
-        src/mesh.cpp
-)
-
-# Explicitly add GTest include directory and link library
-target_include_directories(mesh_test PRIVATE /usr/local/Cellar/googletest/1.15.2/include)
-target_link_directories(mesh_test PRIVATE /usr/local/Cellar/googletest/1.15.2/lib)
-target_link_libraries(mesh_test PRIVATE gtest gtest_main pthread)
-
-
 include(GNUInstallDirs)
 install(TARGETS ShapeTriangulation
     BUNDLE DESTINATION ..
