@@ -1,4 +1,4 @@
-# Full-Stack Mesh Generation Project
+# Triangulate: Interactive Mesh Generation Engine
 
 ## Table of Contents
 
