@@ -248,7 +248,9 @@ bool Triangle::isInCircumcircle(const Point& pt) const
     double dRadius = ptCircumcenter.findDistance(getPoint(1)); // Calculate the radius
     double dPointDistance = ptCircumcenter.findDistance(pt); // Calculate the distance from the point to the circumcenter
 
-    return dPointDistance < dRadius;
+    // Epsilon tolerance: point must be clearly inside, not just floating-point noise
+    const double epsilon = 1e-6;
+    return dPointDistance < (dRadius-epsilon);
 }
 
 // Getter for aiNeighbourIndices

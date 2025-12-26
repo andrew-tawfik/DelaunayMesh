@@ -73,6 +73,15 @@ public:
 
     // Updates neighboring relationships between triangles
     void updateNeighboursAfterSwap(int oldNeighborIndex, int oldTriangleIndex, int newTriangleIndex);
+
+    // Removes helper triangles used for intermediate computations
+    void removeHelperTriangles();
+
+    // Updates triangle indices after removing triangles
+    void updateTriangleIndicesAfterRemoval();
+
+    // Updates neighboring triangles when a triangle is removed
+    void updateRemovedNeighbours(int iRemovedTriangleIndex);
 };
 
 // Serialization function
