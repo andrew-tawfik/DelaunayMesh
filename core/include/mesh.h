@@ -82,6 +82,8 @@ public:
 
     // Updates neighboring triangles when a triangle is removed
     void updateRemovedNeighbours(int iRemovedTriangleIndex);
+
+    void restoreDelaunay(int iPointIndex);
 };
 
 // Serialization function

@@ -1249,3 +1249,32 @@ void Mesh::updateRemovedNeighbours(int iRemovedTriangleIndex)
         }
     }
 }
+
+void Mesh::restoreDelaunay(int iPointIndex)
+{
+    const Point& pt = m_vecPoints[iPointIndex];
+    
+    bool changed = true;
+    while (changed) {
+        changed = false;
+        
+        for (size_t t = 0; t < m_vecTriangles.size() && !changed; t++) {
+            Triangle& tri = m_vecTriangles[t];
+            
+            bool hasNewPoint = (tri.getPointIndex(0) == iPointIndex ||
+                               tri.getPointIndex(1) == iPointIndex ||
+                               tri.getPointIndex(2) == iPointIndex);
+            if (!hasNewPoint) continue;
+            
+            for (int edge = 0; edge < 3 && !changed; edge++) {
+                int neighborIdx = tri.getNeighbourIndex(edge);
+                if (neighborIdx < 0) continue;
+                
+                if (m_vecTriangles[neighborIdx].isInCircumcircle(pt)) {
+                    swapEdge(t, neighborIdx);
+                    changed = true;  // Will exit both loops and restart
+                }
+            }
+        }
+    }
+}
