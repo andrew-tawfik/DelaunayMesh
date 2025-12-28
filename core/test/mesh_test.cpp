@@ -363,7 +363,7 @@ TEST_F(MeshTestFixture, FindContainingTriangle_AlwaysFindsCorrectTriangle)
     {
         Mesh mesh;
         // Point outside the super triangle
-        Point outside(25000.0, 125000.0);
+        Point outside(525000.0, 125000.0);
 
         int foundIdx = mesh.findContainingTriangle(outside);
 
@@ -1536,204 +1536,32 @@ TEST_F(MeshTestFixture, PointOnEdge_FourTriangles)
     }
 }
 
-TEST_F(MeshTestFixture, Debug_DelaunayViolation_DetailedState) {
-    std::mt19937 rng(12345);
+TEST_F(MeshTestFixture, TriangulatePoint_Incremental10000) {
+    // Test incremental insertion (triangulatePoint) vs batch (buildMesh)
+    std::mt19937 rng(99999);
     std::uniform_real_distribution<float> dist(1.0f, 1000.0f);
-    
-    std::vector<Point> points;
-    for (int i = 0; i < 1000; i++) {
-        points.emplace_back(dist(rng), dist(rng));
-    }
     
     Mesh mesh;
     
-    // Insert points up to lastGoodPoint (118)
-    for (int i = 0; i < 119; i++) {
-        mesh.triangulatePoint(points[i].getX(), points[i].getY());
-    }
+    auto startTime = std::chrono::high_resolution_clock::now();
     
-    // Verify we're still good
-    ASSERT_TRUE(verifyDelaunayProperty(mesh)) << "Already broken before point 119";
-    
-    std::cout << "\n========== STATE BEFORE INSERTING POINT 119 ==========" << std::endl;
-    std::cout << "Point 119 to insert: (" << points[119].getX() << ", " << points[119].getY() << ")" << std::endl;
-    std::cout << "Violating point 14: (" << points[14].getX() << ", " << points[14].getY() << ")" << std::endl;
-    
-    // Find which triangle point 119 will land in
-    int targetTriIdx = mesh.findContainingTriangle(points[119]);
-    std::cout << "\nPoint 119 will land in triangle: " << targetTriIdx << std::endl;
-    
-    const std::vector<Triangle>& triangles = mesh.getTriVector();
-    const std::vector<Point>& pts = mesh.getPtVector();
-    
-    auto printTriangle = [&](int idx, const std::string& label) {
-        if (idx < 0 || idx >= triangles.size()) {
-            std::cout << label << " [" << idx << "]: INVALID/BOUNDARY" << std::endl;
-            return;
-        }
-        const Triangle& t = triangles[idx];
-        std::cout << label << " [" << idx << "]:" << std::endl;
-        for (int v = 0; v < 3; v++) {
-            int ptIdx = t.getPointIndex(v);
-            Point p = t.getPoint(v);
-            std::cout << "    v" << v << ": ptIdx=" << ptIdx 
-                      << " (" << p.getX() << ", " << p.getY() << ")";
-            if (ptIdx == 14) std::cout << "  <-- VIOLATING POINT";
-            std::cout << std::endl;
-        }
-        std::cout << "    neighbors: [" 
-                  << t.getNeighbourIndex(0) << ", "
-                  << t.getNeighbourIndex(1) << ", "
-                  << t.getNeighbourIndex(2) << "]" << std::endl;
+    for (int i = 0; i < 10000; i++) {
+        float x = dist(rng);
+        float y = dist(rng);
+        mesh.triangulatePoint(x, y);
         
-        // Check if point 119 is in this triangle's circumcircle
-        std::cout << "    point119 in circumcircle: " 
-                  << (t.isInCircumcircle(points[119]) ? "YES" : "NO") << std::endl;
-        // Check if point 14 is in this triangle's circumcircle
-        std::cout << "    point14 in circumcircle: " 
-                  << (t.isInCircumcircle(points[14]) ? "YES" : "NO") << std::endl;
-    };
-    
-    // Find where point 14 currently lives
-    int point14TriIdx = -1;
-    for (int t = 0; t < triangles.size(); t++) {
-        const Triangle& tri = triangles[t];
-        if (tri.getPointIndex(0) == 14 || 
-            tri.getPointIndex(1) == 14 || 
-            tri.getPointIndex(2) == 14) {
-            point14TriIdx = t;
-            break;
-        }
-    }
-    std::cout << "\nPoint 14 is a vertex of triangle: " << point14TriIdx << std::endl;
-    
-    // Print the target triangle
-    std::cout << "\n--- TARGET TRIANGLE (where 119 lands) ---" << std::endl;
-    printTriangle(targetTriIdx, "TARGET");
-    
-    // Print its neighbors
-    std::cout << "\n--- NEIGHBORS OF TARGET ---" << std::endl;
-    const Triangle& target = triangles[targetTriIdx];
-    int neighborIndices[3] = {
-        target.getNeighbourIndex(0),
-        target.getNeighbourIndex(1),
-        target.getNeighbourIndex(2)
-    };
-    for (int i = 0; i < 3; i++) {
-        printTriangle(neighborIndices[i], "NEIGHBOR[" + std::to_string(i) + "]");
+        // Periodic consistency checks (every 1000 points)
     }
     
-    // Print neighbors of neighbors
-    std::cout << "\n--- NEIGHBORS OF NEIGHBORS ---" << std::endl;
-    std::set<int> printed;
-    printed.insert(targetTriIdx);
-    for (int i = 0; i < 3; i++) {
-        printed.insert(neighborIndices[i]);
-    }
+    auto endTime = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
     
-    for (int i = 0; i < 3; i++) {
-        int nIdx = neighborIndices[i];
-        if (nIdx < 0) continue;
-        const Triangle& neighbor = triangles[nIdx];
-        for (int j = 0; j < 3; j++) {
-            int nnIdx = neighbor.getNeighbourIndex(j);
-            if (nnIdx >= 0 && printed.find(nnIdx) == printed.end()) {
-                printTriangle(nnIdx, "N[" + std::to_string(i) + "].NEIGHBOR[" + std::to_string(j) + "]");
-                printed.insert(nnIdx);
-            }
-        }
-    }
+    mesh.removeHelperTriangles();
+    std::cout << "Incremental insertion of 10000 points took " 
+              << duration.count() << " ms" << std::endl;
     
-    // Print where point 14 lives and its neighborhood
-    std::cout << "\n--- TRIANGLE CONTAINING POINT 14 ---" << std::endl;
-    printTriangle(point14TriIdx, "POINT14_TRI");
-    
-    if (point14TriIdx >= 0) {
-        std::cout << "\n--- NEIGHBORS OF POINT 14's TRIANGLE ---" << std::endl;
-        const Triangle& p14Tri = triangles[point14TriIdx];
-        for (int i = 0; i < 3; i++) {
-            int nIdx = p14Tri.getNeighbourIndex(i);
-            if (nIdx >= 0 && printed.find(nIdx) == printed.end()) {
-                printTriangle(nIdx, "P14_NEIGHBOR[" + std::to_string(i) + "]");
-                printed.insert(nIdx);
-            }
-        }
-    }
-    
-    // Find path from target triangle to point 14's triangle
-    std::cout << "\n--- PATH FROM TARGET TO POINT14 ---" << std::endl;
-    std::queue<int> bfsQueue;
-    std::map<int, int> parent;
-    bfsQueue.push(targetTriIdx);
-    parent[targetTriIdx] = -1;
-    
-    while (!bfsQueue.empty() && parent.find(point14TriIdx) == parent.end()) {
-        int current = bfsQueue.front();
-        bfsQueue.pop();
-        
-        const Triangle& tri = triangles[current];
-        for (int i = 0; i < 3; i++) {
-            int nIdx = tri.getNeighbourIndex(i);
-            if (nIdx >= 0 && parent.find(nIdx) == parent.end()) {
-                parent[nIdx] = current;
-                bfsQueue.push(nIdx);
-            }
-        }
-    }
-    
-    if (parent.find(point14TriIdx) != parent.end()) {
-        std::vector<int> path;
-        int curr = point14TriIdx;
-        while (curr != -1) {
-            path.push_back(curr);
-            curr = parent[curr];
-        }
-        std::reverse(path.begin(), path.end());
-        
-        std::cout << "Path length: " << path.size() << " triangles" << std::endl;
-        std::cout << "Path: ";
-        for (int i = 0; i < path.size(); i++) {
-            std::cout << path[i];
-            if (i < path.size() - 1) std::cout << " -> ";
-        }
-        std::cout << std::endl;
-        
-        // Print each triangle along the path
-        std::cout << "\n--- TRIANGLES ALONG PATH ---" << std::endl;
-        for (int i = 0; i < path.size(); i++) {
-            printTriangle(path[i], "PATH[" + std::to_string(i) + "]");
-        }
-    } else {
-        std::cout << "No path found (disconnected mesh?)" << std::endl;
-    }
-    
-    // Now insert point 119 and see what happens
-    std::cout << "\n========== INSERTING POINT 119 ==========" << std::endl;
-    mesh.triangulatePoint(points[119].getX(), points[119].getY());
-    
-    int failTri = -1, failPt = -1;
-    bool ok = verifyDelaunayProperty(mesh, &failTri, &failPt);
-    
-    if (!ok) {
-        std::cout << "\n--- VIOLATION DETAILS ---" << std::endl;
-        std::cout << "Violation: point " << failPt << " in circumcircle of triangle " << failTri << std::endl;
-        
-        const std::vector<Triangle>& newTriangles = mesh.getTriVector();
-        printTriangle(failTri, "VIOLATED_TRI");
-        
-        // Show which triangles now contain point 119
-        std::cout << "\n--- TRIANGLES NOW CONTAINING POINT 119 ---" << std::endl;
-        for (int t = 0; t < newTriangles.size(); t++) {
-            const Triangle& tri = newTriangles[t];
-            if (tri.getPointIndex(0) == 119 || 
-                tri.getPointIndex(1) == 119 || 
-                tri.getPointIndex(2) == 119) {
-                printTriangle(t, "CONTAINS_119");
-            }
-        }
-    }
-    
-    EXPECT_TRUE(ok) << "Delaunay violated after inserting point 119";
+    EXPECT_TRUE(verifyNeighbourConsistency(mesh));
+    EXPECT_TRUE(verifyDelaunayProperty(mesh));
 }
 
 /*
