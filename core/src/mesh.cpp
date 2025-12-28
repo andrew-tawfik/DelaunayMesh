@@ -117,9 +117,9 @@ int Mesh::findContainingTriangle(const Point& ptTargetPoint) const
 // Creates a super triangle that encloses all points in the mesh
 Triangle Mesh::superTriangle()
 {
-    Point p0 {-800, -500};
-    Point p1 {2200, -500};
-    Point p2 {700, 2098.076};
+    Point p0(-1000000.0f, -1000000.0f);
+    Point p1( 2000000.0f, -1000000.0f);  
+    Point p2( 500000.0f,  3000000.0f);
 
     Triangle triSuper {p0, p1, p2};
     triSuper.setPointIndex(0, -10);
@@ -225,24 +225,7 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
         m_vecTriangles.push_back(triNewTriangle1);
         m_vecTriangles.push_back(triNewTriangle2);
 
-        // Check the circumcircles of the new triangles and swap edges if necessary to maintain the Delaunay condition
-        if (m_vecTriangles[iTriangleIndex].getNeighbourIndex(2) != -1 && m_vecTriangles[m_vecTriangles[iTriangleIndex].getNeighbourIndex(2)].isInCircumcircle(ptTargetPoint))
-        {
-            std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iTriangleIndex, iPointIndex, 2);
-            swapAll(neighbourQueue, iPointIndex);
-        }
-
-        if (m_vecTriangles[iNewIndex1].getNeighbourIndex(0) != -1 && m_vecTriangles[m_vecTriangles[iNewIndex1].getNeighbourIndex(0)].isInCircumcircle(ptTargetPoint))
-        {
-            std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iNewIndex1, iPointIndex, 0);
-            swapAll(neighbourQueue, iPointIndex);
-        }
-
-        if (m_vecTriangles[iNewIndex2].getNeighbourIndex(0) != -1 && m_vecTriangles[m_vecTriangles[iNewIndex2].getNeighbourIndex(0)].isInCircumcircle(ptTargetPoint))
-        {
-            std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iNewIndex2, iPointIndex, 0);
-            swapAll(neighbourQueue, iPointIndex);
-        }
+        restoreDelaunay(iPointIndex);
     }
     else
     {
@@ -307,37 +290,13 @@ void Mesh::handleEdgeCase(int iTriangleIndex, int iPointIndex)
             // Add the new triangle to the list of triangles
             m_vecTriangles.push_back(triNewTriangle1);
 
-            // Check and handle circumcircles for possible swaps
-            int neighbourIdx0 = m_vecTriangles[iTriangleIndex].getNeighbourIndex(2);
-            int neighbourIdx1 = m_vecTriangles[iNewIndex1].getNeighbourIndex(0);
-
-            if (neighbourIdx0 >= 0 && m_vecTriangles[neighbourIdx0].isInCircumcircle(ptTargetPoint))
-            {
-                std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iTriangleIndex, iPointIndex, 2);
-                swapAll(neighbourQueue, iPointIndex);
-
-                if (areNeighbours(iTriangleIndex, iNewIndex1))
-                {
-                    iTriangleIndex = m_vecTriangles[neighbourIdx0].getIndex();
-                }
-            }
-
-            if (neighbourIdx1 >= 0 && m_vecTriangles[neighbourIdx1].isInCircumcircle(ptTargetPoint))
-            {
-                std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iNewIndex1, iPointIndex, 0);
-                swapAll(neighbourQueue, iPointIndex);
-
-                if (areNeighbours(iTriangleIndex, iNewIndex1))
-                {
-                    iNewIndex1 = m_vecTriangles[neighbourIdx1].getIndex();
-                }
-            }
-
             // Handle the opposite side of the triangle if necessary
             if (iOldNeighbour > -1)
             {
                 createTrianglesOppositeSide(iOldNeighbour, iPointIndex, iTriangleIndex, iNewIndex1);
             }
+
+            restoreDelaunay(iPointIndex);
         }
 
         // Handle case where the point is on Edge 1 (pt1 to pt2)
@@ -383,37 +342,13 @@ void Mesh::handleEdgeCase(int iTriangleIndex, int iPointIndex)
             // Add the new triangle to the list of triangles
             m_vecTriangles.push_back(triNewTriangle1);
 
-            // Check and handle circumcircles for possible swaps
-            int neighbourIdx0 = m_vecTriangles[iTriangleIndex].getNeighbourIndex(2);
-            int neighbourIdx1 = m_vecTriangles[iNewIndex1].getNeighbourIndex(0);
-
-            if (neighbourIdx0 >= 0 && m_vecTriangles[neighbourIdx0].isInCircumcircle(ptTargetPoint))
-            {
-                std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iTriangleIndex, iPointIndex, 2);
-                swapAll(neighbourQueue, iPointIndex);
-
-                if (areNeighbours(iTriangleIndex, iNewIndex1))
-                {
-                    iTriangleIndex = m_vecTriangles[neighbourIdx0].getIndex();
-                }
-            }
-
-            if (neighbourIdx1 >= 0 && m_vecTriangles[neighbourIdx1].isInCircumcircle(ptTargetPoint))
-            {
-                std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iNewIndex1, iPointIndex, 0);
-                swapAll(neighbourQueue, iPointIndex);
-
-                if (areNeighbours(iTriangleIndex, iNewIndex1))
-                {
-                    iNewIndex1 = m_vecTriangles[neighbourIdx1].getIndex();
-                }
-            }
-
             // Handle the opposite side of the triangle if necessary
             if (iOldNeighbour > -1)
             {
                 createTrianglesOppositeSide(iOldNeighbour, iPointIndex, iTriangleIndex, iNewIndex1);
             }
+
+            restoreDelaunay(iPointIndex);
         }
 
         // Handle case where the point is on Edge 2 (pt2 to pt0)
@@ -459,37 +394,13 @@ void Mesh::handleEdgeCase(int iTriangleIndex, int iPointIndex)
             // Add the new triangle to the list of triangles
             m_vecTriangles.push_back(triNewTriangle1);
 
-            // Check and handle circumcircles for possible swaps
-            int neighbourIdx0 = m_vecTriangles[iTriangleIndex].getNeighbourIndex(0);
-            int neighbourIdx1 = m_vecTriangles[iNewIndex1].getNeighbourIndex(0);
-
-            if (neighbourIdx0 >= 0 && m_vecTriangles[neighbourIdx0].isInCircumcircle(ptTargetPoint))
-            {
-                std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iTriangleIndex, iPointIndex, 0);
-                swapAll(neighbourQueue, iPointIndex);
-
-                if (areNeighbours(iTriangleIndex, iNewIndex1))
-                {
-                    iTriangleIndex = m_vecTriangles[neighbourIdx0].getIndex();
-                }
-            }
-
-            if (neighbourIdx1 >= 0 && m_vecTriangles[neighbourIdx1].isInCircumcircle(ptTargetPoint))
-            {
-                std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iNewIndex1, iPointIndex, 0);
-                swapAll(neighbourQueue, iPointIndex);
-
-                if (areNeighbours(iTriangleIndex, iNewIndex1))
-                {
-                    iNewIndex1 = m_vecTriangles[neighbourIdx1].getIndex();
-                }
-            }
-
             // Handle the opposite side of the triangle if necessary
             if (iOldNeighbour > -1)
             {
                 createTrianglesOppositeSide(iOldNeighbour, iPointIndex, iTriangleIndex, iNewIndex1);
             }
+
+            restoreDelaunay(iPointIndex);
         }
     }
 }
@@ -563,20 +474,6 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
         // Update the reference to the current triangle and perform edge neighbor updates
         updateEdgeNeighbours(iTriangleIndex, iNewIndex1, iNeighbourIndex0, iNeighbourIndex1);
 
-        // Check if the new triangles' neighbors are in the circumcircle of the target point
-        int neighbourIdx0 = m_vecTriangles[iTriangleIndex].getNeighbourIndex(2);
-        int neighbourIdx1 = m_vecTriangles[iNewIndex1].getNeighbourIndex(0);
-        if (neighbourIdx0 >= 0 && m_vecTriangles[neighbourIdx0].isInCircumcircle(ptTargetPoint))
-        {
-            std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iTriangleIndex, iPointIndex, 2);
-            swapAll(neighbourQueue, iPointIndex);
-        }
-
-        if (neighbourIdx1 >= 0 && m_vecTriangles[neighbourIdx1].isInCircumcircle(ptTargetPoint))
-        {
-            std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iNewIndex1, iPointIndex, 0);
-            swapAll(neighbourQueue, iPointIndex);
-        }
     }
     // Handle the case where the target point is on Edge 1 (between points 0 and 1)
     else if (triCurrent.onEdge(ptTargetPoint) == 1)
@@ -632,21 +529,6 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
 
         // Update the reference to the current triangle and perform edge neighbor updates
         updateEdgeNeighbours(iTriangleIndex, iNewIndex1, iNeighbourIndex0, iNeighbourIndex1);
-
-        // Check if the new triangles' neighbors are in the circumcircle of the target point
-        int neighbourIdx0 = m_vecTriangles[iTriangleIndex].getNeighbourIndex(2);
-        int neighbourIdx1 = m_vecTriangles[iNewIndex1].getNeighbourIndex(0);
-        if (neighbourIdx0 >= 0 && m_vecTriangles[neighbourIdx0].isInCircumcircle(ptTargetPoint))
-        {
-            std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iTriangleIndex, iPointIndex, 2);
-            swapAll(neighbourQueue, iPointIndex);
-        }
-
-        if (neighbourIdx1 >= 0 && m_vecTriangles[neighbourIdx1].isInCircumcircle(ptTargetPoint))
-        {
-            std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iNewIndex1, iPointIndex, 0);
-            swapAll(neighbourQueue, iPointIndex);
-        }
     }
     // Handle the case where the target point is on Edge 2 (between points 1 and 2)
     else
@@ -702,21 +584,6 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
 
         // Update the reference to the current triangle and perform edge neighbor updates
         updateEdgeNeighbours(iTriangleIndex, iNewIndex1, iNeighbourIndex0, iNeighbourIndex1);
-
-        // Check if the new triangles' neighbors are in the circumcircle of the target point
-        int neighbourIdx0 = m_vecTriangles[iTriangleIndex].getNeighbourIndex(0);
-        int neighbourIdx1 = m_vecTriangles[iNewIndex1].getNeighbourIndex(0);
-        if (neighbourIdx0 >= 0 && m_vecTriangles[neighbourIdx0].isInCircumcircle(ptTargetPoint))
-        {
-            std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iTriangleIndex, iPointIndex, 0);
-            swapAll(neighbourQueue, iPointIndex);
-        }
-
-        if (neighbourIdx1 >= 0 && m_vecTriangles[neighbourIdx1].isInCircumcircle(ptTargetPoint))
-        {
-            std::queue<int> neighbourQueue = checkNeighboringCircumcircles(iNewIndex1, iPointIndex, 0);
-            swapAll(neighbourQueue, iPointIndex);
-        }
     }
 }
 
@@ -1240,8 +1107,12 @@ void Mesh::restoreDelaunay(int iPointIndex)
     const Point& pt = m_vecPoints[iPointIndex];
     
     bool changed = true;
-    while (changed) {
+    int maxIterations = m_vecTriangles.size() * 3;
+    int iterations = 0;
+    
+    while (changed && iterations < maxIterations) {
         changed = false;
+        iterations++;
         
         for (size_t t = 0; t < m_vecTriangles.size() && !changed; t++) {
             Triangle& tri = m_vecTriangles[t];
@@ -1252,12 +1123,23 @@ void Mesh::restoreDelaunay(int iPointIndex)
             if (!hasNewPoint) continue;
             
             for (int edge = 0; edge < 3 && !changed; edge++) {
+                // Find the ring edge - the edge OPPOSITE to point P
+                // Skip spoke edges (edges that connect to P)
+                int p0 = tri.getPointIndex(edge);
+                int p1 = tri.getPointIndex((edge + 1) % 3);
+                
+                if (p0 == iPointIndex || p1 == iPointIndex) {
+                    continue;  // This is a spoke edge, skip it
+                }
+                
+                // This is the ring edge
                 int neighborIdx = tri.getNeighbourIndex(edge);
                 if (neighborIdx < 0) continue;
                 
                 if (m_vecTriangles[neighborIdx].isInCircumcircle(pt)) {
                     swapEdge(t, neighborIdx);
-                    changed = true;  // Will exit both loops and restart
+                    changed = true;
+                    break;
                 }
             }
         }
