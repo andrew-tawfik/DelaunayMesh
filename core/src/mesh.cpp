@@ -48,7 +48,7 @@ void Mesh::setTriVector(const std::vector<Triangle>& vecTri)
     m_vecTriangles = vecTri;
 }
 
-void Mesh::triangulatePoint(float fx, float fy)
+void Mesh::triangulatePoint(double fx, double fy)
 {
     int iPointIndex = m_vecPoints.size();
     Point target_point = {fx, fy};

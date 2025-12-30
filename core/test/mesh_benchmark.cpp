@@ -6,15 +6,15 @@
 
 void benchmarkIncrementalInsertion(int numPoints) {
     std::mt19937 rng(99999);
-    std::uniform_real_distribution<float> dist(1.0f, 150000.0f);
+    std::uniform_real_distribution<double> dist(1.0, 150000.0);
     
     Mesh mesh;
     
     auto startTime = std::chrono::high_resolution_clock::now();
     
     for (int i = 0; i < numPoints; i++) {
-        float x = dist(rng);
-        float y = dist(rng);
+        double x = dist(rng);
+        double y = dist(rng);
         mesh.triangulatePoint(x, y);
         
         if ((i + 1) % 10000 == 0) {

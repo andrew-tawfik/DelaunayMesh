@@ -30,7 +30,7 @@ public:
     std::vector<Triangle> getTriVector() const;
 
     void addPoint(const Point& pt) ;
-    void triangulatePoint(float fx, float fy);
+    void triangulatePoint(double fx, double fy);
 
     // Function to build the mesh from points and triangles
     void buildMesh();

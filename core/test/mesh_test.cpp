@@ -272,8 +272,8 @@ TEST_F(MeshTestFixture, FindContainingTriangle_AlwaysFindsCorrectTriangle)
         for (const Triangle &t : triangles)
         {
             // Compute centroid
-            float cx = (t.getPoint(0).getX() + t.getPoint(1).getX() + t.getPoint(2).getX()) / 3.0f;
-            float cy = (t.getPoint(0).getY() + t.getPoint(1).getY() + t.getPoint(2).getY()) / 3.0f;
+            double cx = (t.getPoint(0).x() + t.getPoint(1).x() + t.getPoint(2).x()) / 3.0f;
+            double cy = (t.getPoint(0).y() + t.getPoint(1).y() + t.getPoint(2).y()) / 3.0f;
             Point centroid(cx, cy);
 
             int foundIdx = mesh.findContainingTriangle(centroid);
@@ -493,7 +493,7 @@ TEST_F(MeshTestFixture, CreateTriangles_TriggersSwapWhenNeeded)
 
         for (size_t i = 0; i < testCaseRect.size(); i++)
         {
-            mesh.triangulatePoint(testCaseRect[i].getX(), testCaseRect[i].getY());
+            mesh.triangulatePoint(testCaseRect[i].x(), testCaseRect[i].y());
 
             EXPECT_TRUE(verifyDelaunayProperty(mesh))
                 << "Delaunay violated after inserting point " << i;
@@ -508,7 +508,7 @@ TEST_F(MeshTestFixture, CreateTriangles_TriggersSwapWhenNeeded)
 
         for (size_t i = 0; i < testCaseInner.size(); i++)
         {
-            mesh.triangulatePoint(testCaseInner[i].getX(), testCaseInner[i].getY());
+            mesh.triangulatePoint(testCaseInner[i].x(), testCaseInner[i].y());
 
             EXPECT_TRUE(verifyDelaunayProperty(mesh))
                 << "Delaunay violated after inserting interior point " << i;
@@ -530,7 +530,7 @@ TEST_F(MeshTestFixture, CreateTriangles_TriggersSwapWhenNeeded)
 
         for (size_t i = 0; i < worstCase.size(); i++)
         {
-            mesh.triangulatePoint(worstCase[i].getX(), worstCase[i].getY());
+            mesh.triangulatePoint(worstCase[i].x(), worstCase[i].y());
 
             EXPECT_TRUE(verifyDelaunayProperty(mesh))
                 << "Delaunay violated after inserting worst case point " << i;
@@ -552,7 +552,7 @@ TEST_F(MeshTestFixture, CreateTriangles_TriggersSwapWhenNeeded)
 
         for (size_t i = 0; i < cascadeCase.size(); i++)
         {
-            mesh.triangulatePoint(cascadeCase[i].getX(), cascadeCase[i].getY());
+            mesh.triangulatePoint(cascadeCase[i].x(), cascadeCase[i].y());
 
             EXPECT_TRUE(verifyDelaunayProperty(mesh))
                 << "Delaunay violated after inserting cascade point " << i;
@@ -566,12 +566,12 @@ TEST_F(MeshTestFixture, CreateTriangles_TriggersSwapWhenNeeded)
         Mesh mesh;
 
         std::mt19937 rng(42);
-        std::uniform_real_distribution<float> dist(1.0f, 100.0f);
+        std::uniform_real_distribution<double> dist(1.0, 100.0);
 
         for (int i = 0; i < 20; i++)
         {
-            float x = dist(rng);
-            float y = dist(rng);
+            double x = dist(rng);
+            double y = dist(rng);
 
             mesh.triangulatePoint(x, y);
 
@@ -1451,7 +1451,7 @@ TEST_F(MeshTestFixture, PointOnEdge_FourTriangles)
 
         int triCountBefore = mesh.getTriVector().size();
 
-        mesh.triangulatePoint(edgeMidpoint.getX(), edgeMidpoint.getY());
+        mesh.triangulatePoint(edgeMidpoint.x(), edgeMidpoint.y());
 
         int triCountAfter = mesh.getTriVector().size();
 
@@ -1464,13 +1464,13 @@ TEST_F(MeshTestFixture, PointOnEdge_FourTriangles)
 TEST_F(MeshTestFixture, TriangulatePoint_Incremental10000) {
     // Test incremental insertion (triangulatePoint) vs batch (buildMesh)
     std::mt19937 rng(99999);
-    std::uniform_real_distribution<float> dist(1.0f, 10000.0f);
+    std::uniform_real_distribution<double> dist(1.0, 10000.0);
     
     Mesh mesh;
         
     for (int i = 0; i < 10000; i++) {
-        float x = dist(rng);
-        float y = dist(rng);
+        double x = dist(rng);
+        double y = dist(rng);
         mesh.triangulatePoint(x, y);
         
         // Periodic consistency checks (every 1000 points)

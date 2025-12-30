@@ -7,32 +7,31 @@
 class Point {
 
 private:
-    float m_fx{0.0}, m_fy{0.0};  // x and y coordinates of the point
+    double m_x = 0.0;
+    double m_y = 0.0;
 
 public:
     // Default constructor
-    Point();
+    Point() = default;
 
     // Parameterized constructor
-    Point(float fx, float fy);
+    Point(double x, double y);
 
     // Getter for x coordinate
-    float getX() const;
+    [[nodiscard]] double x() const noexcept {return m_x; }
+    [[nodiscard]] double y() const noexcept {return m_y; }
 
     // Setter for x coordinate
-    void setX(float fx);
-
-    // Getter for y coordinate
-    float getY() const;
+    void setX(double x) noexcept {m_x = x; }
 
     // Setter for y coordinate
-    void setY(float fy);
+    void setY(double y) noexcept {m_y = y;}
 
     // Function to find the distance between another point
-    double findDistance(const Point& p2) const;
+    [[nodiscard]] double distanceTo(const Point& p2) const;
 
     // Function to find the slope to another point
-    double findSlope(const Point& p2) const;
+    [[nodiscard]] double slopeTo(const Point& p2) const;
 
     bool operator==(const Point& other) const;
 

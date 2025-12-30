@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
     // Mesh Workflow
     Mesh m;
     for (Point p : testCaseRect) {
-        m.triangulatePoint(p.getX(), p.getY());
+        m.triangulatePoint(p.x(), p.y());
     }
 
     std::vector<Triangle> meshTriangles = m.getTriVector();

@@ -2,43 +2,18 @@
 #include <cmath>
 #include <iostream>
 
-// Default constructor: initializes the point at (0.0, 0.0)
-Point::Point() {}
-
 // Parameterized constructor: initializes the point at (fx, fy)
-Point::Point(float fx, float fy) : m_fx(fx), m_fy(fy) {}
+Point::Point(double fx, double fy) : m_x(fx), m_y(fy) {}
 
-// Getter for x coordinate
-float Point::getX() const
-{
-    return m_fx;
-}
-
-// Setter for x coordinate
-void Point::setX(float fx)
-{
-    this->m_fx = fx;
-}
-
-// Getter for y coordinate
-float Point::getY() const
-{
-    return m_fy;
-}
-
-// Setter for y coordinate
-void Point::setY(float fy) {
-    this->m_fy = fy;
-}
 
 // Function to find the distance between another point
-double Point::findDistance(const Point& p2) const
+double Point::distanceTo(const Point& p2) const
 {
-    double dx1 = m_fx;
-    double dy1 = m_fy;
+    double dx1 = m_x;
+    double dy1 = m_y;
 
-    double dx2 = p2.getX();
-    double dy2 = p2.getY();
+    double dx2 = p2.x();
+    double dy2 = p2.y();
 
     double dy_t = dy2 - dy1;
     double dx_t = dx2 - dx1;
@@ -49,22 +24,18 @@ double Point::findDistance(const Point& p2) const
 }
 
 // Function to find the slope to another point
-double Point::findSlope(const Point& p2) const
+double Point::slopeTo(const Point& other) const
 {
-    double dx1 = m_fx;
-    double dy1 = m_fy;
-
-    double dx2 = p2.getX();
-    double dy2 = p2.getY();
-
-    double dSlope = (dy2 - dy1) / (dx2 - dx1);
-
-    return dSlope;
+    return (other.m_y - m_y) / (other.m_x - m_x);
 }
 
-bool Point::operator==(const Point& other) const { return m_fx == other.m_fx && m_fy == other.m_fy; }
+bool Point::operator==(const Point& other) const {
+    constexpr double epsilon = 1e-6;
+    return std::abs(m_x - other.m_x) < epsilon && 
+           std::abs(m_y - other.m_y) < epsilon;
+}
 
 void to_json(nlohmann::json &j, const Point &p)
 {
-    j = nlohmann::json{{"x", p.getX()},{"y", p.getY()}};
+    j = nlohmann::json{{"x", p.x()},{"y", p.y()}};
 }
