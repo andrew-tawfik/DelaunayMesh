@@ -79,7 +79,7 @@ double Triangle::edgeLength(size_t edge) const
     return m_points[edge].distanceTo(m_points[(edge + 1) % 3]);
 }
 
-double Triangle::perimeter() const
+double Triangle::perimeter() const noexcept
 {
     double sum = 0.0;
     for (size_t i = 0; i < 3; ++i) {
@@ -110,7 +110,7 @@ double Triangle::angle(size_t vertex) const
     return (180.0 / M_PI) * std::acos(cosAngle);
 }
 
-double Triangle::area() const
+double Triangle::area() const noexcept
 {
     // Signed area using cross product (shoelace formula)
     return 0.5 * (
@@ -135,7 +135,7 @@ Point Triangle::edgeMidpoint(size_t edge) const
     );
 }
 
-Point Triangle::circumcenter() const
+Point Triangle::circumcenter() const noexcept
 {
     double x1 = m_points[0].x(), y1 = m_points[0].y();
     double x2 = m_points[1].x(), y2 = m_points[1].y();
@@ -186,7 +186,7 @@ void Triangle::printPoints() const
               << std::endl;
 }
 
-bool Triangle::contains(const Point& pt) const
+bool Triangle::contains(const Point& pt) const noexcept
 {
     double px = pt.x();
     double py = pt.y();
@@ -205,7 +205,7 @@ bool Triangle::contains(const Point& pt) const
     return (d1 <= 0) && (d2 <= 0) && (d3 <= 0);
 }
 
-bool Triangle::isInCircumcircle(const Point& pt) const
+bool Triangle::isInCircumcircle(const Point& pt) const noexcept
 {
     Point cc = circumcenter();
     double radius = cc.distanceTo(m_points[0]);
@@ -242,7 +242,7 @@ bool Triangle::isPointOnEdge(const Point& pt, const Point& edgeStart, const Poin
     return dotProduct <= squaredLength;  // Within segment
 }
 
-int Triangle::onEdge(const Point& pt) const
+int Triangle::onEdge(const Point& pt) const noexcept
 {
     for (size_t i = 0; i < 3; ++i) {
         if (isPointOnEdge(pt, m_points[i], m_points[(i + 1) % 3])) {
@@ -252,7 +252,7 @@ int Triangle::onEdge(const Point& pt) const
     return -1;  // Not on any edge
 }
 
-std::optional<int> Triangle::neighborToward(const Point& pt) const
+std::optional<int> Triangle::neighborToward(const Point& pt) const noexcept
 {
     double px = pt.x();
     double py = pt.y();

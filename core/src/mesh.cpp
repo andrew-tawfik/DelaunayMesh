@@ -20,12 +20,6 @@ Mesh::Mesh(const std::vector<Point>& vecPt)
     setTriVector({ superTriangle()});
 }
 
-// Returns the shape of the mesh as a vector of points
-std::vector<Point> Mesh::getPtVector() const
-{
-    return m_vecPoints;
-}
-
 // Sets the shape of the mesh with a given vector of points
 void Mesh::setPtVector(const std::vector<Point>& vecPt)
 {
@@ -35,12 +29,6 @@ void Mesh::setPtVector(const std::vector<Point>& vecPt)
 void Mesh::addPoint(const Point &pt)
 {
     m_vecPoints.push_back(pt);
-}
-
-// Returns the triangle vector
-std::vector<Triangle> Mesh::getTriVector() const
-{
-    return m_vecTriangles;
 }
 
 // Sets the triangle vector
@@ -758,8 +746,8 @@ void Mesh::updateNeighboursAfterSwap(int oldNeighborIndex, int oldTriangleIndex,
 void to_json(nlohmann::json &j, const Mesh &m)
 {
     j = nlohmann::json {
-        {"triangles", m.getTriVector()},
-        {"points", m.getPtVector()}
+        {"triangles", m.triangles()},
+        {"points", m.points()}
     };
 }
 

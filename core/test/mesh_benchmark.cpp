@@ -33,8 +33,8 @@ void benchmarkIncrementalInsertion(int numPoints) {
     std::cout << "=== Results ===" << std::endl;
     std::cout << "Total time:    " << duration.count() << " ms" << std::endl;
     std::cout << "Points/sec:    " << (numPoints * 1000.0 / duration.count()) << std::endl;
-    std::cout << "Triangles:     " << mesh.getTriVector().size() << std::endl;
-    std::cout << "Points:        " << mesh.getPtVector().size() << std::endl;
+    std::cout << "Triangles:     " << mesh.triangles().size() << std::endl;
+    std::cout << "Points:        " << mesh.points().size() << std::endl;
     std::cout << std::endl;
 }
 

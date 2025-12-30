@@ -6,7 +6,7 @@
 
 inline bool verifyNeighbourConsistency(const Mesh &mesh)
 {
-    auto triangles = mesh.getTriVector();
+    auto triangles = mesh.triangles();
 
     int violations = 0;
     // for every triangle
@@ -59,8 +59,8 @@ inline bool verifyNeighbourConsistency(const Mesh &mesh)
 
 bool verifyDelaunayProperty(const Mesh &mesh, int *failTriangle = nullptr, int *failPoint = nullptr)
 {
-    auto triangles = mesh.getTriVector();
-    auto points = mesh.getPtVector();
+    auto triangles = mesh.triangles();
+    auto points = mesh.points();
     int violations = 0;
 
     for (const Triangle &t : triangles)

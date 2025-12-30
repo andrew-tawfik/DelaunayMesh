@@ -29,7 +29,7 @@ double Point::slopeTo(const Point& other) const
     return (other.m_y - m_y) / (other.m_x - m_x);
 }
 
-bool Point::operator==(const Point& other) const {
+bool Point::operator==(const Point& other) const noexcept{
     constexpr double epsilon = 1e-6;
     return std::abs(m_x - other.m_x) < epsilon && 
            std::abs(m_y - other.m_y) < epsilon;

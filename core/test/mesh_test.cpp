@@ -87,9 +87,9 @@ TEST_F(MeshTestFixture, CreateTriangles_PointInside_MultipleInsertions)
         ASSERT_GE(containingTri, 0)
             << "Point " << i << " should be inside mesh";
 
-        int triCountBefore = mesh.getTriVector().size();
+        int triCountBefore = mesh.triangles().size();
         mesh.createTriangles(containingTri, i);
-        int triCountAfter = mesh.getTriVector().size();
+        int triCountAfter = mesh.triangles().size();
 
         // Each interior insertion adds 2 triangles
         EXPECT_EQ(triCountAfter, triCountBefore + 2)
@@ -101,7 +101,7 @@ TEST_F(MeshTestFixture, CreateTriangles_PointInside_MultipleInsertions)
     }
 
     // Final check: all inserted points are vertices
-    std::vector<Triangle> triangles = mesh.getTriVector();
+    std::vector<Triangle> triangles = mesh.triangles();
     for (size_t pointIdx = 0; pointIdx < pointsToInsert.size(); pointIdx++)
     {
         bool foundAsVertex = false;
@@ -166,7 +166,7 @@ TEST_F(MeshTestFixture, SwapEdge_RestoresDelaunay)
     mesh.setTriVector({tri0, tri1});
 
     // === Verify initial state: Delaunay is violated ===
-    std::vector<Triangle> trianglesBefore = mesh.getTriVector();
+    std::vector<Triangle> trianglesBefore = mesh.triangles();
 
     // Check: C should be inside circumcircle of tri0 (ABD)
     bool violationExists = trianglesBefore[0].isInCircumcircle(C);
@@ -177,13 +177,13 @@ TEST_F(MeshTestFixture, SwapEdge_RestoresDelaunay)
     mesh.swapEdge(0, 1);
 
     // === Verify: Delaunay violation is fixed ===
-    std::vector<Triangle> trianglesAfter = mesh.getTriVector();
+    std::vector<Triangle> trianglesAfter = mesh.triangles();
 
     // After swap, diagonal should be A-C instead of B-D
     // New triangles should be: A-B-C and A-C-D
 
     // Check: No point is inside any triangle's circumcircle
-    std::vector<Point> points = mesh.getPtVector();
+    std::vector<Point> points = mesh.points();
 
     for (const Triangle &t : trianglesAfter)
     {
@@ -230,7 +230,7 @@ TEST_F(MeshTestFixture, FindContainingTriangle_AlwaysFindsCorrectTriangle)
         int foundIdx = mesh.findContainingTriangle(inside);
 
         ASSERT_GE(foundIdx, 0) << "Should find super triangle";
-        EXPECT_TRUE(mesh.getTriVector()[foundIdx].contains(inside))
+        EXPECT_TRUE(mesh.triangles()[foundIdx].contains(inside))
             << "Returned triangle should actually contain the point";
     }
 
@@ -239,8 +239,8 @@ TEST_F(MeshTestFixture, FindContainingTriangle_AlwaysFindsCorrectTriangle)
         Mesh mesh(testCaseRect);
         mesh.buildMesh();
 
-        std::vector<Point> points = mesh.getPtVector();
-        std::vector<Triangle> triangles = mesh.getTriVector();
+        std::vector<Point> points = mesh.points();
+        std::vector<Triangle> triangles = mesh.triangles();
 
         for (int i = 0; i < points.size(); i++)
         {
@@ -267,7 +267,7 @@ TEST_F(MeshTestFixture, FindContainingTriangle_AlwaysFindsCorrectTriangle)
         Mesh mesh(testCaseRect);
         mesh.buildMesh();
 
-        std::vector<Triangle> triangles = mesh.getTriVector();
+        std::vector<Triangle> triangles = mesh.triangles();
 
         for (const Triangle &t : triangles)
         {
@@ -301,7 +301,7 @@ TEST_F(MeshTestFixture, FindContainingTriangle_AlwaysFindsCorrectTriangle)
         Mesh mesh(testCaseRect);
         mesh.buildMesh();
 
-        std::vector<Triangle> triangles = mesh.getTriVector();
+        std::vector<Triangle> triangles = mesh.triangles();
 
         // Find an internal edge (shared by two triangles)
         for (const Triangle &t : triangles)
@@ -344,7 +344,7 @@ TEST_F(MeshTestFixture, FindContainingTriangle_AlwaysFindsCorrectTriangle)
             ASSERT_GE(result, 0);
 
             // Result might differ due to random start, but must always contain the point
-            EXPECT_TRUE(mesh.getTriVector()[result].contains(testPoint))
+            EXPECT_TRUE(mesh.triangles()[result].contains(testPoint))
                 << "Iteration " << i << ": returned triangle doesn't contain point";
         }
     }
@@ -354,7 +354,7 @@ TEST_F(MeshTestFixture, FindContainingTriangle_AlwaysFindsCorrectTriangle)
         Mesh mesh(testCaseInner); // Has interior points
         mesh.buildMesh();
 
-        std::vector<Triangle> triangles = mesh.getTriVector();
+        std::vector<Triangle> triangles = mesh.triangles();
 
         // Test several interior points
         std::vector<Point> testPoints = {
@@ -417,7 +417,7 @@ TEST_F(MeshTestFixture, SwapEdge_MaintainsNeighborConsistency)
 
         EXPECT_TRUE(verifyNeighbourConsistency(mesh));
 
-        std::vector<Triangle> triangles = mesh.getTriVector();
+        std::vector<Triangle> triangles = mesh.triangles();
         EXPECT_EQ(triangles.size(), 2);
         for (const Triangle &t : triangles)
         {
@@ -960,8 +960,8 @@ TEST_F(MeshTestFixture, FullPipeline_ProducesValidMesh)
     Mesh mesh(testCaseInner);
     mesh.buildMesh();
 
-    std::vector<Triangle> triangles = mesh.getTriVector();
-    std::vector<Point> points = mesh.getPtVector();
+    std::vector<Triangle> triangles = mesh.triangles();
+    std::vector<Point> points = mesh.points();
 
     // All input points appear as vertices
     for (int i = 0; i < points.size(); i++)
@@ -1018,13 +1018,13 @@ TEST_F(MeshTestFixture, PointOnEdge_FourTriangles)
 
         ASSERT_EQ(tri0.onEdge(P), 0);
 
-        int triCountBefore = mesh.getTriVector().size();
+        int triCountBefore = mesh.triangles().size();
         mesh.createTriangles(0, 3);
-        int triCountAfter = mesh.getTriVector().size();
+        int triCountAfter = mesh.triangles().size();
 
         EXPECT_EQ(triCountAfter, triCountBefore + 1);
 
-        std::vector<Triangle> triangles = mesh.getTriVector();
+        std::vector<Triangle> triangles = mesh.triangles();
         int trianglesWithP = 0;
         for (const Triangle &t : triangles)
         {
@@ -1071,7 +1071,7 @@ TEST_F(MeshTestFixture, PointOnEdge_FourTriangles)
 
         mesh.createTriangles(0, 3);
 
-        std::vector<Triangle> triangles = mesh.getTriVector();
+        std::vector<Triangle> triangles = mesh.triangles();
         EXPECT_EQ(triangles.size(), 2);
 
         int trianglesWithP = 0;
@@ -1120,7 +1120,7 @@ TEST_F(MeshTestFixture, PointOnEdge_FourTriangles)
 
         mesh.createTriangles(0, 3);
 
-        std::vector<Triangle> triangles = mesh.getTriVector();
+        std::vector<Triangle> triangles = mesh.triangles();
         EXPECT_EQ(triangles.size(), 2);
 
         int trianglesWithP = 0;
@@ -1179,14 +1179,14 @@ TEST_F(MeshTestFixture, PointOnEdge_FourTriangles)
         ASSERT_TRUE(verifyNeighbourConsistency(mesh));
         ASSERT_EQ(tri0.onEdge(P), 0);
 
-        int triCountBefore = mesh.getTriVector().size();
+        int triCountBefore = mesh.triangles().size();
         mesh.createTriangles(0, 4);
-        int triCountAfter = mesh.getTriVector().size();
+        int triCountAfter = mesh.triangles().size();
 
         EXPECT_EQ(triCountBefore, 2);
         EXPECT_EQ(triCountAfter, 4);
 
-        std::vector<Triangle> triangles = mesh.getTriVector();
+        std::vector<Triangle> triangles = mesh.triangles();
 
         int trianglesWithP = 0;
         for (const Triangle &t : triangles)
@@ -1243,7 +1243,7 @@ TEST_F(MeshTestFixture, PointOnEdge_FourTriangles)
 
         mesh.createTriangles(0, 4);
 
-        std::vector<Triangle> triangles = mesh.getTriVector();
+        std::vector<Triangle> triangles = mesh.triangles();
 
         std::set<int> allPointIndices;
         for (const Triangle &t : triangles)
@@ -1359,7 +1359,7 @@ TEST_F(MeshTestFixture, PointOnEdge_FourTriangles)
 
         EXPECT_TRUE(verifyNeighbourConsistency(mesh));
 
-        std::vector<Triangle> triangles = mesh.getTriVector();
+        std::vector<Triangle> triangles = mesh.triangles();
         for (const Triangle &t : triangles)
         {
             EXPECT_GT(t.area(), 0);
@@ -1416,7 +1416,7 @@ TEST_F(MeshTestFixture, PointOnEdge_FourTriangles)
 
         ASSERT_TRUE(verifyNeighbourConsistency(mesh));
 
-        std::vector<Triangle> triangles = mesh.getTriVector();
+        std::vector<Triangle> triangles = mesh.triangles();
 
         Point edgeMidpoint;
         int triIndex = -1;
@@ -1449,11 +1449,11 @@ TEST_F(MeshTestFixture, PointOnEdge_FourTriangles)
             return;
         }
 
-        int triCountBefore = mesh.getTriVector().size();
+        int triCountBefore = mesh.triangles().size();
 
         mesh.triangulatePoint(edgeMidpoint.x(), edgeMidpoint.y());
 
-        int triCountAfter = mesh.getTriVector().size();
+        int triCountAfter = mesh.triangles().size();
 
         EXPECT_EQ(triCountAfter, triCountBefore + 2);
         EXPECT_TRUE(verifyNeighbourConsistency(mesh));

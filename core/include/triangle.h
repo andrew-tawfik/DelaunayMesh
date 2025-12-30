@@ -20,6 +20,13 @@ public:
     Triangle();
     Triangle(const Point& pt0, const Point& pt1, const Point& pt2);
 
+    // Rule of Five
+    ~Triangle() = default;
+    Triangle(const Triangle&) = default;
+    Triangle& operator=(const Triangle&) = default;
+    Triangle(Triangle&&) noexcept = default;
+    Triangle& operator=(Triangle&&) noexcept = default;
+
     // Point access
     [[nodiscard]] const Point& point(size_t i) const;
     void setPoint(size_t i, const Point& p);
@@ -38,17 +45,17 @@ public:
 
     // Geometry calculations
     [[nodiscard]] double edgeLength(size_t edge) const;
-    [[nodiscard]] double perimeter() const;
+    [[nodiscard]] double perimeter() const noexcept;
     [[nodiscard]] double angle(size_t vertex) const;
-    [[nodiscard]] double area() const;
-    [[nodiscard]] Point circumcenter() const;
+    [[nodiscard]] double area() const noexcept;
+    [[nodiscard]] Point circumcenter() const noexcept;
     [[nodiscard]] Point edgeMidpoint(size_t iSide) const;
 
     // Spatial Queries
-    [[nodiscard]] bool contains(const Point& ptTargetPoint) const;
-    [[nodiscard]] bool isInCircumcircle(const Point& pt) const;
-    [[nodiscard]] int onEdge(const Point& pt) const;
-    [[nodiscard]] std::optional<int> neighborToward(const Point& pt) const;
+    [[nodiscard]] bool contains(const Point& ptTargetPoint) const noexcept;
+    [[nodiscard]] bool isInCircumcircle(const Point& pt) const noexcept;
+    [[nodiscard]] int onEdge(const Point& pt) const noexcept;
+    [[nodiscard]] std::optional<int> neighborToward(const Point& pt) const noexcept;
 
 
     // Debug

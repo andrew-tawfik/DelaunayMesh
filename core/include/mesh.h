@@ -22,12 +22,13 @@ public:
     Mesh(const std::vector<Point>& vecPt);
 
     // Getters and setters for the shape
-    std::vector<Point> getPtVector() const;
+    [[nodiscard]] const std::vector<Point>& points() const { return m_vecPoints; }
     void setPtVector(const std::vector<Point>& vecPt);
 
     // Getters and setters for the vector of Triangles (for testing purposes only)
     void setTriVector(const std::vector<Triangle>& vecTri);
-    std::vector<Triangle> getTriVector() const;
+    [[nodiscard]] const std::vector<Triangle>& triangles() const { return m_vecTriangles; }
+
 
     void addPoint(const Point& pt) ;
     void triangulatePoint(double fx, double fy);

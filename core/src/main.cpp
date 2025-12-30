@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
         m.triangulatePoint(p.x(), p.y());
     }
 
-    std::vector<Triangle> meshTriangles = m.getTriVector();
+    std::vector<Triangle> meshTriangles = m.triangles();
 
     // Prints the mesh and each triangles' neighbours
     for (Triangle t : meshTriangles)
