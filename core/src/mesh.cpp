@@ -234,354 +234,117 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
 // Handle cases where the target point lies on an edge of the current triangle
 void Mesh::handleEdgeCase(int iTriangleIndex, int iPointIndex)
 {
+    using namespace delaunay;
+    
+    const Point& pt = m_vecPoints[iPointIndex];
+    Triangle& tri = m_vecTriangles[iTriangleIndex];
+    
+    int edge = tri.onEdge(pt);
+    if (edge < 0) return;  // Not on any edge
+    
+    // Compute indices using modular arithmetic
+    int i0 = edge;
+    int i1 = (edge + 1) % 3;
+    int i2 = (edge + 2) % 3;
+    
+    // Create new triangle from the two points NOT on the split edge, plus new point
+    Triangle triNew(tri.point(i1), tri.point(i2), pt);
+    
+    int iNewIndex = m_vecTriangles.size();
+    triNew.setIndex(iNewIndex);
+    
+    // Set point indices
+    triNew.setPointIndex(0, tri.pointIndex(i1));
+    triNew.setPointIndex(1, tri.pointIndex(i2));
+    triNew.setPointIndex(2, iPointIndex);
+    
+    // Set neighbor relationships
+    triNew.setNeighbourIndex(0, tri.neighbourIndex(i1));
+    triNew.setNeighbourIndex(1, iTriangleIndex);  // Points back to original
+    
+    // Update old neighbor to point to new triangle
+    int oldNeighbour = tri.neighbourIndex(i1);
+    if (oldNeighbour != NO_NEIGHBOR)
     {
-        // Reference to the point being processed and the triangle that is being split
-        const Point& ptTargetPoint = m_vecPoints[iPointIndex];
-        Triangle& triCurrent = m_vecTriangles[iTriangleIndex];
-
-        // Create a new triangle that will be used to split the current triangle
-        Triangle triNewTriangle1;
-        int iNewIndex1 = m_vecTriangles.size();
-        triNewTriangle1.setIndex(iNewIndex1);
-
-        // Handle case where the point is on Edge 0 (pt0 to pt1)
-        if(triCurrent.onEdge(ptTargetPoint) == 0)
-        {
-            // Set points for the new triangle and update indices
-            triNewTriangle1.setPoint(0, triCurrent.point(1));
-            triNewTriangle1.setPoint(1, triCurrent.point(2));
-            triNewTriangle1.setPoint(2, ptTargetPoint);
-
-            triNewTriangle1.setPointIndex(0, triCurrent.pointIndex(1));
-            triNewTriangle1.setPointIndex(1, triCurrent.pointIndex(2));
-            triNewTriangle1.setPointIndex(2, iPointIndex);
-
-            // Set neighbor relationships for the new triangle
-            triNewTriangle1.setNeighbourIndex(1, iTriangleIndex);
-            triNewTriangle1.setNeighbourIndex(0, triCurrent.neighbourIndex(1));
-
-            int iOldNeighbourIndex1 = triCurrent.neighbourIndex(1);
-
-            // Update the old neighbor to reference the new triangle
-            if (iOldNeighbourIndex1 != -1)
-            {
-                Triangle& triOldNeighbour = m_vecTriangles[iOldNeighbourIndex1];
-                for (int i = 0; i < 3; ++i)
-                {
-                    if (triOldNeighbour.neighbourIndex(i) == iTriangleIndex)
-                    {
-                        triOldNeighbour.setNeighbourIndex(i, iNewIndex1);
-                        break;
-                    }
-                }
-            }
-
-            // Update the current triangle to include the new point
-            triCurrent.setPointIndex(1, iPointIndex);
-            triCurrent.setPoint(1, ptTargetPoint);
-            triCurrent.setNeighbourIndex(1, iNewIndex1);
-
-            const int iOldNeighbour = triCurrent.neighbourIndex(0);
-            triCurrent.setNeighbourIndex(0, -1);
-
-            // Add the new triangle to the list of triangles
-            m_vecTriangles.push_back(triNewTriangle1);
-
-            // Handle the opposite side of the triangle if necessary
-            if (iOldNeighbour > -1)
-            {
-                createTrianglesOppositeSide(iOldNeighbour, iPointIndex, iTriangleIndex, iNewIndex1);
-            }
-
-            restoreDelaunay(iPointIndex);
-        }
-
-        // Handle case where the point is on Edge 1 (pt1 to pt2)
-        else if (triCurrent.onEdge(ptTargetPoint) == 1)
-        {
-            // Set points for the new triangle and update indices
-            triNewTriangle1.setPoint(0, triCurrent.point(0));
-            triNewTriangle1.setPoint(1, triCurrent.point(1));
-            triNewTriangle1.setPoint(2, ptTargetPoint);
-
-            triNewTriangle1.setPointIndex(0, triCurrent.pointIndex(0));
-            triNewTriangle1.setPointIndex(1, triCurrent.pointIndex(1));
-            triNewTriangle1.setPointIndex(2, iPointIndex);
-
-            // Set neighbor relationships for the new triangle
-            triNewTriangle1.setNeighbourIndex(0, triCurrent.neighbourIndex(0));
-            triNewTriangle1.setNeighbourIndex(2, iTriangleIndex);
-
-            int iOldNeighbourIndex1 = triCurrent.neighbourIndex(0);
-
-            // Update the old neighbor to reference the new triangle
-            if (iOldNeighbourIndex1 != -1)
-            {
-                Triangle& triOldNeighbour = m_vecTriangles[iOldNeighbourIndex1];
-                for (int i = 0; i < 3; ++i)
-                {
-                    if (triOldNeighbour.neighbourIndex(i) == iTriangleIndex)
-                    {
-                        triOldNeighbour.setNeighbourIndex(i, iNewIndex1);
-                        break;
-                    }
-                }
-            }
-
-            // Update the current triangle to include the new point
-            triCurrent.setPointIndex(1, iPointIndex);
-            triCurrent.setPoint(1, ptTargetPoint);
-            triCurrent.setNeighbourIndex(0, iNewIndex1);
-
-            const int iOldNeighbour = triCurrent.neighbourIndex(1);
-            triCurrent.setNeighbourIndex(1, -1);
-
-            // Add the new triangle to the list of triangles
-            m_vecTriangles.push_back(triNewTriangle1);
-
-            // Handle the opposite side of the triangle if necessary
-            if (iOldNeighbour > -1)
-            {
-                createTrianglesOppositeSide(iOldNeighbour, iPointIndex, iTriangleIndex, iNewIndex1);
-            }
-
-            restoreDelaunay(iPointIndex);
-        }
-
-        // Handle case where the point is on Edge 2 (pt2 to pt0)
-        else
-        {
-            // Set points for the new triangle and update indices
-            triNewTriangle1.setPoint(0, triCurrent.point(1));
-            triNewTriangle1.setPoint(1, triCurrent.point(2));
-            triNewTriangle1.setPoint(2, ptTargetPoint);
-
-            triNewTriangle1.setPointIndex(0, triCurrent.pointIndex(1));
-            triNewTriangle1.setPointIndex(1, triCurrent.pointIndex(2));
-            triNewTriangle1.setPointIndex(2, iPointIndex);
-
-            // Set neighbor relationships for the new triangle
-            triNewTriangle1.setNeighbourIndex(0, triCurrent.neighbourIndex(1));
-            triNewTriangle1.setNeighbourIndex(2, iTriangleIndex);
-
-            int iOldNeighbourIndex1 = triCurrent.neighbourIndex(1);
-
-            // Update the old neighbor to reference the new triangle
-            if (iOldNeighbourIndex1 != -1)
-            {
-                Triangle& triOldNeighbour = m_vecTriangles[iOldNeighbourIndex1];
-                for (int i = 0; i < 3; ++i)
-                {
-                    if (triOldNeighbour.neighbourIndex(i) == iTriangleIndex)
-                    {
-                        triOldNeighbour.setNeighbourIndex(i, iNewIndex1);
-                        break;
-                    }
-                }
-            }
-
-            // Update the current triangle to include the new point
-            triCurrent.setPointIndex(2, iPointIndex);
-            triCurrent.setPoint(2, ptTargetPoint);
-            triCurrent.setNeighbourIndex(1, iNewIndex1);
-
-            const int iOldNeighbour = triCurrent.neighbourIndex(2);
-            triCurrent.setNeighbourIndex(2, -1);
-
-            // Add the new triangle to the list of triangles
-            m_vecTriangles.push_back(triNewTriangle1);
-
-            // Handle the opposite side of the triangle if necessary
-            if (iOldNeighbour > -1)
-            {
-                createTrianglesOppositeSide(iOldNeighbour, iPointIndex, iTriangleIndex, iNewIndex1);
-            }
-
-            restoreDelaunay(iPointIndex);
-        }
+        updateNeighbourReference(oldNeighbour, iTriangleIndex, iNewIndex);
     }
+    
+    // Update original triangle
+    int oppositeNeighbour = tri.neighbourIndex(i0);
+    tri.setPointIndex(i1, iPointIndex);
+    tri.setPoint(i1, pt);
+    tri.setNeighbourIndex(i1, iNewIndex);
+    tri.setNeighbourIndex(i0, NO_NEIGHBOR);
+    
+    m_vecTriangles.push_back(triNew);
+    
+    // Handle opposite side if there's a neighbor
+    if (oppositeNeighbour != NO_NEIGHBOR)
+    {
+        createTrianglesOppositeSide(oppositeNeighbour, iPointIndex, iTriangleIndex, iNewIndex);
+    }
+    
+    restoreDelaunay(iPointIndex);
 }
 
 // Creates new triangles on the opposite side of a specified triangle and point.
 void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int iNeighbourIndex0, int iNeighbourIndex1)
 {
-    // Retrieve the point that will be used to create new triangles
-    const Point& ptTargetPoint = m_vecPoints[iPointIndex];
-
-    // Get the current triangle that will be modified
-    Triangle& triCurrent = m_vecTriangles[iTriangleIndex];
-
-    // Create a new triangle to be added to the mesh
-    Triangle triNewTriangle1;
-    int iNewIndex1 = m_vecTriangles.size();
-    triNewTriangle1.setIndex(iNewIndex1);
-
-    // Handle the case where the target point is on Edge 0 (between points 1 and 2)
-    if (triCurrent.onEdge(ptTargetPoint) == 0)
+    using namespace delaunay;
+    
+    const Point& pt = m_vecPoints[iPointIndex];
+    Triangle& tri = m_vecTriangles[iTriangleIndex];
+    
+    int edge = tri.onEdge(pt);
+    if (edge < 0) return;
+    
+    // Compute indices using modular arithmetic
+    int i0 = edge;
+    int i1 = (edge + 1) % 3;
+    int i2 = (edge + 2) % 3;
+    
+    // Create new triangle
+    Triangle triNew(tri.point(i1), tri.point(i2), pt);
+    int iNewIndex = m_vecTriangles.size();
+    triNew.setIndex(iNewIndex);
+    
+    // Set point indices
+    triNew.setPointIndex(0, tri.pointIndex(i1));
+    triNew.setPointIndex(1, tri.pointIndex(i2));
+    triNew.setPointIndex(2, iPointIndex);
+    
+    // Set neighbor relationships for new triangle
+    triNew.setNeighbourIndex(0, tri.neighbourIndex(i1));
+    triNew.setNeighbourIndex(1, iTriangleIndex);
+    
+    // Determine which original neighbor connects to new vs current triangle
+    if (areNeighbours(iTriangleIndex, iNeighbourIndex0))
     {
-        // Define the points of the new triangle
-        triNewTriangle1.setPoint(0, triCurrent.point(1));
-        triNewTriangle1.setPoint(1, triCurrent.point(2));
-        triNewTriangle1.setPoint(2, ptTargetPoint);
-
-        // Set the point indices for the new triangle
-        triNewTriangle1.setPointIndex(0, triCurrent.pointIndex(1));
-        triNewTriangle1.setPointIndex(1, triCurrent.pointIndex(2));
-        triNewTriangle1.setPointIndex(2, iPointIndex);
-
-        // Set the neighbors of the new triangle
-        triNewTriangle1.setNeighbourIndex(1, iTriangleIndex);
-        triNewTriangle1.setNeighbourIndex(0, triCurrent.neighbourIndex(1));
-
-        // Update the neighbor index of the old neighbor
-        int iOldNeighbourIndex1 = triCurrent.neighbourIndex(1);
-        if (iOldNeighbourIndex1 != -1)
-        {
-            Triangle& triOldNeighbour = m_vecTriangles[iOldNeighbourIndex1];
-            for (int i = 0; i < 3; ++i)
-            {
-                if (triOldNeighbour.neighbourIndex(i) == iTriangleIndex)
-                {
-                    triOldNeighbour.setNeighbourIndex(i, iNewIndex1);
-                    break;
-                }
-            }
-        }
-
-        // Update the current triangle with the new point and neighbor
-        triCurrent.setPointIndex(1, iPointIndex);
-        triCurrent.setPoint(1, ptTargetPoint);
-        triCurrent.setNeighbourIndex(1, iNewIndex1);
-
-        // Determine the appropriate neighbor indices for the new triangle
-        if (areNeighbours(iTriangleIndex, iNeighbourIndex0))
-        {
-            triNewTriangle1.setNeighbourIndex(2, iNeighbourIndex1);
-            triCurrent.setNeighbourIndex(0, iNeighbourIndex0);
-        }
-        else
-        {
-            triNewTriangle1.setNeighbourIndex(2, iNeighbourIndex0);
-            triCurrent.setNeighbourIndex(0, iNeighbourIndex1);
-        }
-
-        // Add the new triangle to the list of triangles
-        m_vecTriangles.push_back(triNewTriangle1);
-
-        // Update the reference to the current triangle and perform edge neighbor updates
-        updateEdgeNeighbours(iTriangleIndex, iNewIndex1, iNeighbourIndex0, iNeighbourIndex1);
-
+        triNew.setNeighbourIndex(2, iNeighbourIndex1);
+        tri.setNeighbourIndex(i0, iNeighbourIndex0);
     }
-    // Handle the case where the target point is on Edge 1 (between points 0 and 1)
-    else if (triCurrent.onEdge(ptTargetPoint) == 1)
-    {
-        // Define the points of the new triangle
-        triNewTriangle1.setPoint(0, triCurrent.point(0));
-        triNewTriangle1.setPoint(1, triCurrent.point(1));
-        triNewTriangle1.setPoint(2, ptTargetPoint);
-
-        // Set the point indices for the new triangle
-        triNewTriangle1.setPointIndex(0, triCurrent.pointIndex(0));
-        triNewTriangle1.setPointIndex(1, triCurrent.pointIndex(1));
-        triNewTriangle1.setPointIndex(2, iPointIndex);
-
-        // Set the neighbors of the new triangle
-        triNewTriangle1.setNeighbourIndex(0, triCurrent.neighbourIndex(0));
-        triNewTriangle1.setNeighbourIndex(2, iTriangleIndex);
-
-        // Update the neighbor index of the old neighbor
-        int iOldNeighbourIndex1 = triCurrent.neighbourIndex(0);
-        if (iOldNeighbourIndex1 != -1)
-        {
-            Triangle& triOldNeighbour = m_vecTriangles[iOldNeighbourIndex1];
-            for (int i = 0; i < 3; ++i)
-            {
-                if (triOldNeighbour.neighbourIndex(i) == iTriangleIndex)
-                {
-                    triOldNeighbour.setNeighbourIndex(i, iNewIndex1);
-                    break;
-                }
-            }
-        }
-
-        // Update the current triangle with the new point and neighbor
-        triCurrent.setPointIndex(1, iPointIndex);
-        triCurrent.setPoint(1, ptTargetPoint);
-        triCurrent.setNeighbourIndex(0, iNewIndex1);
-
-        // Determine the appropriate neighbor indices for the new triangle
-        if (areNeighbours(iTriangleIndex, iNeighbourIndex1))
-        {
-            triNewTriangle1.setNeighbourIndex(1, iNeighbourIndex0);
-            triCurrent.setNeighbourIndex(1, iNeighbourIndex1);
-        }
-        else
-        {
-            triNewTriangle1.setNeighbourIndex(1, iNeighbourIndex1);
-            triCurrent.setNeighbourIndex(1, iNeighbourIndex0);
-        }
-
-        // Add the new triangle to the list of triangles
-        m_vecTriangles.push_back(triNewTriangle1);
-
-        // Update the reference to the current triangle and perform edge neighbor updates
-        updateEdgeNeighbours(iTriangleIndex, iNewIndex1, iNeighbourIndex0, iNeighbourIndex1);
-    }
-    // Handle the case where the target point is on Edge 2 (between points 1 and 2)
     else
     {
-        // Define the points of the new triangle
-        triNewTriangle1.setPoint(0, triCurrent.point(1));
-        triNewTriangle1.setPoint(1, triCurrent.point(2));
-        triNewTriangle1.setPoint(2, ptTargetPoint);
-
-        // Set the point indices for the new triangle
-        triNewTriangle1.setPointIndex(0, triCurrent.pointIndex(1));
-        triNewTriangle1.setPointIndex(1, triCurrent.pointIndex(2));
-        triNewTriangle1.setPointIndex(2, iPointIndex);
-
-        // Set the neighbors of the new triangle
-        triNewTriangle1.setNeighbourIndex(0, triCurrent.neighbourIndex(1));
-        triNewTriangle1.setNeighbourIndex(2, iTriangleIndex);
-
-        // Update the neighbor index of the old neighbor
-        int iOldNeighbourIndex1 = triCurrent.neighbourIndex(1);
-        if (iOldNeighbourIndex1 != -1)
-        {
-            Triangle& triOldNeighbour = m_vecTriangles[iOldNeighbourIndex1];
-            for (int i = 0; i < 3; ++i)
-            {
-                if (triOldNeighbour.neighbourIndex(i) == iTriangleIndex)
-                {
-                    triOldNeighbour.setNeighbourIndex(i, iNewIndex1);
-                    break;
-                }
-            }
-        }
-
-        // Update the current triangle with the new point and neighbor
-        triCurrent.setPointIndex(2, iPointIndex);
-        triCurrent.setPoint(2, ptTargetPoint);
-        triCurrent.setNeighbourIndex(1, iNewIndex1);
-
-        // Determine the appropriate neighbor indices for the new triangle
-        if (areNeighbours(iTriangleIndex, iNeighbourIndex0))
-        {
-            triNewTriangle1.setNeighbourIndex(1, iNeighbourIndex1);
-            triCurrent.setNeighbourIndex(2, iNeighbourIndex0);
-        }
-        else
-        {
-            triNewTriangle1.setNeighbourIndex(1, iNeighbourIndex0);
-            triCurrent.setNeighbourIndex(2, iNeighbourIndex1);
-        }
-
-        // Add the new triangle to the list of triangles
-        m_vecTriangles.push_back(triNewTriangle1);
-
-        // Update the reference to the current triangle and perform edge neighbor updates
-        updateEdgeNeighbours(iTriangleIndex, iNewIndex1, iNeighbourIndex0, iNeighbourIndex1);
+        triNew.setNeighbourIndex(2, iNeighbourIndex0);
+        tri.setNeighbourIndex(i0, iNeighbourIndex1);
     }
+    
+    // Update old neighbor to point to new triangle
+    int oldNeighbour = tri.neighbourIndex(i1);
+    if (oldNeighbour != NO_NEIGHBOR)
+    {
+        updateNeighbourReference(oldNeighbour, iTriangleIndex, iNewIndex);
+    }
+    
+    // Update original triangle with new point
+    tri.setPointIndex(i1, iPointIndex);
+    tri.setPoint(i1, pt);
+    tri.setNeighbourIndex(i1, iNewIndex);
+    
+    m_vecTriangles.push_back(triNew);
+    
+    // Update edge neighbours
+    updateEdgeNeighbours(iTriangleIndex, iNewIndex, iNeighbourIndex0, iNeighbourIndex1);
 }
 
 // Updates the neighboring triangles' edge references after swapping edges.
@@ -1135,6 +898,21 @@ void Mesh::restoreDelaunay(int iPointIndex)
                     break;
                 }
             }
+        }
+    }
+}
+
+void Mesh::updateNeighbourReference(int neighbourIdx, int oldRef, int newRef)
+{
+    if (neighbourIdx == delaunay::NO_NEIGHBOR) return;
+    
+    Triangle& neighbour = m_vecTriangles[neighbourIdx];
+    for (size_t i = 0; i < 3; ++i)
+    {
+        if (neighbour.neighbourIndex(i) == oldRef)
+        {
+            neighbour.setNeighbourIndex(i, newRef);
+            return;
         }
     }
 }

@@ -84,6 +84,8 @@ public:
     void updateRemovedNeighbours(int iRemovedTriangleIndex);
 
     void restoreDelaunay(int iPointIndex);
+
+    void updateNeighbourReference(int neighbourIdx, int oldRef, int newRef);
 };
 
 // Serialization function
