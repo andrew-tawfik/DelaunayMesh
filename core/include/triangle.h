@@ -3,73 +3,55 @@
 
 #include "point.h"
 #include <vector>
+#include <array>
 
 // Class representing a triangle defined by three points
 class Triangle {
 private:
-    Point m_pt0, m_pt1, m_pt2;  // Points defining the triangle
-    int m_iIndex; // Index of the triangle
-    int m_aiNeighbourIndices[3];  // Indices of neighboring triangles
-    int m_aiPointIndices[3];  // Indices of points in the triangle
+    std::array<Point, 3> m_points{};
+    std::array<int, 3> m_pointIndices{-1, -1, -1};
+    std::array<int, 3> m_neighbourIndices{-1, -1, -1};
+    int m_index = -1;
+
+    [[nodiscard]] bool isPointOnEdge(const Point& pt, const Point& edgeStart, const Point& edgeEnd) const;
 
 public:
-    // Default constructor
+    // Constructors
     Triangle();
-
-    // Constructor to initialize a triangle with three points
     Triangle(const Point& pt0, const Point& pt1, const Point& pt2);
 
-    // Getter and setter for neighboring triangle indices
-    int getNeighbourIndex(int iIndex) const;
-    void setNeighbourIndex(int iIndex, int iValue);
+    // Point access
+    [[nodiscard]] const Point& point(size_t i) const;
+    void setPoint(size_t i, const Point& p);
 
-    // Getter and setter for point indices
-    int getPointIndex(int iIndex) const;
-    int getPointIndex() const;
-    void setPointIndex(int iIndex, int iValue);
+    // Point index access
+    [[nodiscard]] int pointIndex(size_t i) const;
+    void setPointIndex(size_t i, int idx);
 
-    int getIndex() const;
-    void setIndex(int iValue);
+    // Neighbour index access
+    [[nodiscard]] int neighbourIndex(size_t i) const;
+    void setNeighbourIndex(size_t i, int idx);
 
-    // Function to get the length of a specified side
-    double getLength(int iSide) const;
+    // Triangle index
+    [[nodiscard]] int index() const noexcept { return m_index; }
+    void setIndex(int idx) noexcept { m_index = idx; }
 
-    // Function to get the perimeter of the triangle
-    double getPerimeter() const;
+    // Geometry calculations
+    [[nodiscard]] double edgeLength(size_t edge) const;
+    [[nodiscard]] double perimeter() const;
+    [[nodiscard]] double angle(size_t vertex) const;
+    [[nodiscard]] double area() const;
+    [[nodiscard]] Point circumcenter() const;
+    [[nodiscard]] Point edgeMidpoint(size_t iSide) const;
 
-    // Function to get a specified angle in the triangle
-    double getAng(int iAngle)const;
+    // Spatial Queries
+    [[nodiscard]] bool contains(const Point& ptTargetPoint) const;
+    [[nodiscard]] int findPathToContainingTriangle(const Point& ptTargetPoint) const;
+    [[nodiscard]] bool isInCircumcircle(const Point& pt) const;
+    [[nodiscard]] int onEdge(const Point& pt) const;
 
-    // Function to get the area of the triangle
-    double getArea() const;
-
-    // Function to check if the triangle contains a given point
-    bool contains(const Point& ptTargetPoint) const;
-
-    // Function to find the path to the triangle containing a given point
-    int findPathToContainingTriangle(const Point& ptTargetPoint) const;
-
-    // Function to get a specified point of the triangle
-    Point getPoint(int iPoint) const;
-
-    // Function to set new points based
-    void setPoint(int iPoint, const Point& newPoint);
-
-    // Function to print the points of the triangle
+    // Debug
     void printPoints() const;
-
-    // Function to get the circumcenter of the triangle
-    Point getCircumcenter() const;
-
-    // Function to check if a point is inside the circumcircle of the triangle
-    bool isInCircumcircle(const Point& pt) const;
-
-    // Function to determine whether a point is on the perimeter of the triangle, and on which edge is it located on
-    int onEdge(const Point& pt) const;
-
-    // Function to get the point of the center of the edge
-    Point getEdgeMidpoint(int iSide) const;
-
 };
 
 // Serialization function

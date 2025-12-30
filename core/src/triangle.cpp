@@ -1,403 +1,298 @@
 #define _USE_MATH_DEFINES
 
-#include <sstream>
-#include <iostream>
 #include "triangle.h"
-#include "point.h"
 #include <cmath>
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
 
-
-// Default constructor: initializes the triangle with default points
-Triangle::Triangle()
+Triangle::Triangle() 
+    : m_points{Point(), Point(3.0, 0.0), Point(3.0, 4.0)}
 {
-    this->m_pt0 = Point();
-    this->m_pt1 = Point(3.0f, 0.0f);
-    this->m_pt2 = Point(3.0f, 4.0f);
-
-    m_aiNeighbourIndices[0] = -1;
-    m_aiNeighbourIndices[1] = -1;
-    m_aiNeighbourIndices[2] = -1;
-
-    m_aiPointIndices[0] = -1;
-    m_aiPointIndices[1] = -1;
-    m_aiPointIndices[2] = -1;
 }
 
-// Constructor: initializes the triangle with given points
-Triangle::Triangle(const Point& pt0, const Point& pt1, const Point& pt2)
+Triangle::Triangle(const Point& p0, const Point& p1, const Point& p2)
+    : m_points{p0, p1, p2}
+    , m_pointIndices{-1, -1, -1}
+    , m_neighbourIndices{-1, -1, -1}
 {
-    if (getArea() >= 0)
-    {
-        this->m_pt0 = pt0;
-        this->m_pt1 = pt1;
-        this->m_pt2 = pt2;
+    // Fix winding order if needed
+    if (area() < 0) {
+        std::swap(m_points[0], m_points[1]);
     }
-    else
-    {
-        this->m_pt0 = pt1;
-        this->m_pt1 = pt0;
-        this->m_pt2 = pt2;
+}
+
+const Point& Triangle::point(size_t i) const
+{
+    if (i >= 3) {
+        throw std::out_of_range("Triangle point index must be 0, 1, or 2");
     }
-
-    m_aiNeighbourIndices[0] = -1;
-    m_aiNeighbourIndices[1] = -1;
-    m_aiNeighbourIndices[2] = -1;
-
-    m_aiPointIndices[0] = -1;
-    m_aiPointIndices[1] = -1;
-    m_aiPointIndices[2] = -1;
+    return m_points[i];
 }
 
-
-// Get the length of a specified side
-double Triangle::getLength(int iSide) const
+void Triangle::setPoint(size_t i, const Point& p)
 {
-    if (iSide == 0) return m_pt0.distanceTo(m_pt1);
-    if (iSide == 1) return m_pt1.distanceTo(m_pt2);
-    if (iSide == 2) return m_pt2.distanceTo(m_pt0);
-    return 0.0;
-}
-
-// Get the perimeter of the triangle
-double Triangle::getPerimeter() const
-{
-    return getLength(0) + getLength(1) + getLength(2);
-}
-
-// Get a specified angle in the triangle
-double Triangle::getAng(int iAngle) const
-{
-    double dL1 = getLength(0);
-    double dL2 = getLength(1);
-    double dL3 = getLength(2);
-
-    if (iAngle == 0)
-    {
-        return (180 / M_PI) * std::acos(((dL2 * dL2) + (dL3 * dL3) - (dL1 * dL1)) / (2 * dL2 * dL3));
+    if (i >= 3) {
+        throw std::out_of_range("Triangle point index must be 0, 1, or 2");
     }
-    if (iAngle == 1)
-    {
-        return (180 / M_PI) * std::acos(((dL1 * dL1) + (dL3 * dL3) - (dL2 * dL2)) / (2 * dL1 * dL3));
+    m_points[i] = p;
+}
+
+int Triangle::pointIndex(size_t i) const
+{
+    if (i >= 3) {
+        throw std::out_of_range("Triangle point index must be 0, 1, or 2");
     }
-    if (iAngle == 2)
-    {
-        return (180 / M_PI) * std::acos(((dL1 * dL1) + (dL2 * dL2) - (dL3 * dL3)) / (2 * dL1 * dL2));
+    return m_pointIndices[i];
+}
+
+void Triangle::setPointIndex(size_t i, int idx)
+{
+    if (i >= 3) {
+        throw std::out_of_range("Triangle point index must be 0, 1, or 2");
     }
-    return 0.0;
+    m_pointIndices[i] = idx;
 }
 
-// Get the area of the triangle
-double Triangle::getArea() const
+int Triangle::neighbourIndex(size_t i) const
 {
-    return 0.5 * (m_pt0.x() * (m_pt1.y() - m_pt2.y()) + m_pt1.x() * (m_pt2.y() - m_pt0.y()) + m_pt2.x() * (m_pt0.y() - m_pt1.y()));
+    if (i >= 3) {
+        throw std::out_of_range("Triangle neighbour index must be 0, 1, or 2");
+    }
+    return m_neighbourIndices[i];
 }
 
-// Check if the triangle contains a given point
-bool Triangle::contains(const Point& ptTargetPoint) const
+void Triangle::setNeighbourIndex(size_t i, int idx)
 {
-    double dTpx = ptTargetPoint.x();
-    double dTpy = ptTargetPoint.y();
-
-    // Determinants of segments
-    double dL1 = (dTpx - m_pt0.x()) * (m_pt1.y() - m_pt0.y()) - (m_pt1.x() - m_pt0.x()) * (dTpy - m_pt0.y());
-    double dL2 = (dTpx - m_pt1.x()) * (m_pt2.y() - m_pt1.y()) - (m_pt2.x() - m_pt1.x()) * (dTpy - m_pt1.y());
-    double dL3 = (dTpx - m_pt2.x()) * (m_pt0.y() - m_pt2.y()) - (m_pt0.x() - m_pt2.x()) * (dTpy - m_pt2.y());
-
-    // All the signs must be the same (all positive or all negative)
-    bool bAllNeg = (dL1 <= 0) && (dL2 <= 0) && (dL3 <= 0);
-
-    return bAllNeg;  // Either all positive or all negative
+    if (i >= 3) {
+        throw std::out_of_range("Triangle neighbour index must be 0, 1, or 2");
+    }
+    m_neighbourIndices[i] = idx;
 }
 
-// Find the path to the triangle containing a given point
-int Triangle::findPathToContainingTriangle(const Point& ptTargetPoint) const
+double Triangle::edgeLength(size_t edge) const
 {
-    double dTpx = ptTargetPoint.x();
-    double dTpy = ptTargetPoint.y();
+    if (edge >= 3) {
+        throw std::out_of_range("Triangle edge index must be 0, 1, or 2");
+    }
+    return m_points[edge].distanceTo(m_points[(edge + 1) % 3]);
+}
 
-    // Determinants of segments
-    double dL1 = (dTpx - m_pt0.x()) * (m_pt1.y() - m_pt0.y()) - (m_pt1.x() - m_pt0.x()) * (dTpy - m_pt0.y());
-    double dL2 = (dTpx - m_pt1.x()) * (m_pt2.y() - m_pt1.y()) - (m_pt2.x() - m_pt1.x()) * (dTpy - m_pt1.y());
-    double dL3 = (dTpx - m_pt2.x()) * (m_pt0.y() - m_pt2.y()) - (m_pt0.x() - m_pt2.x()) * (dTpy - m_pt2.y());
+double Triangle::perimeter() const
+{
+    double sum = 0.0;
+    for (size_t i = 0; i < 3; ++i) {
+        sum += edgeLength(i);
+    }
+    return sum;
+}
 
-    if (!contains(ptTargetPoint))
-    {
-        if (dL1 > 0) return getNeighbourIndex(0);
-        if (dL2 > 0) return getNeighbourIndex(1);
-        if (dL3 > 0) return getNeighbourIndex(2);
-
+double Triangle::angle(size_t vertex) const
+{
+    if (vertex >= 3) {
+        throw std::out_of_range("Triangle vertex index must be 0, 1, or 2");
     }
 
-    return -2; // Return -2 if no positive determinant is found
+    // Get the three edge lengths
+    double a = edgeLength(0);
+    double b = edgeLength(1);
+    double c = edgeLength(2);
+
+    // Law of cosines for each angle
+    double cosAngle = 0.0;
+    switch (vertex) {
+        case 0: cosAngle = (b * b + c * c - a * a) / (2.0 * b * c); break;
+        case 1: cosAngle = (a * a + c * c - b * b) / (2.0 * a * c); break;
+        case 2: cosAngle = (a * a + b * b - c * c) / (2.0 * a * b); break;
+    }
+
+    return (180.0 / M_PI) * std::acos(cosAngle);
 }
 
-// Set a specific point of the triangle
-void Triangle::setPoint(int iPoint, const Point& newPoint)
+double Triangle::area() const
 {
-    if (iPoint == 0) this->m_pt0 = newPoint;
-    if (iPoint == 1) this->m_pt1 = newPoint;
-    if (iPoint == 2) this->m_pt2 = newPoint;
-
+    // Signed area using cross product (shoelace formula)
+    return 0.5 * (
+        m_points[0].x() * (m_points[1].y() - m_points[2].y()) +
+        m_points[1].x() * (m_points[2].y() - m_points[0].y()) +
+        m_points[2].x() * (m_points[0].y() - m_points[1].y())
+    );
 }
 
-
-// Get a specific point of the triangle
-Point Triangle::getPoint(int iPoint) const
+Point Triangle::edgeMidpoint(size_t edge) const
 {
-    if (iPoint == 0) return m_pt0;
-    if (iPoint == 1) return m_pt1;
-    if (iPoint == 2) return m_pt2;
-    return Point();  // Default return if iPoint is invalid
+    if (edge >= 3) {
+        throw std::out_of_range("Triangle edge index must be 0, 1, or 2");
+    }
+    
+    const Point& start = m_points[edge];
+    const Point& end = m_points[(edge + 1) % 3];
+    
+    return Point(
+        (start.x() + end.x()) / 2.0,
+        (start.y() + end.y()) / 2.0
+    );
+}
+
+Point Triangle::circumcenter() const
+{
+    double x1 = m_points[0].x(), y1 = m_points[0].y();
+    double x2 = m_points[1].x(), y2 = m_points[1].y();
+    double x3 = m_points[2].x(), y3 = m_points[2].y();
+
+    // Midpoints of edges AB and BC
+    Point midAB((x1 + x2) / 2.0, (y1 + y2) / 2.0);
+    Point midBC((x2 + x3) / 2.0, (y2 + y3) / 2.0);
+
+    // Slopes of edges
+    double slopeAB = m_points[0].slopeTo(m_points[1]);
+    double slopeBC = m_points[1].slopeTo(m_points[2]);
+
+    // Perpendicular slopes
+    bool verticalPerpAB = (slopeAB == 0);
+    bool verticalPerpBC = (slopeBC == 0);
+    
+    double perpSlopeAB = verticalPerpAB ? INFINITY : -1.0 / slopeAB;
+    double perpSlopeBC = verticalPerpBC ? INFINITY : -1.0 / slopeBC;
+
+    // Y-intercepts (or x-value for vertical lines)
+    double intercept1 = verticalPerpAB ? midAB.x() : midAB.y() - perpSlopeAB * midAB.x();
+    double intercept2 = verticalPerpBC ? midBC.x() : midBC.y() - perpSlopeBC * midBC.x();
+
+    // Find intersection of perpendicular bisectors
+    double cx, cy;
+    
+    if (verticalPerpAB) {
+        cx = intercept1;
+        cy = perpSlopeBC * cx + intercept2;
+    } else if (verticalPerpBC) {
+        cx = intercept2;
+        cy = perpSlopeAB * cx + intercept1;
+    } else {
+        cx = (intercept2 - intercept1) / (perpSlopeAB - perpSlopeBC);
+        cy = perpSlopeAB * cx + intercept1;
+    }
+
+    return Point(cx, cy);
 }
 
 // Print the points of the triangle
 void Triangle::printPoints() const
 {
-    std::ostringstream oss; // Create a string stream
-    oss << "Point 0: (" << m_pt0.x() << ", " << m_pt0.y() << "), "
-        << "Point 1: (" << m_pt1.x() << ", " << m_pt1.y() << "), "
-        << "Point 2: (" << m_pt2.x() << ", " << m_pt2.y() << ")";
-
-    std::cout << oss.str() << std::endl; // Output the string
+    std::cout << "Point 0: (" << m_points[0].x() << ", " << m_points[0].y() << "), "
+              << "Point 1: (" << m_points[1].x() << ", " << m_points[1].y() << "), "
+              << "Point 2: (" << m_points[2].x() << ", " << m_points[2].y() << ")"
+              << std::endl;
 }
 
-// Get the circumcenter of the triangle
-Point Triangle::getCircumcenter() const {
-    double dX1 = m_pt0.x(), dY1 = m_pt0.y();
-    double dX2 = m_pt1.x(), dY2 = m_pt1.y();
-    double dX3 = m_pt2.x(), dY3 = m_pt2.y();
+bool Triangle::contains(const Point& pt) const
+{
+    double px = pt.x();
+    double py = pt.y();
 
-    // Midpoints of the sides
-    Point ptMidAB((dX1 + dX2) / 2, (dY1 + dY2) / 2);
-    Point ptMidBC((dX2 + dX3) / 2, (dY2 + dY3) / 2);
+    // Calculate signed areas (cross products) for each edge
+    double d1 = (px - m_points[0].x()) * (m_points[1].y() - m_points[0].y()) 
+              - (m_points[1].x() - m_points[0].x()) * (py - m_points[0].y());
+    
+    double d2 = (px - m_points[1].x()) * (m_points[2].y() - m_points[1].y()) 
+              - (m_points[2].x() - m_points[1].x()) * (py - m_points[1].y());
+    
+    double d3 = (px - m_points[2].x()) * (m_points[0].y() - m_points[2].y()) 
+              - (m_points[0].x() - m_points[2].x()) * (py - m_points[2].y());
 
-    // Find slopes of the sides
-    double dSlopeAB = m_pt0.slopeTo(m_pt1);
-    double dSlopeBC = m_pt1.slopeTo(m_pt2);
-
-    // Determine perpendicular slopes
-    double dPerpSlopeAB, dPerpSlopeBC;
-
-    if (dSlopeAB == 0)
-    {
-        dPerpSlopeAB = INFINITY; // Perpendicular to horizontal line is vertical
-    }
-    else
-    {
-        dPerpSlopeAB = -1 / dSlopeAB;
-    }
-
-    if (dSlopeBC == 0)
-    {
-        dPerpSlopeBC = INFINITY; // Perpendicular to horizontal line is vertical
-    }
-    else
-    {
-        dPerpSlopeBC = -1 / dSlopeBC;
-    }
-
-    double dIntercept1, dIntercept2;
-    bool bIsVerticalAB = (dPerpSlopeAB == INFINITY);
-    bool bIsVerticalBC = (dPerpSlopeBC == INFINITY);
-
-    // Form the equations of the perpendicular bisectors
-    if (bIsVerticalAB)
-    {
-        dIntercept1 = ptMidAB.x();
-    }
-    else
-    {
-        dIntercept1 = ptMidAB.y() - dPerpSlopeAB * ptMidAB.x();
-    }
-
-    if (bIsVerticalBC)
-    {
-        dIntercept2 = ptMidBC.x();
-    }
-    else
-    {
-        dIntercept2 = ptMidBC.y() - dPerpSlopeBC * ptMidBC.x();
-    }
-
-    double dCircumcenterX, dCircumcenterY;
-
-    // Solve the equations to find the intersection point (circumcenter)
-    if (bIsVerticalAB)
-    {
-        dCircumcenterX = dIntercept1;
-        dCircumcenterY = dPerpSlopeBC * dCircumcenterX + dIntercept2;
-    }
-    else if (bIsVerticalBC)
-    {
-        dCircumcenterX = dIntercept2;
-        dCircumcenterY = dPerpSlopeAB * dCircumcenterX + dIntercept1;
-    }
-    else
-    {
-        dCircumcenterX = (dIntercept2 - dIntercept1) / (dPerpSlopeAB - dPerpSlopeBC);
-        dCircumcenterY = dPerpSlopeAB * dCircumcenterX + dIntercept1;
-    }
-
-    return Point(dCircumcenterX, dCircumcenterY);
+    // Point is inside if all signs are the same (all <= 0 for CCW winding)
+    return (d1 <= 0) && (d2 <= 0) && (d3 <= 0);
 }
 
-// Check if a point is inside the circumcircle
 bool Triangle::isInCircumcircle(const Point& pt) const
 {
-    Point ptCircumcenter = getCircumcenter();
-    double dRadius = ptCircumcenter.distanceTo(getPoint(1)); // Calculate the radius
-    double dPointDistance = ptCircumcenter.distanceTo(pt); // Calculate the distance from the point to the circumcenter
-
-    // Epsilon tolerance: point must be clearly inside
-    const double epsilon = 1e-6;
-    return dPointDistance < (dRadius-epsilon);
+    Point cc = circumcenter();
+    double radius = cc.distanceTo(m_points[0]);
+    double distance = cc.distanceTo(pt);
+    
+    // Use epsilon to avoid floating-point edge cases
+    constexpr double epsilon = 1e-9;
+    return distance < (radius - epsilon);
 }
 
-// Getter for aiNeighbourIndices
-int Triangle::getNeighbourIndex(int iIndex) const
+bool Triangle::isPointOnEdge(const Point& pt, const Point& edgeStart, const Point& edgeEnd) const
 {
-    if (iIndex >= 0 && iIndex < 3)
-    {
-        return m_aiNeighbourIndices[iIndex];
+    constexpr double epsilon = 1e-9;
+    
+    // Check collinearity using cross product
+    double crossProduct = (pt.y() - edgeStart.y()) * (edgeEnd.x() - edgeStart.x()) 
+                        - (pt.x() - edgeStart.x()) * (edgeEnd.y() - edgeStart.y());
+    
+    if (std::abs(crossProduct) >= epsilon) {
+        return false;  // Not collinear
     }
-    return -1; // Return -1 for invalid index
-}
-
-// Setter for aiNeighbourIndices
-void Triangle::setNeighbourIndex(int iIndex, int iValue) {
-    if (iIndex >= 0 && iIndex < 3)
-    {
-        m_aiNeighbourIndices[iIndex] = iValue;
+    
+    // Check if point is within the segment bounds using dot product
+    double dotProduct = (pt.x() - edgeStart.x()) * (edgeEnd.x() - edgeStart.x()) 
+                      + (pt.y() - edgeStart.y()) * (edgeEnd.y() - edgeStart.y());
+    
+    if (dotProduct < 0) {
+        return false;  // Before start
     }
+    
+    double squaredLength = (edgeEnd.x() - edgeStart.x()) * (edgeEnd.x() - edgeStart.x()) 
+                         + (edgeEnd.y() - edgeStart.y()) * (edgeEnd.y() - edgeStart.y());
+    
+    return dotProduct <= squaredLength;  // Within segment
 }
 
-// Getter for aiPointIndices
-int Triangle::getPointIndex(int iIndex) const
-{
-    if (iIndex >= 0 && iIndex < 3)
-    {
-        return m_aiPointIndices[iIndex];
-    }
-    return -1; // Return -1 for invalid index
-}
-
-// Setter for aiPointIndices
-void Triangle::setPointIndex(int iIndex, int iValue)
-{
-    if (iIndex >= 0 && iIndex < 3)
-    {
-        m_aiPointIndices[iIndex] = iValue;
-    }
-}
-
-//Getter for iIndex
-int Triangle::getIndex() const
-{
-    return m_iIndex;
-}
-
-//Setter for iIndex
-void Triangle::setIndex(int iValue)
-{
-    this->m_iIndex = iValue;
-}
-
-// Determines whether a point is on the perimeter of the triangle, and on which edge is it located on
 int Triangle::onEdge(const Point& pt) const
 {
-
-    // Check if pt is on the line segment 0
-    double crossProduct = (pt.y() - m_pt0.y()) * (m_pt1.x() - m_pt0.x()) - (pt.x() - m_pt0.x()) * (m_pt1.y() - m_pt0.y());
-    if (std::abs(crossProduct) < 1e-7) // Check for collinearity
-    {
-        double dotProduct = (pt.x() - m_pt0.x()) * (m_pt1.x() - m_pt0.x()) + (pt.y() - m_pt0.y()) * (m_pt1.y() - m_pt0.y());
-        if (dotProduct >= 0)
-        {
-            double squaredLength = (m_pt1.x() - m_pt0.x()) * (m_pt1.x() - m_pt0.x()) + (m_pt1.y() - m_pt0.y()) * (m_pt1.y() - m_pt0.y());
-            if (dotProduct <= squaredLength)
-            {
-                return 0;
-            }
+    for (size_t i = 0; i < 3; ++i) {
+        if (isPointOnEdge(pt, m_points[i], m_points[(i + 1) % 3])) {
+            return static_cast<int>(i);
         }
     }
-
-    // Check if pt is on the line segment 1
-    crossProduct = (pt.y() - m_pt1.y()) * (m_pt2.x() - m_pt1.x()) - (pt.x() - m_pt1.x()) * (m_pt2.y() - m_pt1.y());
-    if (std::abs(crossProduct) < 1e-7) // Check for collinearity
-    {
-        double dotProduct = (pt.x() - m_pt1.x()) * (m_pt2.x() - m_pt1.x()) + (pt.y() - m_pt1.y()) * (m_pt2.y() - m_pt1.y());
-        if (dotProduct >= 0)
-        {
-            double squaredLength = (m_pt2.x() - m_pt1.x()) * (m_pt2.x() - m_pt1.x()) + (m_pt2.y() - m_pt1.y()) * (m_pt2.y() - m_pt1.y());
-            if (dotProduct <= squaredLength)
-            {
-                return 1;
-            }
-        }
-    }
-
-    // Check if pt is on the line segment 2
-    crossProduct = (pt.y() - m_pt2.y()) * (m_pt0.x() - m_pt2.x()) - (pt.x() - m_pt2.x()) * (m_pt0.y() - m_pt2.y());
-    if (std::abs(crossProduct) < 1e-7) // Check for collinearity
-    {
-        double dotProduct = (pt.x() - m_pt2.x()) * (m_pt0.x() - m_pt2.x()) + (pt.y() - m_pt2.y()) * (m_pt0.y() - m_pt2.y());
-        if (dotProduct >= 0)
-        {
-            double squaredLength = (m_pt0.x() - m_pt2.x()) * (m_pt0.x() - m_pt2.x()) + (m_pt0.y() - m_pt2.y()) * (m_pt0.y() - m_pt2.y());
-            if (dotProduct <= squaredLength)
-            {
-                return 2;
-            }
-        }
-    }
-
-    return -1;
+    return -1;  // Not on any edge
 }
 
-// Gets the point of the center of the edge
-Point Triangle::getEdgeMidpoint(int iSide) const
+int Triangle::findPathToContainingTriangle(const Point& pt) const
 {
-    Point ptStart, ptEnd;
-
-    // Determine which points make up the edge
-    if (iSide == 0)
-    {
-        ptStart = m_pt0;
-        ptEnd = m_pt1;
-    }
-    else if (iSide == 1)
-    {
-        ptStart = m_pt1;
-        ptEnd = m_pt2;
-    }
-    else
-    {
-        ptStart = m_pt2;
-        ptEnd = m_pt0;
+    if (contains(pt)) {
+        return -2;  // This triangle contains the point
     }
 
-    // Calculation of the midpoint
-    double dXMid = (ptStart.x() + ptEnd.x()) / 2.0;
-    double dYMid = (ptStart.y() + ptEnd.y()) / 2.0;
+    double px = pt.x();
+    double py = pt.y();
 
-    // Return the midpoint
-    return Point(dXMid, dYMid);
+    // Calculate signed areas for each edge
+    double d1 = (px - m_points[0].x()) * (m_points[1].y() - m_points[0].y()) 
+              - (m_points[1].x() - m_points[0].x()) * (py - m_points[0].y());
+    
+    double d2 = (px - m_points[1].x()) * (m_points[2].y() - m_points[1].y()) 
+              - (m_points[2].x() - m_points[1].x()) * (py - m_points[1].y());
+    
+    double d3 = (px - m_points[2].x()) * (m_points[0].y() - m_points[2].y()) 
+              - (m_points[0].x() - m_points[2].x()) * (py - m_points[2].y());
+
+    // Return neighbour across the edge with positive determinant
+    if (d1 > 0) return m_neighbourIndices[0];
+    if (d2 > 0) return m_neighbourIndices[1];
+    if (d3 > 0) return m_neighbourIndices[2];
+
+    return -1;  // Should not reach here
 }
 
-void to_json(nlohmann::json &j, const Triangle &t)
+void to_json(nlohmann::json& j, const Triangle& t)
 {
-    bool helper_triangle = false;
-    for (int i = 0; i < 3; ++i) {
-        if (t.getPointIndex(i) <= -10) {
-            helper_triangle = true;
-            break; // Exit early if the condition is not met
+    bool isHelper = false;
+    for (size_t i = 0; i < 3; ++i) {
+        if (t.pointIndex(i) <= -10) {
+            isHelper = true;
+            break;
         }
     }
-    j = nlohmann::json {
-        {"helper", helper_triangle}, // helper flag: 0 : 1
-        {"index", t.getIndex()}, // triangle index
-        {"pt0", t.getPoint(0)}, // Point 0
-        {"pt1", t.getPoint(1)}, // Point 1
-        {"pt2", t.getPoint(2)} // Point 2
+    
+    j = nlohmann::json{
+        {"helper", isHelper},
+        {"index", t.index()},
+        {"pt0", t.point(0)},
+        {"pt1", t.point(1)},
+        {"pt2", t.point(2)}
     };
 }

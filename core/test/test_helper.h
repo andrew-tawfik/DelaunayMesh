@@ -14,7 +14,7 @@ inline bool verifyNeighbourConsistency(const Mesh &mesh)
     {
         for (int i = 0; i < 3; i++)
         {
-            const int neighbourIndex = t.getNeighbourIndex(i);
+            const int neighbourIndex = t.neighbourIndex(i);
 
             if (neighbourIndex == -1)
             {
@@ -34,7 +34,7 @@ inline bool verifyNeighbourConsistency(const Mesh &mesh)
 
             for (int j = 0; j < 3; j++)
             {
-                if (neighbour.getNeighbourIndex(j) == t.getIndex())
+                if (neighbour.neighbourIndex(j) == t.index())
                 {
                     neighbourPointsBack = true;
                     break;
@@ -66,9 +66,9 @@ bool verifyDelaunayProperty(const Mesh &mesh, int *failTriangle = nullptr, int *
     for (const Triangle &t : triangles)
     {
         int vertexIndices[3] = {
-            t.getPointIndex(0),
-            t.getPointIndex(1),
-            t.getPointIndex(2)};
+            t.pointIndex(0),
+            t.pointIndex(1),
+            t.pointIndex(2)};
 
         for (int i = 0; i < points.size(); i++)
         {
@@ -81,7 +81,7 @@ bool verifyDelaunayProperty(const Mesh &mesh, int *failTriangle = nullptr, int *
             {
                 violations++;
                 if (failTriangle)
-                    *failTriangle = t.getIndex();
+                    *failTriangle = t.index();
                 if (failPoint)
                     *failPoint = i;
             }

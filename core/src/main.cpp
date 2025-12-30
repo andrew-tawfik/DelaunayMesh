@@ -26,11 +26,11 @@ int main(int argc, char *argv[])
     // Prints the mesh and each triangles' neighbours
     for (Triangle t : meshTriangles)
     {
-        std::cout << "Triangle " << t.getIndex() << ": ";
+        std::cout << "Triangle " << t.index() << ": ";
         t.printPoints();
-        std::cout << "\ta) Neighbour at index:  " << t.getNeighbourIndex(0) << std::endl;
-        std::cout << "\tb) Neighbour at index:  " << t.getNeighbourIndex(1) << std::endl;
-        std::cout << "\tc) Neighbour at index:  " << t.getNeighbourIndex(2) << std::endl;
+        std::cout << "\ta) Neighbour at index:  " << t.neighbourIndex(0) << std::endl;
+        std::cout << "\tb) Neighbour at index:  " << t.neighbourIndex(1) << std::endl;
+        std::cout << "\tc) Neighbour at index:  " << t.neighbourIndex(2) << std::endl;
     }
 
     return 0;

@@ -109,7 +109,7 @@ TEST_F(MeshTestFixture, CreateTriangles_PointInside_MultipleInsertions)
         {
             for (int i = 0; i < 3; i++)
             {
-                if (t.getPointIndex(i) == static_cast<int>(pointIdx))
+                if (t.pointIndex(i) == static_cast<int>(pointIdx))
                 {
                     foundAsVertex = true;
                     break;
@@ -188,9 +188,9 @@ TEST_F(MeshTestFixture, SwapEdge_RestoresDelaunay)
     for (const Triangle &t : trianglesAfter)
     {
         int vertexIndices[3] = {
-            t.getPointIndex(0),
-            t.getPointIndex(1),
-            t.getPointIndex(2)};
+            t.pointIndex(0),
+            t.pointIndex(1),
+            t.pointIndex(2)};
 
         for (size_t i = 0; i < points.size(); i++)
         {
@@ -203,7 +203,7 @@ TEST_F(MeshTestFixture, SwapEdge_RestoresDelaunay)
             }
 
             EXPECT_FALSE(t.isInCircumcircle(points[i]))
-                << "Point " << i << " is inside circumcircle of triangle " << t.getIndex()
+                << "Point " << i << " is inside circumcircle of triangle " << t.index()
                 << " after swap - Delaunay not restored";
         }
     }
@@ -211,8 +211,8 @@ TEST_F(MeshTestFixture, SwapEdge_RestoresDelaunay)
     // === Verify: Both triangles still valid ===
     for (const Triangle &t : trianglesAfter)
     {
-        EXPECT_GT(t.getArea(), 0)
-            << "Triangle " << t.getIndex() << " has non-positive area after swap";
+        EXPECT_GT(t.area(), 0)
+            << "Triangle " << t.index() << " has non-positive area after swap";
     }
 
     // === Verify: Neighbor consistency maintained ===
@@ -253,9 +253,9 @@ TEST_F(MeshTestFixture, FindContainingTriangle_AlwaysFindsCorrectTriangle)
             // Point should be contained or be a vertex
             const Triangle &t = triangles[foundIdx];
             bool isContained = t.contains(p);
-            bool isVertex = (t.getPointIndex(0) == i ||
-                             t.getPointIndex(1) == i ||
-                             t.getPointIndex(2) == i);
+            bool isVertex = (t.pointIndex(0) == i ||
+                             t.pointIndex(1) == i ||
+                             t.pointIndex(2) == i);
 
             EXPECT_TRUE(isContained || isVertex)
                 << "Point " << i << " not in returned triangle " << foundIdx;
@@ -272,14 +272,14 @@ TEST_F(MeshTestFixture, FindContainingTriangle_AlwaysFindsCorrectTriangle)
         for (const Triangle &t : triangles)
         {
             // Compute centroid
-            double cx = (t.getPoint(0).x() + t.getPoint(1).x() + t.getPoint(2).x()) / 3.0f;
-            double cy = (t.getPoint(0).y() + t.getPoint(1).y() + t.getPoint(2).y()) / 3.0f;
+            double cx = (t.point(0).x() + t.point(1).x() + t.point(2).x()) / 3.0f;
+            double cy = (t.point(0).y() + t.point(1).y() + t.point(2).y()) / 3.0f;
             Point centroid(cx, cy);
 
             int foundIdx = mesh.findContainingTriangle(centroid);
 
-            EXPECT_EQ(foundIdx, t.getIndex())
-                << "Centroid of triangle " << t.getIndex()
+            EXPECT_EQ(foundIdx, t.index())
+                << "Centroid of triangle " << t.index()
                 << " should be found in that same triangle, but found in " << foundIdx;
         }
     }
@@ -308,15 +308,15 @@ TEST_F(MeshTestFixture, FindContainingTriangle_AlwaysFindsCorrectTriangle)
         {
             for (int i = 0; i < 3; i++)
             {
-                int neighborIdx = t.getNeighbourIndex(i);
+                int neighborIdx = t.neighbourIndex(i);
                 if (neighborIdx >= 0)
                 {
                     // Get midpoint of this edge
-                    Point edgeMidpoint = t.getEdgeMidpoint(i);
+                    Point edgeMidpoint = t.edgeMidpoint(i);
 
                     int foundIdx = mesh.findContainingTriangle(edgeMidpoint);
 
-                    EXPECT_TRUE(foundIdx == t.getIndex() || foundIdx == neighborIdx)
+                    EXPECT_TRUE(foundIdx == t.index() || foundIdx == neighborIdx)
                         << "Edge midpoint should be in one of the two adjacent triangles";
 
                     // Just test one edge
@@ -421,7 +421,7 @@ TEST_F(MeshTestFixture, SwapEdge_MaintainsNeighborConsistency)
         EXPECT_EQ(triangles.size(), 2);
         for (const Triangle &t : triangles)
         {
-            EXPECT_GT(t.getArea(), 0);
+            EXPECT_GT(t.area(), 0);
         }
     }
 
@@ -969,9 +969,9 @@ TEST_F(MeshTestFixture, FullPipeline_ProducesValidMesh)
         bool found = false;
         for (const Triangle &t : triangles)
         {
-            if (t.getPointIndex(0) == i ||
-                t.getPointIndex(1) == i ||
-                t.getPointIndex(2) == i)
+            if (t.pointIndex(0) == i ||
+                t.pointIndex(1) == i ||
+                t.pointIndex(2) == i)
             {
                 found = true;
                 break;
@@ -983,7 +983,7 @@ TEST_F(MeshTestFixture, FullPipeline_ProducesValidMesh)
     // All triangles valid
     for (const Triangle &t : triangles)
     {
-        EXPECT_GT(t.getArea(), 0);
+        EXPECT_GT(t.area(), 0);
     }
 
     EXPECT_TRUE(verifyNeighbourConsistency(mesh));
@@ -1030,13 +1030,13 @@ TEST_F(MeshTestFixture, PointOnEdge_FourTriangles)
         {
             for (int i = 0; i < 3; i++)
             {
-                if (t.getPointIndex(i) == 3)
+                if (t.pointIndex(i) == 3)
                 {
                     trianglesWithP++;
                     break;
                 }
             }
-            EXPECT_GT(t.getArea(), 0);
+            EXPECT_GT(t.area(), 0);
         }
         EXPECT_EQ(trianglesWithP, 2);
 
@@ -1079,13 +1079,13 @@ TEST_F(MeshTestFixture, PointOnEdge_FourTriangles)
         {
             for (int i = 0; i < 3; i++)
             {
-                if (t.getPointIndex(i) == 3)
+                if (t.pointIndex(i) == 3)
                 {
                     trianglesWithP++;
                     break;
                 }
             }
-            EXPECT_GT(t.getArea(), 0);
+            EXPECT_GT(t.area(), 0);
         }
         EXPECT_EQ(trianglesWithP, 2);
 
@@ -1128,13 +1128,13 @@ TEST_F(MeshTestFixture, PointOnEdge_FourTriangles)
         {
             for (int i = 0; i < 3; i++)
             {
-                if (t.getPointIndex(i) == 3)
+                if (t.pointIndex(i) == 3)
                 {
                     trianglesWithP++;
                     break;
                 }
             }
-            EXPECT_GT(t.getArea(), 0);
+            EXPECT_GT(t.area(), 0);
         }
         EXPECT_EQ(trianglesWithP, 2);
 
@@ -1193,13 +1193,13 @@ TEST_F(MeshTestFixture, PointOnEdge_FourTriangles)
         {
             for (int i = 0; i < 3; i++)
             {
-                if (t.getPointIndex(i) == 4)
+                if (t.pointIndex(i) == 4)
                 {
                     trianglesWithP++;
                     break;
                 }
             }
-            EXPECT_GT(t.getArea(), 0);
+            EXPECT_GT(t.area(), 0);
         }
         EXPECT_EQ(trianglesWithP, 4);
 
@@ -1250,7 +1250,7 @@ TEST_F(MeshTestFixture, PointOnEdge_FourTriangles)
         {
             for (int i = 0; i < 3; i++)
             {
-                allPointIndices.insert(t.getPointIndex(i));
+                allPointIndices.insert(t.pointIndex(i));
             }
         }
 
@@ -1263,11 +1263,11 @@ TEST_F(MeshTestFixture, PointOnEdge_FourTriangles)
         for (const Triangle &t : triangles)
         {
             std::set<int> triPoints;
-            triPoints.insert(t.getPointIndex(0));
-            triPoints.insert(t.getPointIndex(1));
-            triPoints.insert(t.getPointIndex(2));
+            triPoints.insert(t.pointIndex(0));
+            triPoints.insert(t.pointIndex(1));
+            triPoints.insert(t.pointIndex(2));
             EXPECT_EQ(triPoints.size(), 3)
-                << "Triangle " << t.getIndex() << " has duplicate point indices";
+                << "Triangle " << t.index() << " has duplicate point indices";
         }
 
         int countA = 0, countB = 0, countC = 0, countD = 0, countP = 0;
@@ -1275,7 +1275,7 @@ TEST_F(MeshTestFixture, PointOnEdge_FourTriangles)
         {
             for (int i = 0; i < 3; i++)
             {
-                int idx = t.getPointIndex(i);
+                int idx = t.pointIndex(i);
                 if (idx == 0)
                     countA++;
                 if (idx == 1)
@@ -1362,7 +1362,7 @@ TEST_F(MeshTestFixture, PointOnEdge_FourTriangles)
         std::vector<Triangle> triangles = mesh.getTriVector();
         for (const Triangle &t : triangles)
         {
-            EXPECT_GT(t.getArea(), 0);
+            EXPECT_GT(t.area(), 0);
         }
     }
 
@@ -1430,11 +1430,11 @@ TEST_F(MeshTestFixture, PointOnEdge_FourTriangles)
 
             for (int i = 0; i < 3; i++)
             {
-                int nbrIdx = t.getNeighbourIndex(i);
+                int nbrIdx = t.neighbourIndex(i);
                 if (nbrIdx >= 0)
                 {
-                    edgeMidpoint = t.getEdgeMidpoint(i);
-                    triIndex = t.getIndex();
+                    edgeMidpoint = t.edgeMidpoint(i);
+                    triIndex = t.index();
                     neighborIndex = nbrIdx;
                     foundEdge = true;
                     break;
