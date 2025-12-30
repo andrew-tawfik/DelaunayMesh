@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+#include "constants.h"
 
 Triangle::Triangle() 
     : m_points{Point(), Point(3.0, 0.0), Point(3.0, 4.0)}
@@ -251,12 +252,8 @@ int Triangle::onEdge(const Point& pt) const
     return -1;  // Not on any edge
 }
 
-int Triangle::findPathToContainingTriangle(const Point& pt) const
+std::optional<int> Triangle::neighborToward(const Point& pt) const
 {
-    if (contains(pt)) {
-        return -2;  // This triangle contains the point
-    }
-
     double px = pt.x();
     double py = pt.y();
 
@@ -275,14 +272,14 @@ int Triangle::findPathToContainingTriangle(const Point& pt) const
     if (d2 > 0) return m_neighbourIndices[1];
     if (d3 > 0) return m_neighbourIndices[2];
 
-    return -1;  // Should not reach here
+    return std::nullopt;
 }
 
 void to_json(nlohmann::json& j, const Triangle& t)
 {
     bool isHelper = false;
     for (size_t i = 0; i < 3; ++i) {
-        if (t.pointIndex(i) <= -10) {
+        if (delaunay::isSuperVertex(t.pointIndex(i))) {
             isHelper = true;
             break;
         }

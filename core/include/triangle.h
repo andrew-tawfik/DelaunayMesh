@@ -46,9 +46,10 @@ public:
 
     // Spatial Queries
     [[nodiscard]] bool contains(const Point& ptTargetPoint) const;
-    [[nodiscard]] int findPathToContainingTriangle(const Point& ptTargetPoint) const;
     [[nodiscard]] bool isInCircumcircle(const Point& pt) const;
     [[nodiscard]] int onEdge(const Point& pt) const;
+    [[nodiscard]] std::optional<int> neighborToward(const Point& pt) const;
+
 
     // Debug
     void printPoints() const;

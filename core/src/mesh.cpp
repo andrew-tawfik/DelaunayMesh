@@ -5,6 +5,7 @@
 #include <vector>
 #include <queue>
 #include <algorithm>
+#include "constants.h"
 
 // Constructor: Creates empty mesh object
 Mesh::Mesh() {
@@ -77,55 +78,51 @@ void Mesh::buildMesh()
 // Finds the index of the triangle containing the target point
 int Mesh::findContainingTriangle(const Point& ptTargetPoint) const
 {
-    // random number generator
-    static std::random_device rd;  // Seed
-    static std::mt19937 gen(rd()); // Mersenne Twister RNG
-
-
-    // Should adapt to size of updated vecTriangles
+    using namespace delaunay;
+    
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(0, m_vecTriangles.size() - 1);
 
-    // Get a randomized triangle from vecTriangles
-    int iRandomIndex = dis(gen);
+    int iCurrentIndex = dis(gen);
 
-    // Initialize stack for DFS
-    std::stack<int> stackTriangles;
-    stackTriangles.push(iRandomIndex);
-
-    while (!stackTriangles.empty())
+    while (true)
     {
-        int iCurrentIndex = stackTriangles.top();
-        stackTriangles.pop();
-
         const Triangle& triCurrent = m_vecTriangles[iCurrentIndex];
-        int iResult = triCurrent.findPathToContainingTriangle(ptTargetPoint);
-
-        if (iResult == -1) break; // indicates triangle not found
-        if (iResult == -2) // -2 indicates that the currentTri contains ptTargetPoint
+        
+        // Check if this triangle contains the point
+        if (triCurrent.contains(ptTargetPoint))
         {
             return triCurrent.index();
         }
-        else
+        
+        // Get neighbor toward the point
+        auto next = triCurrent.neighborToward(ptTargetPoint);
+        if (!next || *next == NO_NEIGHBOR)
         {
-            stackTriangles.push(iResult);
+            break;  // Dead end
         }
+        
+        iCurrentIndex = *next;
     }
 
-    return -1;
+    return NO_NEIGHBOR;
 }
+
 
 // Creates a super triangle that encloses all points in the mesh
 Triangle Mesh::superTriangle()
 {
-    Point p0(-1000000.0f, -1000000.0f);
-    Point p1( 2000000.0f, -1000000.0f);  
-    Point p2( 500000.0f,  3000000.0f);
+    using namespace delaunay;
+    
+    Point p0(-1000000.0, -1000000.0);
+    Point p1( 2000000.0, -1000000.0);  
+    Point p2( 500000.0,  3000000.0);
 
-    Triangle triSuper {p0, p1, p2};
-    triSuper.setPointIndex(0, -10);
-    triSuper.setPointIndex(1, -11);
-    triSuper.setPointIndex(2, -12);
-
+    Triangle triSuper{p0, p1, p2};
+    triSuper.setPointIndex(0, SUPER_VERTEX_0);
+    triSuper.setPointIndex(1, SUPER_VERTEX_1);
+    triSuper.setPointIndex(2, SUPER_VERTEX_2);
     triSuper.setIndex(0);
 
     return triSuper;
@@ -893,20 +890,16 @@ void Mesh::swapAll(std::queue<int>& neighbourQueue, int iPointIndex)
 
     while (neighbourQueue.size() > 1)
     {
-        // Remove the oldest triangle from the queue
         neighbourQueue.pop();
 
-        // Get the index of the next triangle to process
         int iNeighbourIndex = neighbourQueue.front();
         Triangle& triNeighbour = m_vecTriangles[iNeighbourIndex];
 
-        // Find the triangle that contains the target point
-        int iTriangleIndex = triNeighbour.findPathToContainingTriangle(ptTargetPoint);
-
-        // If a valid triangle index is found, perform an edge swap
-        if (iNeighbourIndex >= 0)
+        // Find which neighbor contains the point
+        auto next = triNeighbour.neighborToward(ptTargetPoint);
+        if (iNeighbourIndex >= 0 && next)
         {
-            swapEdge(iTriangleIndex, iNeighbourIndex);
+            swapEdge(*next, iNeighbourIndex);
         }
     }
 }
@@ -1018,7 +1011,7 @@ void Mesh::removeHelperTriangles()
         for (int j = 0; j < 3; ++j)
         {
             // Check for super triangle sentinel values
-            if (triangle.pointIndex(j) <= -10)
+            if (delaunay::isSuperVertex(triangle.pointIndex(j)))
             {
                 trianglesToRemove.push_back(i);
                 updateRemovedNeighbours(triangle.index());
