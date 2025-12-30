@@ -119,10 +119,18 @@ Triangle Mesh::superTriangle()
 // Creates new triangles by splitting an existing triangle based on the provided point index.
 void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
 {
-    // Validate indices to ensure they are within bounds
-    if (iTriangleIndex < 0 || iTriangleIndex >= m_vecTriangles.size() || iPointIndex < 0 || iPointIndex >= m_vecPoints.size()) {
-        std::cerr << "Invalid indices provided to createTriangles." << std::endl;
-        return;
+    if (iTriangleIndex < 0 || iTriangleIndex >= (m_vecTriangles.size())) {
+        throw std::out_of_range(
+            "createTriangles: triangle index " + std::to_string(iTriangleIndex) + 
+            " out of range [0, " + std::to_string(m_vecTriangles.size()) + ")"
+        );
+    }
+    
+    if (iPointIndex < 0 || iPointIndex >= m_vecPoints.size()) {
+        throw std::out_of_range(
+            "createTriangles: point index " + std::to_string(iPointIndex) + 
+            " out of range [0, " + std::to_string(m_vecPoints.size()) + ")"
+        );
     }
 
     // Reference to the target point in vecPtShape
