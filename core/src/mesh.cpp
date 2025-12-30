@@ -63,7 +63,7 @@ void Mesh::buildMesh()
 {
     int iPointIndex = 0;
 
-    for (auto point : m_vecPoints)
+    for (const auto& point : m_vecPoints)
     {
         // Find the triangle that contains the current point
         int iTriIndex = findContainingTriangle(point);
@@ -765,30 +765,22 @@ void to_json(nlohmann::json &j, const Mesh &m)
 
 void Mesh::removeHelperTriangles()
 {
-    std::vector<int> trianglesToRemove;
-
-    for (int i = 0; i < m_vecTriangles.size(); ++i)
-    {
-        const Triangle& triangle = m_vecTriangles[i];
-
-        for (int j = 0; j < 3; ++j)
-        {
-            // Check for super triangle sentinel values
-            if (delaunay::isSuperVertex(triangle.pointIndex(j)))
-            {
-                trianglesToRemove.push_back(i);
-                updateRemovedNeighbours(triangle.index());
-                break;
-            }
+    using namespace delaunay;
+    
+    auto isHelperTriangle = [](const Triangle& tri) {
+        for (size_t i = 0; i < 3; ++i) {
+            if (isSuperVertex(tri.pointIndex(i))) return true;
+        }
+        return false;
+    };
+    
+    for (auto& tri : m_vecTriangles) {
+        if (isHelperTriangle(tri)) {
+            updateRemovedNeighbours(tri.index());
         }
     }
-
-    for (int i = trianglesToRemove.size() - 1; i >= 0; --i)
-    {
-        m_vecTriangles.erase(m_vecTriangles.begin() + trianglesToRemove[i]);
-    }
-
-    // Remove the buggy resize line entirely
+    
+    std::erase_if(m_vecTriangles, isHelperTriangle);
     
     updateTriangleIndicesAfterRemoval();
 }
@@ -796,40 +788,28 @@ void Mesh::removeHelperTriangles()
 // Updates triangle indices after some triangles have been removed.
 void Mesh::updateTriangleIndicesAfterRemoval()
 {
-    // Iterate through all remaining triangles
-    for (int iTriangleIndex = 0; iTriangleIndex < m_vecTriangles.size(); ++iTriangleIndex)
+    using namespace delaunay;
+    
+    // Build old index -> new index mapping
+    std::unordered_map<int, int> indexMap;
+    for (size_t i = 0; i < m_vecTriangles.size(); ++i)
     {
-        Triangle& currentTriangle = m_vecTriangles[iTriangleIndex];
-        int iOldIndex = currentTriangle.index();  // Get the current triangle index
-
-        // Update the triangle's index if it has changed
-        if (iOldIndex != iTriangleIndex)
+        int oldIndex = m_vecTriangles[i].index();
+        indexMap[oldIndex] = static_cast<int>(i);
+        m_vecTriangles[i].setIndex(static_cast<int>(i));
+    }
+    
+    // Update all neighbour references using the map
+    for (auto& tri : m_vecTriangles)
+    {
+        for (size_t edge = 0; edge < 3; ++edge)
         {
-            currentTriangle.setIndex(iTriangleIndex);
-
-            // Update the neighbors of the current triangle to reference the new index
-            for (int i = 0; i < 3; ++i)
-            {
-                int iTriangleNeighbourIndex = currentTriangle.neighbourIndex(i);
-                if (iTriangleNeighbourIndex == -1) continue;  // Skip if no neighbor
-
-                // Iterate through all triangles to find and update the neighbor's references
-                for (Triangle& triNeighbour : m_vecTriangles)
-                {
-                    if (triNeighbour.index() == iTriangleNeighbourIndex)
-                    {
-                        // Update the specific neighbor reference to the new index
-                        for (int j = 0; j < 3; ++j)
-                        {
-                            if (triNeighbour.neighbourIndex(j) == iOldIndex)
-                            {
-                                triNeighbour.setNeighbourIndex(j, iTriangleIndex);
-                                break;  // Exit loop once the neighbor is updated
-                            }
-                        }
-                    }
-                }
-            }
+            int oldNeighbourIdx = tri.neighbourIndex(edge);
+            if (oldNeighbourIdx == NO_NEIGHBOR) continue;
+            
+            auto it = indexMap.find(oldNeighbourIdx);
+            int newIdx = (it != indexMap.end()) ? it->second : NO_NEIGHBOR;
+            tri.setNeighbourIndex(edge, newIdx);
         }
     }
 }
@@ -837,24 +817,17 @@ void Mesh::updateTriangleIndicesAfterRemoval()
 // Updates the neighbors of a triangle that has been removed.
 void Mesh::updateRemovedNeighbours(int iRemovedTriangleIndex)
 {
-    const Triangle& triRemoved = m_vecTriangles[iRemovedTriangleIndex];  // Get the removed triangle
+    using namespace delaunay;
+    
+    const Triangle& triRemoved = m_vecTriangles[iRemovedTriangleIndex];
 
-    // Iterate through each edge of the removed triangle
-    for (int i = 0; i < 3; ++i)
+    for (size_t i = 0; i < 3; ++i)
     {
-        int removedNeighborIndex = triRemoved.neighbourIndex(i);
-        if (removedNeighborIndex == -1) continue;  // Skip if no neighbor
+        int neighbourIdx = triRemoved.neighbourIndex(i);
+        if (neighbourIdx == NO_NEIGHBOR) continue;
 
-        Triangle& triNeighbour = m_vecTriangles[removedNeighborIndex];
-
-        // Update the neighbor reference to indicate it no longer has a neighbor on this edge
-        for (int j = 0; j < 3; ++j)
-        {
-            if (triNeighbour.neighbourIndex(j) == iRemovedTriangleIndex)
-            {
-                triNeighbour.setNeighbourIndex(j, -1);  // Mark as no neighbor
-            }
-        }
+        // Clear the back-reference from neighbour to removed triangle
+        updateNeighbourReference(neighbourIdx, iRemovedTriangleIndex, NO_NEIGHBOR);
     }
 }
 
