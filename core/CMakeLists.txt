@@ -24,6 +24,13 @@ add_executable(mesh_test
         src/mesh.cpp
 )
 
+add_executable(benchmark
+        test/mesh_benchmark.cpp
+        src/point.cpp
+        src/triangle.cpp
+        src/mesh.cpp
+)
+
 target_link_libraries(mesh_test PRIVATE GTest::gtest GTest::gtest_main pthread)
 
 

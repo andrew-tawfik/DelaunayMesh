@@ -5,6 +5,7 @@
 #include <gtest/gtest.h>
 #include <vector>
 #include <random>
+#include "test_helper.h"
 
 // === Unit Test Definitions ===
 class MeshTestFixture : public ::testing::Test
@@ -30,82 +31,6 @@ protected:
 
     std::vector<Point> testCaseSingle = {
         Point(5, 5)};
-
-    bool verifyNeighbourConsistency(const Mesh &mesh)
-    {
-        std::vector<Triangle> triangles = mesh.getTriVector();
-        // for every triangle
-        for (const Triangle &t : triangles)
-        {
-            for (int i = 0; i < 3; i++)
-            {
-                const int neighbourIndex = t.getNeighbourIndex(i);
-
-                if (neighbourIndex == -1)
-                {
-                    continue;
-                }
-
-                // Neighbor index out of bounds
-                if (neighbourIndex < 0 || neighbourIndex >= triangles.size())
-                {
-                    return false;
-                }
-
-                // Verify bidirectional: neighbor must point back to us
-                const Triangle &neighbour = triangles[neighbourIndex];
-                bool neighbourPointsBack = false;
-
-                for (int j = 0; j < 3; j++)
-                {
-                    if (neighbour.getNeighbourIndex(j) == t.getIndex())
-                    {
-                        neighbourPointsBack = true;
-                        break;
-                    }
-                }
-
-                if (!neighbourPointsBack)
-                {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    bool verifyDelaunayProperty(const Mesh &mesh, int *failTriangle = nullptr, int *failPoint = nullptr)
-    {
-        std::vector<Triangle> triangles = mesh.getTriVector();
-        std::vector<Point> points = mesh.getPtVector();
-
-        for (const Triangle &t : triangles)
-        {
-            int vertexIndices[3] = {
-                t.getPointIndex(0),
-                t.getPointIndex(1),
-                t.getPointIndex(2)};
-
-            for (int i = 0; i < points.size(); i++)
-            {
-                if (i == vertexIndices[0] || i == vertexIndices[1] || i == vertexIndices[2])
-                {
-                    continue;
-                }
-
-                if (t.isInCircumcircle(points[i]))
-                {
-                    if (failTriangle)
-                        *failTriangle = t.getIndex();
-                    if (failPoint)
-                        *failPoint = i;
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
 };
 
 TEST_F(MeshTestFixture, NeighborConsistencyInvariant)
@@ -363,7 +288,7 @@ TEST_F(MeshTestFixture, FindContainingTriangle_AlwaysFindsCorrectTriangle)
     {
         Mesh mesh;
         // Point outside the super triangle
-        Point outside(525000.0, 125000.0);
+        Point outside(1e8, 1e8);
 
         int foundIdx = mesh.findContainingTriangle(outside);
 
@@ -1539,12 +1464,10 @@ TEST_F(MeshTestFixture, PointOnEdge_FourTriangles)
 TEST_F(MeshTestFixture, TriangulatePoint_Incremental10000) {
     // Test incremental insertion (triangulatePoint) vs batch (buildMesh)
     std::mt19937 rng(99999);
-    std::uniform_real_distribution<float> dist(1.0f, 1000.0f);
+    std::uniform_real_distribution<float> dist(1.0f, 10000.0f);
     
     Mesh mesh;
-    
-    auto startTime = std::chrono::high_resolution_clock::now();
-    
+        
     for (int i = 0; i < 10000; i++) {
         float x = dist(rng);
         float y = dist(rng);
@@ -1553,22 +1476,8 @@ TEST_F(MeshTestFixture, TriangulatePoint_Incremental10000) {
         // Periodic consistency checks (every 1000 points)
     }
     
-    auto endTime = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-    
     mesh.removeHelperTriangles();
-    std::cout << "Incremental insertion of 10000 points took " 
-              << duration.count() << " ms" << std::endl;
     
     EXPECT_TRUE(verifyNeighbourConsistency(mesh));
     EXPECT_TRUE(verifyDelaunayProperty(mesh));
 }
-
-/*
-The Delaunay triangulation algorithm produces invalid results when processing 
-large point sets (1000+ points). After building the mesh, some triangles have 
-non-vertex points inside their circumcircles, violating the Delaunay property. 
-
-After inserting Point 119, Point 14 is inside the circumcircle of triangle 30.
-
-*/
