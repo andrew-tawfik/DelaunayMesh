@@ -39,7 +39,7 @@ void benchmarkIncrementalInsertion(int numPoints) {
 }
 
 int main(int argc, char* argv[]) {
-    int numPoints = 200000;
+    int numPoints = 100000;
     
     if (argc > 1) {
         numPoints = std::atoi(argv[1]);

@@ -10,7 +10,6 @@ A complete refactor of the core triangulation code imporved performance **253x**
 | Points | Before | After | Speedup |
 |--------|--------|-------|---------|
 | 100,000 | 210s | 0.8s | 253x |
-| 200,000 | ~840s | 2.3s | ~365x |
 
 Throughput: **87,000 points/sec**
 

@@ -5,6 +5,7 @@ project(ShapeTriangulation LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -flto -DNDEBUG")
 
 # Find Boost with required components
 find_package(Boost 1.70 REQUIRED)
