@@ -17,7 +17,7 @@ void benchmarkIncrementalInsertion(int numPoints) {
         double y = dist(rng);
         mesh.triangulatePoint(x, y);
         
-        if ((i + 1) % 10000 == 0) {
+        if ((i + 1) % 20000 == 0) {
             auto now = std::chrono::high_resolution_clock::now();
             auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime);
             std::cout << "  " << (i + 1) << " points: " << elapsed.count() << " ms" << std::endl;
@@ -39,7 +39,7 @@ void benchmarkIncrementalInsertion(int numPoints) {
 }
 
 int main(int argc, char* argv[]) {
-    int numPoints = 100000;
+    int numPoints = 200000;
     
     if (argc > 1) {
         numPoints = std::atoi(argv[1]);

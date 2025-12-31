@@ -50,7 +50,7 @@ public:
     void updateTriangleIndicesAfterRemoval();
 
     // Delaunay restoration
-    void restoreDelaunay(int iPointIndex);
+    void restoreDelaunay(int iPointIndex, const std::vector<int>& initialTriangles);
     [[nodiscard]] std::queue<int> checkNeighboringCircumcircles(int iTriangleIndex, int iPointIndex, int iEdgeIndex);
 
     // Edge swapping

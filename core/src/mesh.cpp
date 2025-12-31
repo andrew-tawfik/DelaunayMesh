@@ -220,7 +220,7 @@ void Mesh::createTrianglesInside(int iTriangleIndex, int iPointIndex)
     m_vecTriangles.push_back(triNew1);
     m_vecTriangles.push_back(triNew2);
 
-    restoreDelaunay(iPointIndex);
+    restoreDelaunay(iPointIndex, {iTriangleIndex, iNewIndex1, iNewIndex2});
 }
 
 void Mesh::handleEdgeCase(int iTriangleIndex, int iPointIndex)
@@ -265,12 +265,23 @@ void Mesh::handleEdgeCase(int iTriangleIndex, int iPointIndex)
     
     m_vecTriangles.push_back(triNew);
     
+    // Collect triangles for restoreDelaunay
+    std::vector<int> initialTriangles = {iTriangleIndex, iNewIndex};
+    
     // Handle opposite side if there's a neighbor
     if (oppositeNeighbour != NO_NEIGHBOR) {
+        // This creates 2 more triangles
+        const int beforeSize = static_cast<int>(m_vecTriangles.size());
         createTrianglesOppositeSide(oppositeNeighbour, iPointIndex, iTriangleIndex, iNewIndex);
+        
+        // Add the triangles created by createTrianglesOppositeSide
+        initialTriangles.push_back(oppositeNeighbour);
+        if (static_cast<int>(m_vecTriangles.size()) > beforeSize) {
+            initialTriangles.push_back(beforeSize);  // The new triangle index
+        }
     }
     
-    restoreDelaunay(iPointIndex);
+    restoreDelaunay(iPointIndex, initialTriangles);
 }
 
 void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int iNeighbourIndex0, int iNeighbourIndex1)
@@ -428,43 +439,71 @@ void Mesh::updateNeighboursAfterSwap(int oldNeighborIndex, int oldTriangleIndex,
     }
 }
 
-void Mesh::restoreDelaunay(int iPointIndex)
+void Mesh::restoreDelaunay(int iPointIndex, const std::vector<int>& initialTriangles)
 {    
     const Point& pt = m_vecPoints[iPointIndex];
     
-    bool changed = true;
-    const int maxIterations = static_cast<int>(m_vecTriangles.size()) * 3;
-    int iterations = 0;
+    // Stack of edges to check: (triangleIndex, edgeIndex)
+    std::vector<std::pair<int, int>> edgeStack;
+    edgeStack.reserve(32);
     
-    while (changed && iterations < maxIterations) {
-        changed = false;
-        ++iterations;
-        
-        for (size_t t = 0; t < m_vecTriangles.size() && !changed; ++t) {
-            Triangle& tri = m_vecTriangles[t];
-            
-            // Check if triangle contains the new point
-            const bool hasNewPoint = (tri.pointIndex(0) == iPointIndex ||
-                               tri.pointIndex(1) == iPointIndex ||
-                               tri.pointIndex(2) == iPointIndex);
-            if (!hasNewPoint) continue;
-            
-            // Check ring edges (edges opposite to new point)
-            for (size_t edge = 0; edge < 3 && !changed; ++edge) {
-                const int p0 = tri.pointIndex(edge);
-                const int p1 = tri.pointIndex((edge + 1) % 3);
-                
-                // Skip spoke edges
-                if (p0 == iPointIndex || p1 == iPointIndex) {
-                    continue;
+    // Seed with edges opposite to new point in initial triangles
+    for (const int triIdx : initialTriangles) {
+        const Triangle& tri = m_vecTriangles[triIdx];
+        for (int i = 0; i < 3; ++i) {
+            if (tri.pointIndex(i) == iPointIndex) {
+                const int oppositeEdge = (i + 1) % 3;
+                if (tri.neighbourIndex(oppositeEdge) != NO_NEIGHBOR) {
+                    edgeStack.emplace_back(triIdx, oppositeEdge);
                 }
-                
-                const int neighborIdx = tri.neighbourIndex(edge);
-                if (neighborIdx == NO_NEIGHBOR) continue;
-                
-                if (m_vecTriangles[neighborIdx].isInCircumcircle(pt)) {
-                    swapEdge(static_cast<int>(t), neighborIdx);
-                    changed = true;
+                break;
+            }
+        }
+    }
+    
+    // Process until empty
+    while (!edgeStack.empty()) {
+        const auto [triIdx, edgeIdx] = edgeStack.back();
+        edgeStack.pop_back();
+        
+        if (triIdx < 0 || triIdx >= static_cast<int>(m_vecTriangles.size())) {
+            continue;
+        }
+        
+        Triangle& tri = m_vecTriangles[triIdx];
+        const int neighborIdx = tri.neighbourIndex(edgeIdx);
+        
+        if (neighborIdx == NO_NEIGHBOR) continue;
+        
+        // Verify triangle still contains our point
+        const int p0 = tri.pointIndex(0);
+        const int p1 = tri.pointIndex(1);
+        const int p2 = tri.pointIndex(2);
+        if (p0 != iPointIndex && p1 != iPointIndex && p2 != iPointIndex) {
+            continue;
+        }
+        
+        if (m_vecTriangles[neighborIdx].isInCircumcircle(pt)) {
+            swapEdge(triIdx, neighborIdx);
+            
+            // Add new opposite edges to stack
+            for (int i = 0; i < 3; ++i) {
+                if (m_vecTriangles[triIdx].pointIndex(i) == iPointIndex) {
+                    const int oppEdge = (i + 1) % 3;
+                    if (m_vecTriangles[triIdx].neighbourIndex(oppEdge) != NO_NEIGHBOR) {
+                        edgeStack.emplace_back(triIdx, oppEdge);
+                    }
+                    break;
+                }
+            }
+            
+            for (int i = 0; i < 3; ++i) {
+                if (m_vecTriangles[neighborIdx].pointIndex(i) == iPointIndex) {
+                    const int oppEdge = (i + 1) % 3;
+                    if (m_vecTriangles[neighborIdx].neighbourIndex(oppEdge) != NO_NEIGHBOR) {
+                        edgeStack.emplace_back(neighborIdx, oppEdge);
+                    }
+                    break;
                 }
             }
         }
