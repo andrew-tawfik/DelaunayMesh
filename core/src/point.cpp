@@ -3,7 +3,7 @@
 #include <iostream>
 
 // Function to find the distance between another point
-double Point::distanceTo(const Point& p2) const
+double Point::distanceTo(const Point &p2) const noexcept
 {
     double dx1 = m_x;
     double dy1 = m_y;
@@ -20,18 +20,19 @@ double Point::distanceTo(const Point& p2) const
 }
 
 // Function to find the slope to another point
-double Point::slopeTo(const Point& other) const
+double Point::slopeTo(const Point &other) const noexcept
 {
     return (other.m_y - m_y) / (other.m_x - m_x);
 }
 
-bool Point::operator==(const Point& other) const noexcept{
+bool Point::operator==(const Point &other) const noexcept
+{
     constexpr double epsilon = 1e-6;
-    return std::abs(m_x - other.m_x) < epsilon && 
+    return std::abs(m_x - other.m_x) < epsilon &&
            std::abs(m_y - other.m_y) < epsilon;
 }
 
 void to_json(nlohmann::json &j, const Point &p)
 {
-    j = nlohmann::json{{"x", p.x()},{"y", p.y()}};
+    j = nlohmann::json{{"x", p.x()}, {"y", p.y()}};
 }
