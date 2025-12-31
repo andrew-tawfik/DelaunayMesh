@@ -1,36 +1,70 @@
-#include "point.h"
-#include "triangle.h"
 #include "mesh.h"
 #include <iostream>
-#include <vector>
+#include <websocketpp/config/asio_no_tls.hpp>
+#include <websocketpp/server.hpp>
+#include <websocketpp/client.hpp>
+#include <map>
+
+typedef websocketpp::server<websocketpp::config::asio> server;
+
+// Map to associate each client with their own mesh
+std::map<websocketpp::connection_hdl, Mesh, std::owner_less<websocketpp::connection_hdl>> client_meshes;
+
+void on_message(server* s, websocketpp::connection_hdl hdl, server::message_ptr msg)
+{
+
+    try
+    {
+        auto received_message = nlohmann::json::parse(msg->get_payload());
+        std::string action = received_message["action"];
+
+        auto& client_mesh = client_meshes[hdl];
+        if (action == "add_point")
+        {
+            float x = received_message["data"]["x"];
+            float y = received_message["data"]["y"];
+            client_mesh.triangulatePoint(x, y);
+
+            nlohmann::json updated_mesh_json = client_mesh;
+            s->send(hdl, updated_mesh_json.dump(), websocketpp::frame::opcode::text);
+        }
+    }
+    catch (websocketpp::exception const & e)
+    {
+        std::cout << "Send failed: " << e.what() << std::endl;
+    }
+}
+
+// Handle when a client connects
+void on_open(server* s, websocketpp::connection_hdl hdl) {
+    std::cout << "Client connected: " << hdl.lock().get() << std::endl;
+    // Initialize a new mesh for the client
+    client_meshes[hdl] = Mesh();
+}
+
+// Handle when a client disconnects
+void on_close(server* s, websocketpp::connection_hdl hdl) {
+    std::cout << "Client disconnected: " << hdl.lock().get() << std::endl;
+    // Remove the client's mesh
+    client_meshes.erase(hdl);
+}
 
 int main(int argc, char *argv[])
 {
-    // The following vectors are test cases showcasing different test cases
-    std::vector<Point> testCaseHex { Point(22, 8.6), Point(18.5, 14.7), Point(11.5, 14.7), Point(8, 8.6), Point(11.5, 2.5), Point(18.5, 2.5) };
-
-    std::vector<Point> testCaseRect { Point(7.5, 2.0), Point(15.0, 2.0), Point(22.5, 2.0), Point(22.5, 7.0), Point(22.5, 12.0),Point(15.0, 12.0), Point(7.5, 12.0),Point(7.5, 7.0) };
-
-    std::vector<Point> testCaseInner { Point(7.5, 2.0), Point(15.0, 2.0), Point(22.5, 2.0), Point(22.5, 7.0), Point(22.5, 12.0), Point(15.0, 12.0), Point(7.5, 12.0), Point(7.5, 7.0), Point(15, 7), Point(11.25, 4.5), Point(18.75, 9.5), Point(18.75, 4.5), Point(11.25, 9.5), Point(11.25, 7), Point(18.75, 7) };
-
-    std::vector<Point> testCasePicture { Point(11.0, 13.0), Point(13.0, 13.0), Point(17.0, 13.0), Point(19.0, 13.0), Point(9.0, 11.0), Point(15.0, 11.0), Point(21.0, 11.0),Point(21.0, 9.0), Point(9.0, 9.0), Point(11.0, 7.0), Point(19.0, 7.0), Point(15.0, 3.0) };
-
-    // Mesh Workflow
-    Mesh m;
-    for (Point p : testCaseRect) {
-        m.triangulatePoint(p.x(), p.y());
-    }
-
-    std::vector<Triangle> meshTriangles = m.triangles();
-
-    // Prints the mesh and each triangles' neighbours
-    for (Triangle t : meshTriangles)
+    server mesh_server;
+    try
     {
-        std::cout << "Triangle " << t.index() << ": ";
-        t.printPoints();
-        std::cout << "\ta) Neighbour at index:  " << t.neighbourIndex(0) << std::endl;
-        std::cout << "\tb) Neighbour at index:  " << t.neighbourIndex(1) << std::endl;
-        std::cout << "\tc) Neighbour at index:  " << t.neighbourIndex(2) << std::endl;
+        mesh_server.init_asio();
+        mesh_server.set_message_handler(std::bind(&on_message, &mesh_server, std::placeholders::_1, std::placeholders::_2));
+        mesh_server.set_open_handler(std::bind(&on_open, &mesh_server, std::placeholders::_1));
+        mesh_server.set_close_handler(std::bind(&on_close, &mesh_server, std::placeholders::_1));
+        mesh_server.listen(9002);
+        mesh_server.start_accept();
+        mesh_server.run();
+    }
+    catch (websocketpp::exception const & e)
+    {
+        std::cout << e.what() << std::endl;
     }
 
     return 0;

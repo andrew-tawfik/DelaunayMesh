@@ -11,9 +11,9 @@ triangulation-backend/CMakeLists.txt.user
 triangulation-backend/.idea
 cmake-build-debug
 
-triangulation-frontend/node_modules
-triangulation-frontend/.idea
-triangulation-frontend/package-lock.json
+ui/node_modules
+ui/.idea
+ui/package-lock.json
 
 *~
 *.autosave
