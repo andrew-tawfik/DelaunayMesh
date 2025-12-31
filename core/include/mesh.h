@@ -42,10 +42,10 @@ public:
     void createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int iNeighbourIndex0, int iNeighbourIndex1);
 
     // Neighbor management
-    void updateNeighbourReference(int neighbourIdx, int oldRef, int newRef);
+    void updateNeighbourReference(int neighbourIdx, int oldRef, int newRef) noexcept;
     void updateEdgeNeighbours(int iTriangleIndex, int iNewTriangleIndex, int iNeighbourIndex0, int iNeighbourIndex1);
-    [[nodiscard]] bool areNeighbours(int iTri1, int iTri2) const;
-    void updateNeighboursAfterSwap(int oldNeighborIndex, int oldTriangleIndex, int newTriangleIndex);
+    [[nodiscard]] bool areNeighbours(int iTri1, int iTri2) const noexcept;
+    void updateNeighboursAfterSwap(int oldNeighborIndex, int oldTriangleIndex, int newTriangleIndex) noexcept;
     void updateRemovedNeighbours(int iRemovedTriangleIndex);
     void updateTriangleIndicesAfterRemoval();
 
@@ -56,8 +56,8 @@ public:
     // Edge swapping
     void swapEdge(int iTri1, int iTri2);
     void swapAll(std::queue<int>& neighbourQueue, int iPointIndex);
-    [[nodiscard]] int findSharedEdge(const Triangle& tri, int iDiff1, int iDiff2) const;
-    [[nodiscard]] int findNewEdge(int i, int iSharedEdge) const;
+    [[nodiscard]] int findSharedEdge(const Triangle& tri, int iDiff1, int iDiff2) const noexcept;
+    [[nodiscard]] int findNewEdge(int i, int iSharedEdge) const noexcept;
 
     // Main triangulation interface
     void triangulatePoint(double x, double y);

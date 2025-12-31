@@ -9,7 +9,7 @@
 #include <stdexcept>
 #include "constants.h"
 
-
+using namespace delaunay;
 namespace {
     // Lookup table for findNewEdge: [i][iSharedEdge] -> newEdge
     constexpr int NEW_EDGE_TABLE[3][3] = {
@@ -19,9 +19,9 @@ namespace {
     };
 
     // Super triangle points (created once, reused)
-    const Point SUPER_P0(-1000000.0, -1000000.0);
-    const Point SUPER_P1( 2000000.0, -1000000.0);
-    const Point SUPER_P2( 500000.0,  3000000.0);
+    constexpr Point SUPER_P0(-1000000.0, -1000000.0);
+    constexpr Point SUPER_P1( 2000000.0, -1000000.0);
+    constexpr Point SUPER_P2( 500000.0,  3000000.0);
 }
 
 
@@ -54,14 +54,12 @@ void Mesh::setTriVector(const std::vector<Triangle>& vecTri)
 }
 
 void Mesh::triangulatePoint(double x, double y)
-{
-    using namespace delaunay;
-    
-    int iPointIndex = static_cast<int>(m_vecPoints.size());
-    Point targetPoint(x, y);
+{    
+    const int iPointIndex = static_cast<int>(m_vecPoints.size());
+    const Point targetPoint(x, y);
     addPoint(targetPoint);
     
-    int iTriIndex = findContainingTriangle(targetPoint);
+    const int iTriIndex = findContainingTriangle(targetPoint);
     if (iTriIndex == NO_NEIGHBOR) {
         throw std::runtime_error("triangulatePoint: no containing triangle found");
     }
@@ -82,9 +80,7 @@ void Mesh::buildMesh()
 }
 
 int Mesh::findContainingTriangle(const Point& pt) const
-{
-    using namespace delaunay;
-    
+{    
     static std::random_device rd;
     static std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(0, static_cast<int>(m_vecTriangles.size()) - 1);
@@ -112,9 +108,7 @@ int Mesh::findContainingTriangle(const Point& pt) const
 }
 
 Triangle Mesh::superTriangle()
-{
-    using namespace delaunay;
-    
+{    
     Triangle triSuper(SUPER_P0, SUPER_P1, SUPER_P2);
     triSuper.setPointIndex(0, SUPER_VERTEX_0);
     triSuper.setPointIndex(1, SUPER_VERTEX_1);
@@ -125,9 +119,7 @@ Triangle Mesh::superTriangle()
 }
 
 Point Mesh::superTrianglePoint(int superVertexIndex)
-{
-    using namespace delaunay;
-    
+{    
     int localIndex = std::abs(superVertexIndex) - std::abs(SUPER_VERTEX_0);
     switch (localIndex) {
         case 0: return SUPER_P0;
@@ -139,9 +131,7 @@ Point Mesh::superTrianglePoint(int superVertexIndex)
 }
 
 void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
-{
-    using namespace delaunay;
-    
+{    
     if (iTriangleIndex < 0 || static_cast<size_t>(iTriangleIndex) >= m_vecTriangles.size()) {
         throw std::out_of_range(
             "createTriangles: triangle index " + std::to_string(iTriangleIndex) + 
@@ -178,9 +168,7 @@ void Mesh::createTriangles(int iTriangleIndex, int iPointIndex)
 }
 
 void Mesh::createTrianglesInside(int iTriangleIndex, int iPointIndex)
-{
-    using namespace delaunay;
-    
+{    
     const Point& pt = m_vecPoints[iPointIndex];
     Triangle& triCurrent = m_vecTriangles[iTriangleIndex];
 
@@ -188,8 +176,8 @@ void Mesh::createTrianglesInside(int iTriangleIndex, int iPointIndex)
     Triangle triNew1(triCurrent.point(0), triCurrent.point(1), pt);
     Triangle triNew2(triCurrent.point(1), triCurrent.point(2), pt);
 
-    int iNewIndex1 = static_cast<int>(m_vecTriangles.size());
-    int iNewIndex2 = iNewIndex1 + 1;
+    const int iNewIndex1 = static_cast<int>(m_vecTriangles.size());
+    const int iNewIndex2 = iNewIndex1 + 1;
     triNew1.setIndex(iNewIndex1);
     triNew2.setIndex(iNewIndex2);
 
@@ -213,8 +201,8 @@ void Mesh::createTrianglesInside(int iTriangleIndex, int iPointIndex)
     triNew2.setNeighbourIndex(2, iNewIndex1);
 
     // Save and update old neighbors
-    int iOldNeighbour1 = triCurrent.neighbourIndex(0);
-    int iOldNeighbour2 = triCurrent.neighbourIndex(1);
+    const int iOldNeighbour1 = triCurrent.neighbourIndex(0);
+    const int iOldNeighbour2 = triCurrent.neighbourIndex(1);
 
     triCurrent.setNeighbourIndex(0, iNewIndex1);
     triCurrent.setNeighbourIndex(1, iNewIndex2);
@@ -236,9 +224,7 @@ void Mesh::createTrianglesInside(int iTriangleIndex, int iPointIndex)
 }
 
 void Mesh::handleEdgeCase(int iTriangleIndex, int iPointIndex)
-{
-    using namespace delaunay;
-    
+{    
     const Point& pt = m_vecPoints[iPointIndex];
     Triangle& tri = m_vecTriangles[iTriangleIndex];
     
@@ -246,13 +232,13 @@ void Mesh::handleEdgeCase(int iTriangleIndex, int iPointIndex)
     if (edge < 0) return;
     
     // Compute indices using modular arithmetic
-    int i0 = edge;
-    int i1 = (edge + 1) % 3;
-    int i2 = (edge + 2) % 3;
+    const int i0 = edge;
+    const int i1 = (edge + 1) % 3;
+    const int i2 = (edge + 2) % 3;
     
     // Create new triangle
     Triangle triNew(tri.point(i1), tri.point(i2), pt);
-    int iNewIndex = static_cast<int>(m_vecTriangles.size());
+    const int iNewIndex = static_cast<int>(m_vecTriangles.size());
     triNew.setIndex(iNewIndex);
     
     // Set point indices
@@ -265,13 +251,13 @@ void Mesh::handleEdgeCase(int iTriangleIndex, int iPointIndex)
     triNew.setNeighbourIndex(1, iTriangleIndex);
     
     // Update old neighbor
-    int oldNeighbour = tri.neighbourIndex(i1);
+    const int oldNeighbour = tri.neighbourIndex(i1);
     if (oldNeighbour != NO_NEIGHBOR) {
         updateNeighbourReference(oldNeighbour, iTriangleIndex, iNewIndex);
     }
     
     // Update original triangle
-    int oppositeNeighbour = tri.neighbourIndex(i0);
+    const int oppositeNeighbour = tri.neighbourIndex(i0);
     tri.setPointIndex(i1, iPointIndex);
     tri.setPoint(i1, pt);
     tri.setNeighbourIndex(i1, iNewIndex);
@@ -288,22 +274,20 @@ void Mesh::handleEdgeCase(int iTriangleIndex, int iPointIndex)
 }
 
 void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int iNeighbourIndex0, int iNeighbourIndex1)
-{
-    using namespace delaunay;
-    
+{    
     const Point& pt = m_vecPoints[iPointIndex];
     Triangle& tri = m_vecTriangles[iTriangleIndex];
     
-    int edge = tri.onEdge(pt);
+    const int edge = tri.onEdge(pt);
     if (edge < 0) return;
     
-    int i0 = edge;
-    int i1 = (edge + 1) % 3;
-    int i2 = (edge + 2) % 3;
+    const int i0 = edge;
+    const int i1 = (edge + 1) % 3;
+    const int i2 = (edge + 2) % 3;
     
     // Create new triangle
     Triangle triNew(tri.point(i1), tri.point(i2), pt);
-    int iNewIndex = static_cast<int>(m_vecTriangles.size());
+    const int iNewIndex = static_cast<int>(m_vecTriangles.size());
     triNew.setIndex(iNewIndex);
     
     // Set point indices
@@ -325,7 +309,7 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
     }
     
     // Update old neighbor
-    int oldNeighbour = tri.neighbourIndex(i1);
+    const int oldNeighbour = tri.neighbourIndex(i1);
     if (oldNeighbour != NO_NEIGHBOR) {
         updateNeighbourReference(oldNeighbour, iTriangleIndex, iNewIndex);
     }
@@ -340,10 +324,8 @@ void Mesh::createTrianglesOppositeSide(int iTriangleIndex, int iPointIndex, int 
     updateEdgeNeighbours(iTriangleIndex, iNewIndex, iNeighbourIndex0, iNeighbourIndex1);
 }
 
-void Mesh::updateNeighbourReference(int neighbourIdx, int oldRef, int newRef)
-{
-    using namespace delaunay;
-    
+void Mesh::updateNeighbourReference(int neighbourIdx, int oldRef, int newRef) noexcept
+{    
     if (neighbourIdx == NO_NEIGHBOR) return;
     
     Triangle& neighbour = m_vecTriangles[neighbourIdx];
@@ -400,7 +382,7 @@ void Mesh::updateEdgeNeighbours(int iTriangleIndex, int iNewTriangleIndex, int i
     }
 }
 
-bool Mesh::areNeighbours(int iTri1, int iTri2) const
+bool Mesh::areNeighbours(int iTri1, int iTri2) const noexcept
 {
     const Triangle& tri1 = m_vecTriangles[iTri1];
     const Triangle& tri2 = m_vecTriangles[iTri2];
@@ -416,10 +398,8 @@ bool Mesh::areNeighbours(int iTri1, int iTri2) const
     return sharedCount == 2;
 }
 
-void Mesh::updateNeighboursAfterSwap(int oldNeighborIndex, int oldTriangleIndex, int newTriangleIndex)
-{
-    using namespace delaunay;
-    
+void Mesh::updateNeighboursAfterSwap(int oldNeighborIndex, int oldTriangleIndex, int newTriangleIndex) noexcept
+{    
     if (oldNeighborIndex == NO_NEIGHBOR || 
         oldNeighborIndex == oldTriangleIndex || 
         oldNeighborIndex == newTriangleIndex) {
@@ -449,13 +429,11 @@ void Mesh::updateNeighboursAfterSwap(int oldNeighborIndex, int oldTriangleIndex,
 }
 
 void Mesh::restoreDelaunay(int iPointIndex)
-{
-    using namespace delaunay;
-    
+{    
     const Point& pt = m_vecPoints[iPointIndex];
     
     bool changed = true;
-    int maxIterations = static_cast<int>(m_vecTriangles.size()) * 3;
+    const int maxIterations = static_cast<int>(m_vecTriangles.size()) * 3;
     int iterations = 0;
     
     while (changed && iterations < maxIterations) {
@@ -466,22 +444,22 @@ void Mesh::restoreDelaunay(int iPointIndex)
             Triangle& tri = m_vecTriangles[t];
             
             // Check if triangle contains the new point
-            bool hasNewPoint = (tri.pointIndex(0) == iPointIndex ||
+            const bool hasNewPoint = (tri.pointIndex(0) == iPointIndex ||
                                tri.pointIndex(1) == iPointIndex ||
                                tri.pointIndex(2) == iPointIndex);
             if (!hasNewPoint) continue;
             
             // Check ring edges (edges opposite to new point)
             for (size_t edge = 0; edge < 3 && !changed; ++edge) {
-                int p0 = tri.pointIndex(edge);
-                int p1 = tri.pointIndex((edge + 1) % 3);
+                const int p0 = tri.pointIndex(edge);
+                const int p1 = tri.pointIndex((edge + 1) % 3);
                 
                 // Skip spoke edges
                 if (p0 == iPointIndex || p1 == iPointIndex) {
                     continue;
                 }
                 
-                int neighborIdx = tri.neighbourIndex(edge);
+                const int neighborIdx = tri.neighbourIndex(edge);
                 if (neighborIdx == NO_NEIGHBOR) continue;
                 
                 if (m_vecTriangles[neighborIdx].isInCircumcircle(pt)) {
@@ -494,9 +472,7 @@ void Mesh::restoreDelaunay(int iPointIndex)
 }
 
 void Mesh::swapEdge(int iTri1, int iTri2)
-{
-    using namespace delaunay;
-    
+{    
     Triangle& triCurrent = m_vecTriangles[iTri1];
     Triangle& triNeighbour = m_vecTriangles[iTri2];
 
@@ -615,7 +591,7 @@ void Mesh::swapEdge(int iTri1, int iTri2)
     updateNeighboursAfterSwap(iNeighbourN2, iTri2, iTri1);
 }
 
-int Mesh::findSharedEdge(const Triangle& tri, int iDiff1, int iDiff2) const
+int Mesh::findSharedEdge(const Triangle& tri, int iDiff1, int iDiff2) const noexcept
 {
     for (size_t i = 0; i < 3; ++i) {
         int curr = tri.pointIndex(i);
@@ -628,7 +604,7 @@ int Mesh::findSharedEdge(const Triangle& tri, int iDiff1, int iDiff2) const
     return -1;
 }
 
-int Mesh::findNewEdge(int i, int iSharedEdge) const
+int Mesh::findNewEdge(int i, int iSharedEdge) const noexcept
 {
     if (i < 0 || i > 2 || iSharedEdge < 0 || iSharedEdge > 2) {
         return -1;
@@ -637,9 +613,7 @@ int Mesh::findNewEdge(int i, int iSharedEdge) const
 }
 
 void Mesh::removeHelperTriangles()
-{
-    using namespace delaunay;
-    
+{    
     auto isHelperTriangle = [](const Triangle& tri) {
         for (size_t i = 0; i < 3; ++i) {
             if (isSuperVertex(tri.pointIndex(i))) {
@@ -663,9 +637,7 @@ void Mesh::removeHelperTriangles()
 }
 
 void Mesh::updateRemovedNeighbours(int iRemovedTriangleIndex)
-{
-    using namespace delaunay;
-    
+{    
     const Triangle& triRemoved = m_vecTriangles[iRemovedTriangleIndex];
 
     for (size_t i = 0; i < 3; ++i) {
@@ -676,9 +648,7 @@ void Mesh::updateRemovedNeighbours(int iRemovedTriangleIndex)
 }
 
 void Mesh::updateTriangleIndicesAfterRemoval()
-{
-    using namespace delaunay;
-    
+{    
     // Build old -> new index mapping
     std::unordered_map<int, int> indexMap;
     for (size_t i = 0; i < m_vecTriangles.size(); ++i) {

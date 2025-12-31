@@ -35,9 +35,9 @@ double Triangle::perimeter() const noexcept
 
 double Triangle::angle(size_t vertex) const noexcept
 {
-    double a = m_pt0.distanceTo(m_pt1);
-    double b = m_pt1.distanceTo(m_pt2);
-    double c = m_pt2.distanceTo(m_pt0);
+    const double a = m_pt0.distanceTo(m_pt1);
+    const double b = m_pt1.distanceTo(m_pt2);
+    const double c = m_pt2.distanceTo(m_pt0);
 
     double cosAngle = 0.0;
     if (vertex == 0) {
@@ -72,24 +72,24 @@ Point Triangle::edgeMidpoint(size_t edge) const noexcept
 
 Point Triangle::circumcenter() const noexcept
 {
-    double x1 = m_pt0.x(), y1 = m_pt0.y();
-    double x2 = m_pt1.x(), y2 = m_pt1.y();
-    double x3 = m_pt2.x(), y3 = m_pt2.y();
+    const double x1 = m_pt0.x(), y1 = m_pt0.y();
+    const double x2 = m_pt1.x(), y2 = m_pt1.y();
+    const double x3 = m_pt2.x(), y3 = m_pt2.y();
 
-    Point midAB((x1 + x2) / 2.0, (y1 + y2) / 2.0);
-    Point midBC((x2 + x3) / 2.0, (y2 + y3) / 2.0);
+    const Point midAB((x1 + x2) / 2.0, (y1 + y2) / 2.0);
+    const Point midBC((x2 + x3) / 2.0, (y2 + y3) / 2.0);
 
-    double slopeAB = m_pt0.slopeTo(m_pt1);
-    double slopeBC = m_pt1.slopeTo(m_pt2);
+    const double slopeAB = m_pt0.slopeTo(m_pt1);
+    const double slopeBC = m_pt1.slopeTo(m_pt2);
 
-    bool verticalPerpAB = (slopeAB == 0);
-    bool verticalPerpBC = (slopeBC == 0);
+    const bool verticalPerpAB = (slopeAB == 0);
+    const bool verticalPerpBC = (slopeBC == 0);
     
-    double perpSlopeAB = verticalPerpAB ? INFINITY : -1.0 / slopeAB;
-    double perpSlopeBC = verticalPerpBC ? INFINITY : -1.0 / slopeBC;
+    const double perpSlopeAB = verticalPerpAB ? INFINITY : -1.0 / slopeAB;
+    const double perpSlopeBC = verticalPerpBC ? INFINITY : -1.0 / slopeBC;
 
-    double intercept1 = verticalPerpAB ? midAB.x() : midAB.y() - perpSlopeAB * midAB.x();
-    double intercept2 = verticalPerpBC ? midBC.x() : midBC.y() - perpSlopeBC * midBC.x();
+    const double intercept1 = verticalPerpAB ? midAB.x() : midAB.y() - perpSlopeAB * midAB.x();
+    const double intercept2 = verticalPerpBC ? midBC.x() : midBC.y() - perpSlopeBC * midBC.x();
 
     double cx, cy;
     
@@ -109,29 +109,36 @@ Point Triangle::circumcenter() const noexcept
 
 bool Triangle::contains(const Point& pt) const noexcept
 {
-    double px = pt.x();
-    double py = pt.y();
+    const double px = pt.x();
+    const double py = pt.y();
 
-    double d1 = (px - m_pt0.x()) * (m_pt1.y() - m_pt0.y()) 
+    const double d1 = (px - m_pt0.x()) * (m_pt1.y() - m_pt0.y()) 
               - (m_pt1.x() - m_pt0.x()) * (py - m_pt0.y());
     
-    double d2 = (px - m_pt1.x()) * (m_pt2.y() - m_pt1.y()) 
+    const double d2 = (px - m_pt1.x()) * (m_pt2.y() - m_pt1.y()) 
               - (m_pt2.x() - m_pt1.x()) * (py - m_pt1.y());
     
-    double d3 = (px - m_pt2.x()) * (m_pt0.y() - m_pt2.y()) 
+    const double d3 = (px - m_pt2.x()) * (m_pt0.y() - m_pt2.y()) 
               - (m_pt0.x() - m_pt2.x()) * (py - m_pt2.y());
 
-    return (d1 <= 0) && (d2 <= 0) && (d3 <= 0);
+    return (d1 <= 0) & (d2 <= 0) & (d3 <= 0);
 }
 
 bool Triangle::isInCircumcircle(const Point& pt) const noexcept
 {
-    Point cc = circumcenter();
-    double radius = cc.distanceTo(m_pt0);
-    double distance = cc.distanceTo(pt);
+    // Faster: Use determinant-based test (no division, no sqrt)
+    const double ax = m_pt0.x() - pt.x();
+    const double ay = m_pt0.y() - pt.y();
+    const double bx = m_pt1.x() - pt.x();
+    const double by = m_pt1.y() - pt.y();
+    const double cx = m_pt2.x() - pt.x();
+    const double cy = m_pt2.y() - pt.y();
     
-    constexpr double epsilon = 1e-6;
-    return distance < (radius - epsilon);
+    const double det = (ax * ax + ay * ay) * (bx * cy - cx * by)
+                     - (bx * bx + by * by) * (ax * cy - cx * ay)
+                     + (cx * cx + cy * cy) * (ax * by - bx * ay);
+    
+    return det > 1e-10;  // Positive if inside (for CCW triangles)
 }
 
 int Triangle::onEdge(const Point& pt) const noexcept
@@ -144,16 +151,16 @@ int Triangle::onEdge(const Point& pt) const noexcept
 
 int Triangle::findPathToward(const Point& pt) const noexcept
 {
-    double px = pt.x();
-    double py = pt.y();
+    const double px = pt.x();
+    const double py = pt.y();
 
-    double d1 = (px - m_pt0.x()) * (m_pt1.y() - m_pt0.y()) 
+    const double d1 = (px - m_pt0.x()) * (m_pt1.y() - m_pt0.y()) 
               - (m_pt1.x() - m_pt0.x()) * (py - m_pt0.y());
     
-    double d2 = (px - m_pt1.x()) * (m_pt2.y() - m_pt1.y()) 
+    const double d2 = (px - m_pt1.x()) * (m_pt2.y() - m_pt1.y()) 
               - (m_pt2.x() - m_pt1.x()) * (py - m_pt1.y());
     
-    double d3 = (px - m_pt2.x()) * (m_pt0.y() - m_pt2.y()) 
+    const double d3 = (px - m_pt2.x()) * (m_pt0.y() - m_pt2.y()) 
               - (m_pt0.x() - m_pt2.x()) * (py - m_pt2.y());
 
     if (d1 > 0) return m_neighbourIndices[0];

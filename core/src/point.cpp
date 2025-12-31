@@ -2,10 +2,6 @@
 #include <cmath>
 #include <iostream>
 
-// Parameterized constructor: initializes the point at (fx, fy)
-Point::Point(double fx, double fy) : m_x(fx), m_y(fy) {}
-
-
 // Function to find the distance between another point
 double Point::distanceTo(const Point& p2) const
 {

@@ -13,7 +13,8 @@ private:
 public:
     // Constructors
     Point() = default;
-    Point(double x, double y);
+    constexpr Point(double x, double y) : m_x(x), m_y(y) {}
+
 
     // Rule of Five: declare all special members
     ~Point() = default;
@@ -33,10 +34,10 @@ public:
     void setY(double y) noexcept {m_y = y;}
 
     // Function to find the distance between another point
-    [[nodiscard]] double distanceTo(const Point& p2) const ;
+    [[nodiscard]] double distanceTo(const Point& p2) const noexcept;
 
     // Function to find the slope to another point
-    [[nodiscard]] double slopeTo(const Point& p2) const ;
+    [[nodiscard]] double slopeTo(const Point& p2) const noexcept;
 
     bool operator==(const Point& other) const noexcept;
 
