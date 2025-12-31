@@ -93,18 +93,21 @@ int Mesh::findContainingTriangle(const Point& pt) const
 
     while (true)
     {
-        const Triangle& triCurrent = m_vecTriangles[iCurrentIndex];
+        const Triangle& tri = m_vecTriangles[iCurrentIndex];
         
-        if (triCurrent.contains(pt)) {
-            return triCurrent.index();
+        int next = tri.findPathToward(pt);  // Single computation!
+        
+        if (next == NO_NEIGHBOR) {
+            // Point is inside this triangle
+            return tri.index();
         }
         
-        auto next = triCurrent.neighborToward(pt);
-        if (!next || *next == NO_NEIGHBOR) {
+        if (next < 0) {
+            // Hit boundary (shouldn't happen with super triangle)
             break;
         }
         
-        iCurrentIndex = *next;
+        iCurrentIndex = next;
     }
 
     return NO_NEIGHBOR;
