@@ -5,14 +5,14 @@ Incremental Delaunay triangulation in C++23.
 ![Delaunay triangulation example](./DEMO.gif)
 
 ## Performance
+A complete refactor of the core triangulation code imporved performance **253x**.
 
-```
-20,000 points:   293 ms
-100,000 points:  3.4 sec
-200,000 points:  9.7 sec
+| Points | Before | After | Speedup |
+|--------|--------|-------|---------|
+| 100,000 | 210s | 0.8s | 253x |
+| 200,000 | ~840s | 2.3s | ~365x |
 
-Throughput: ~20,000 points/sec
-```
+Throughput: **87,000 points/sec**
 
 ## Build
 
