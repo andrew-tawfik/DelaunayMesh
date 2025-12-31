@@ -6,7 +6,8 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE Debug)
 
-find_package(Boost REQUIRED)
+# Find Boost with required components
+find_package(Boost 1.70 REQUIRED)
 find_package(Threads REQUIRED)
 
 include_directories(include)
@@ -18,9 +19,9 @@ add_executable(ShapeTriangulation
         src/mesh.cpp
 )
 
-# Link websocketpp dependencies (Boost and threads)
+# Link Boost.Beast dependencies
 target_link_libraries(ShapeTriangulation PRIVATE 
-    Boost::boost 
+    Boost::boost
     Threads::Threads
 )
 
@@ -49,4 +50,3 @@ install(TARGETS ShapeTriangulation
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
-
