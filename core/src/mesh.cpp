@@ -492,50 +492,6 @@ void Mesh::restoreDelaunay(int iPointIndex)
     }
 }
 
-std::queue<int> Mesh::checkNeighboringCircumcircles(int iTriangleIndex, int iPointIndex, int iEdgeIndex)
-{
-    using namespace delaunay;
-    
-    std::queue<int> neighbourQueue;
-    neighbourQueue.push(iTriangleIndex);
-
-    std::vector<bool> visited(m_vecTriangles.size(), false);
-    const Point& pt = m_vecPoints[iPointIndex];
-    size_t iQueueIndex = 0;
-    bool firstIteration = true;
-
-    while (iQueueIndex < neighbourQueue.size()) {
-        int iCurrentIndex = neighbourQueue.back();
-
-        if (!visited[iCurrentIndex]) {
-            visited[iCurrentIndex] = true;
-            Triangle& triCurrent = m_vecTriangles[iCurrentIndex];
-
-            if (firstIteration) {
-                int iNeighbourIndex = triCurrent.neighbourIndex(iEdgeIndex);
-                if (iNeighbourIndex != NO_NEIGHBOR && !visited[iNeighbourIndex]) {
-                    if (m_vecTriangles[iNeighbourIndex].isInCircumcircle(pt)) {
-                        neighbourQueue.push(iNeighbourIndex);
-                    }
-                }
-                firstIteration = false;
-            } else {
-                for (size_t i = 0; i < 3; ++i) {
-                    int iNeighbourIndex = triCurrent.neighbourIndex(i);
-                    if (iNeighbourIndex != NO_NEIGHBOR && !visited[iNeighbourIndex]) {
-                        if (m_vecTriangles[iNeighbourIndex].isInCircumcircle(pt)) {
-                            neighbourQueue.push(iNeighbourIndex);
-                        }
-                    }
-                }
-            }
-        }
-        ++iQueueIndex;
-    }
-
-    return neighbourQueue;
-}
-
 void Mesh::swapEdge(int iTri1, int iTri2)
 {
     using namespace delaunay;
@@ -656,23 +612,6 @@ void Mesh::swapEdge(int iTri1, int iTri2)
     updateNeighboursAfterSwap(iNeighbourN0, iTri2, iTri1);
     updateNeighboursAfterSwap(iNeighbourN1, iTri2, iTri1);
     updateNeighboursAfterSwap(iNeighbourN2, iTri2, iTri1);
-}
-
-void Mesh::swapAll(std::queue<int>& neighbourQueue, int iPointIndex)
-{
-    const Point& pt = m_vecPoints[iPointIndex];
-
-    while (neighbourQueue.size() > 1) {
-        neighbourQueue.pop();
-
-        int iNeighbourIndex = neighbourQueue.front();
-        Triangle& triNeighbour = m_vecTriangles[iNeighbourIndex];
-
-        auto next = triNeighbour.neighborToward(pt);
-        if (iNeighbourIndex >= 0 && next) {
-            swapEdge(*next, iNeighbourIndex);
-        }
-    }
 }
 
 int Mesh::findSharedEdge(const Triangle& tri, int iDiff1, int iDiff2) const
