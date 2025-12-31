@@ -95,15 +95,13 @@ int Mesh::findContainingTriangle(const Point& pt) const
     {
         const Triangle& tri = m_vecTriangles[iCurrentIndex];
         
-        int next = tri.findPathToward(pt);  // Single computation!
+        int next = tri.findPathToward(pt);
         
-        if (next == NO_NEIGHBOR) {
-            // Point is inside this triangle
+        if (next == POINT_INSIDE) {  // -2: definitively inside
             return tri.index();
         }
         
-        if (next < 0) {
-            // Hit boundary (shouldn't happen with super triangle)
+        if (next == NO_NEIGHBOR) {  // -1: hit boundary, shouldn't happen
             break;
         }
         

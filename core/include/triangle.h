@@ -3,16 +3,17 @@
 
 #include "point.h"
 #include "constants.h"
-#include <array>
-#include <optional>
 #include <cassert>
 #include <cmath>
 
 class Triangle {
 private:
-    std::array<Point, 3> m_points{};
-    std::array<int, 3> m_pointIndices{-1, -1, -1};
-    std::array<int, 3> m_neighbourIndices{-1, -1, -1};
+    // Separate members instead of std::array
+    Point m_pt0{};
+    Point m_pt1{};
+    Point m_pt2{};
+    int m_pointIndices[3] = {-1, -1, -1};
+    int m_neighbourIndices[3] = {-1, -1, -1};
     int m_index = -1;
 
     inline bool isPointOnEdge(const Point& pt, const Point& edgeStart, const Point& edgeEnd) const noexcept {
@@ -48,12 +49,20 @@ public:
     Triangle(Triangle&&) noexcept = default;
     Triangle& operator=(Triangle&&) noexcept = default;
 
-    // Getters - all inline, assert-only checking (debug builds)
+    // Point access - direct member access
     [[nodiscard]] const Point& point(size_t i) const noexcept { 
-        assert(i < 3);
-        return m_points[i]; 
+        if (i == 0) return m_pt0;
+        if (i == 1) return m_pt1;
+        return m_pt2;
     }
     
+    void setPoint(size_t i, const Point& p) noexcept {
+        if (i == 0) m_pt0 = p;
+        else if (i == 1) m_pt1 = p;
+        else m_pt2 = p;
+    }
+
+    // Index access
     [[nodiscard]] int pointIndex(size_t i) const noexcept { 
         assert(i < 3);
         return m_pointIndices[i]; 
@@ -66,12 +75,6 @@ public:
     
     [[nodiscard]] int index() const noexcept { return m_index; }
 
-    // Setters - all inline, assert-only checking (debug builds)
-    void setPoint(size_t i, const Point& p) noexcept {
-        assert(i < 3);
-        m_points[i] = p;
-    }
-    
     void setPointIndex(size_t i, int idx) noexcept {
         assert(i < 3);
         m_pointIndices[i] = idx;
@@ -96,9 +99,7 @@ public:
     [[nodiscard]] bool contains(const Point& pt) const noexcept;
     [[nodiscard]] bool isInCircumcircle(const Point& pt) const noexcept;
     [[nodiscard]] int onEdge(const Point& pt) const noexcept;
-    [[nodiscard]] std::optional<int> neighborToward(const Point& pt) const noexcept;
     [[nodiscard]] int findPathToward(const Point& pt) const noexcept;
-
 
     void printPoints() const;
 };

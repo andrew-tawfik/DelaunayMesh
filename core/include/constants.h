@@ -13,6 +13,8 @@ constexpr int SUPER_VERTEX_THRESHOLD = -10;
 
 constexpr int NO_NEIGHBOR = -1;
 
+constexpr int POINT_INSIDE = -2;
+
 // Helper to check if a point index is a super-triangle vertex
 constexpr bool isSuperVertex(int pointIndex) {
     return pointIndex <= SUPER_VERTEX_THRESHOLD;
