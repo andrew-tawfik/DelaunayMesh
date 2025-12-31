@@ -1,72 +1,111 @@
-# Triangulate: Interactive Mesh Generation Engine
+# DelaunayMesh
 
-## Table of Contents
+Incremental Delaunay triangulation in C++23.
 
-1. [Overview](#overview)
-2. [Features](#features)
-3. [Technical Highlights](#technical-highlights)
-4. [Algorithm](#algorithm)
-6. [Demo](#demo)
+![Delaunay triangulation example](./DEMO.gif)
 
----
+## Performance
 
-## Overview
+```
+20,000 points:   293 ms
+100,000 points:  3.4 sec
+200,000 points:  9.7 sec
 
-This project is a real-time triangulation engine that dynamically generates and updates meshes based on user-defined points. Using the **Delaunay triangulation algorithm**, the application ensures that the resulting meshes maintain desirable properties like well-shaped triangles and adherence to the Delaunay condition.
+Throughput: ~20,000 points/sec
+```
 
-The project is ideal for applications in computer graphics, simulations, and finite element analysis, leveraging its high interactivity and reliable triangulation techniques.
+## Build
 
----
+```bash
+cd core
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+```
 
-## Features
+Requires:
+- CMake 4.2+
+- C++23 
+- Boost (for WebSocket server)
+- Google Test (for unit tests)
 
-- **Dynamic Mesh Updates**: The triangulation engine updates meshes in real time as users add points.
-- **Industry-Standard Algorithm**: Implements the highly regarded **Delaunay triangulation algorithm**, a staple in the graphics industry.
-- **User-Interactive Interface**: Seamless user interaction with immediate visualization of updated meshes.
-- **Optimized for Performance**: High-performance backend ensures efficient handling of large datasets.
-- **Real-Time Communication**: WebSocket-based API enables low-latency communication between the backend and frontend.
+## Usage
 
----
+```cpp
+#include "mesh.h"
 
-## Technical Highlights
+Mesh mesh;
 
-1. **C++ Triangulation Engine**:
-   - Designed for high performance, it calculates and updates meshes efficiently.
-   - Implements edge-flipping and circumcircle calculations to maintain the Delaunay condition.
+// Add points one at a time
+mesh.triangulatePoint(1.0, 2.0);
+mesh.triangulatePoint(3.0, 4.0);
+mesh.triangulatePoint(2.0, 5.0);
 
-2. **React Frontend**:
-   - Provides an intuitive interface for users to add points and see immediate results.
-   - Features real-time rendering of mesh updates.
+// Access results
+for (const Triangle& tri : mesh.triangles()) {
+    std::cout << "Triangle " << tri.index() << ": ";
+    tri.printPoints();
+}
+```
 
-3. **WebSocket Integration**:
-   - Enables continuous, low-latency communication between the frontend and backend for seamless updates.
+## WebSocket Server
 
----
+The project includes a WebSocket server for interactive visualization:
+
+```bash
+./build/ShapeTriangulation
+# Listens on port 9002
+```
+
+Send JSON messages:
+```json
+{"action": "add_point", "data": {"x": 10.5, "y": 20.3}}
+```
 
 ## Algorithm
 
-The Delaunay triangulation algorithm consists of the following steps:
+Bowyer-Watson incremental insertion
 
-1. **Initialization**:
-   - A large super triangle is created to encompass all input points.
-   - This super triangle serves as the starting mesh structure.
+When a point is inserted:
+1. Locate containing triangle via walking search — O(√n) average
+2. Split triangle into 3 (or 4 if on edge)
+3. Restore Delaunay property by flipping edges — O(1) amortized
 
-2. **Adding Points**:
-   - For each input point, locate the triangle containing it.
-   - Split the triangle into smaller triangles, ensuring the mesh maintains Delaunay properties.
+Total complexity: O(n log n) average case.
 
-3. **Edge Flipping**:
-   - Check the circumcircles of adjacent triangles after adding points.
-   - Flip edges where necessary to maintain the Delaunay condition (no point lies inside another triangle's circumcircle).
+## Project Structure
 
-4. **Maintaining Neighbors**:
-   - Update the relationships between triangles to ensure consistency in the mesh structure.
+```
+core/
+├── include/
+│   ├── mesh.h        # Mesh class 
+│   ├── triangle.h    # Triangle class
+│   ├── point.h       # 2D point
+│   └── constants.h   # helper constants
+├── src/
+│   ├── main.cpp      # WebSocket server
+│   ├── mesh.cpp      # Triangulation implementation
+│   ├── triangle.cpp  # Triangular geometry functions
+│   └── point.cpp
+└── test/
+    ├── mesh_test.cpp        # unit test for functional correctness
+    └── mesh_benchmark.cpp   # stress test of 100 000 points 
+```
 
+## Running Tests
 
----
+```bash
+cd core/build
+./mesh_test        # Unit tests
+./benchmark        # Performance benchmark
+```
 
-## Demo
+## Limitations
 
-![Demo of Real-Time Mesh Update](./DEMO.gif)
+- 2D only
+- Single-threaded
 
-The above animation shows real-time triangulation and mesh updates as the user places points on the canvas.
+## Why I Built This
+
+Learning project to understand:
+- Computational geometry algorithms
+- Modern C++ (C++23 features, performance optimization)
