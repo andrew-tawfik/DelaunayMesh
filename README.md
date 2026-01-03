@@ -70,25 +70,6 @@ When a point is inserted:
 
 Total complexity: O(n log n) average case.
 
-## Project Structure
-
-```
-core/
-├── include/
-│   ├── mesh.h        # Mesh class 
-│   ├── triangle.h    # Triangle class
-│   ├── point.h       # 2D point
-│   └── constants.h   # helper constants
-├── src/
-│   ├── main.cpp      # WebSocket server
-│   ├── mesh.cpp      # Triangulation implementation
-│   ├── triangle.cpp  # Triangular geometry functions
-│   └── point.cpp
-└── test/
-    ├── mesh_test.cpp        # unit test for functional correctness
-    └── mesh_benchmark.cpp   # stress test of 100 000 points 
-```
-
 ## Running Tests
 
 ```bash
